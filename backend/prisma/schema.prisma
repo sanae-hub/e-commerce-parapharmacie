@@ -40,7 +40,6 @@ model Order {
   items      OrderItem[]  
 }
 
-// Il manque aussi OrderItem pour la relation entre Order et Product
 model OrderItem {
   id        String   @id @default(uuid())
   orderId   String
