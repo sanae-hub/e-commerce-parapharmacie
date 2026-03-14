@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🏥 ParaClick - E-commerce Parapharmacie
 
 Application e-commerce complète pour une parapharmacie avec système **Click & Collect** en temps réel.
@@ -15,10 +16,75 @@ Application e-commerce complète pour une parapharmacie avec système **Click & 
 ## 🚀 Démarrage Rapide
 
 ### Installation Backend
+=======
+ # ParaClick - E-commerce de Parapharmacie
+
+Plateforme e-commerce de produits de parapharmacie en mode **Click & Collect**. Les clients peuvent commander en ligne et retirer leurs produits en pharmacie.
+
+## 📋 Table des matières
+- [Technologies](#-technologies)
+- [Structure du projet](#-structure-du-projet)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Démarrage](#-démarrage)
+- [API Documentation](#-api-documentation)
+- [Docker](#-docker)
+- [Équipe](#-équipe)
+
+## 🚀 Technologies
+
+### Backend
+- **Node.js** + **Express** - Serveur
+- **Prisma** - ORM pour la base de données
+- **PostgreSQL** - Base de données
+- **JWT** - Authentification
+
+### Frontend
+- **React 18** - Bibliothèque UI
+- **Vite** - Build tool
+- **TailwindCSS** - Styling
+- **React Router** - Navigation
+
+### DevOps
+- **Docker** - Conteneurisation
+- **Docker Compose** - Orchestration
+- **Nginx** - Serveur proxy
+
+## 📁 Structure du projet
+parapharmacie/
+├── backend/ # API Node.js/Express
+│ ├── prisma/ # Schéma et migrations
+│ │ ├── schema.prisma # Modèles de données
+│ │ └── seed.js # Données de test
+│ └── src/ # Code source backend
+│ └── server.js # Point d'entrée
+│
+├── frontend/ # Application React
+│ ├── src/
+│ │ ├── App.jsx # Composant principal
+│ │ ├── main.jsx # Point d'entrée
+│ │ └── index.css # Styles Tailwind
+│ └── index.html # Template HTML
+│
+├── docker/ # Configuration Docker
+│ └── nginx/ # Configuration Nginx
+│
+└── docs/ # Documentation
+
+## Installation
+
+### Prérequis
+- Node.js 18+
+- Docker et Docker Compose (optionnel)
+- PostgreSQL (ou utiliser Docker)
+
+### Backend
+>>>>>>> df344ec (Update README.md)
 ```bash
 cd backend
 npm install
 cp .env.example .env
+<<<<<<< HEAD
 npm run db:push && npm run seed
 npm run dev  # Démarre sur http://localhost:5000
 ```
@@ -230,3 +296,33 @@ docker-compose up --build
 
 **Version :** 1.0 | **Mise à jour :** 22 mars 2026 | **Status :** ✅ Production-ready
  
+=======
+# Éditer .env avec vos informations de base de données
+npx prisma migrate dev --name init
+npm run seed
+npm run dev
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+### configuration backend
+DATABASE_URL="postgresql://user:password@localhost:5432/parapharmacie"
+PORT=5000
+JWT_SECRET="votre_secret_super_long"
+
+### configuration frontend 
+VITE_API_URL=http://localhost:5000/api
+
+### Modèles de données
+User - Clients et administrateurs
+Product - Produits de parapharmacie
+Category - Catégories de produits
+Order - Commandes
+OrderItem - Lignes de commande
+>>>>>>> df344ec (Update README.md)
