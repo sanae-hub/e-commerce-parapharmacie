@@ -1,43 +1,189 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  password     String
-  firstName    String
-  lastName     String
-  role         String   @default("CLIENT")
-  createdAt    DateTime @default(now())
-  orders       Order[] 
+  id                        String   @id @default(uuid())
+  email                     String   @unique
+  password                  String
+  firstName                 String
+  lastName                  String
+  phone                     String
+  address                   String
+  profileImage              String?
+  notificationEmail         Boolean  @default(true)
+  notificationSMS           Boolean  @default(false)
+  notificationPush          Boolean  @default(true)
+  role                      String   @default("CLIENT") // CLIENT, ADMIN, PREPARATEUR, CAISSIER
+  isActive                  Boolean  @default(true)
+  resetToken                String?
+  resetTokenExpiry          DateTime?
+  cart                      Json?    @default("[]")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  
+  orders                    Order[]
+  favorites                 Favorite[]
+  auditLogs                 AuditLog[]
+  sentMessages              Message[] @relation("MessageSender")
+  receivedMessages          Message[] @relation("MessageReceiver")
+}
+
+model Category {
+  id              String         @id @default(uuid())
+  name            String         @unique
+  icon            String?
+  image           String?
+  hasSubcategories Boolean       @default(false)
+  order           Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  products        Product[]
+  subcategories   Subcategory[]
+}
+
+model Subcategory {
+  id          String    @id @default(uuid())
+  title       String
+  icon        String?
+  image       String?
+  categoryId  String
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  items       SubcategoryItem[]
+}
+
+model SubcategoryItem {
+  id            String      @id @default(uuid())
+  name          String
+  subcategoryId String
+  order         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logo        String?
+  description String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  products    Product[]
 }
 
 model Product {
   id             String   @id @default(uuid())
   name           String
-  description    String
+  description    String?  @db.Text
+  usage          String?  @db.Text
+  composition    String?  @db.Text
+  benefits       Json?    @default("[]")
   price          Float
-  stockQuantity  Int      @default(0)
+  oldPrice       Float?
+  image          String?
+  brand          String?
+  brandId        String?
+  sku            String?
+  rating         Float    @default(0)
+  reviews        Int      @default(0)
+  stock          Int      @default(0)
+  stockAlert     Int      @default(10)
   categoryId     String
+  type           String?
+  images         Json?    @default("[]")
+  variants       Json?    @default("[]")
+  active         Boolean  @default(true)
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   
   category       Category @relation(fields: [categoryId], references: [id])
-  orderItems     OrderItem[]  
+  brandModel     Brand?   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  orderItems     OrderItem[]
+  favorites      Favorite[]
+  productImages  ProductImage[]
+  productVariants ProductVariant[]
+  stockMovements StockMovement[]
 }
 
-model Category {
-  id       String    @id @default(uuid())
-  name     String
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  publicId  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
   
-  products Product[]
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@index([productId])
+}
+
+model ProductVariant {
+  id              String   @id @default(uuid())
+  productId       String
+  type            String
+  value           String
+  priceAdjustment Float    @default(0)
+  stock           Int      @default(0)
+  sku             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stockMovements  StockMovement[]
+  
+  @@index([productId])
+}
+
+model StockMovement {
+  id        String   @id @default(uuid())
+  productId String
+  variantId String?
+  type      String
+  quantity  Int
+  reason    String?
+  userId    String?
+  createdAt DateTime @default(now())
+  
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  
+  @@index([productId])
+  @@index([createdAt])
 }
 
 model Order {
-  id         String   @id @default(uuid())
-  userId     String
-  status     String   @default("PENDING")
-  total      Float
-  createdAt  DateTime @default(now())
+  id              String   @id @default(uuid())
+  userId          String?
+  orderNumber     String   @unique
+  status          String   @default("RECEIVED")
+  type            String   @default("CLICK_COLLECT")
+  total           Float
+  timeSlotDate    DateTime?
+  timeSlotStart   String?
+  timeSlotEnd     String?
+  qrCode          String?  @db.Text
+  reminderSent    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
-  user       User     @relation(fields: [userId], references: [id])
-  items      OrderItem[]  
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
+  promoHistories  PromoHistory[]
 }
 
 model OrderItem {
@@ -45,10 +191,171 @@ model OrderItem {
   orderId   String
   productId String
   quantity  Int
-  price     Float   
+  price     Float
   
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id])
   
   @@unique([orderId, productId])
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+}
+
+model PromoCode {
+  id                    String              @id @default(uuid())
+  code                  String              @unique
+  description           String?
+  discountType          String              @default("percentage") // percentage ou fixed
+  discountValue         Float               // Pourcentage (0-100) ou montant fixe
+  applicableOn          String              @default("global") // global, product, category
+  productIds            Json?               @default("[]") // Pour applicableOn=product
+  categoryIds           Json?               @default("[]") // Pour applicableOn=category
+  minPurchaseAmount     Float?              @default(0)
+  maxDiscountAmount     Float?              // Montant max de réduction
+  usageLimit            Int?                // Nombre max d'utilisations
+  usageCount            Int                 @default(0) // Nombre d'utilisations actuelles
+  expiryDate            DateTime?           // Date d'expiration
+  active                Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  promoHistory          PromoHistory[]
+}
+
+model Promotion {
+  id                    String              @id @default(uuid())
+  title                 String
+  description           String?             @db.Text
+  bannerImage           String?             // URL de l'image Cloudinary
+  bannerText            String?
+  discountType          String              @default("percentage") // percentage ou fixed
+  discountValue         Float
+  applicableOn          String              @default("global")
+  productIds            Json?               @default("[]")
+  categoryIds           Json?               @default("[]")
+  minPurchaseAmount     Float?              @default(0)
+  maxDiscountAmount     Float?
+  startDate             DateTime
+  endDate               DateTime
+  displayOnHomepage     Boolean             @default(true)
+  order                 Int                 @default(0) // Pour l'ordre d'affichage
+  active                Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  stats                 PromotionStats?
+}
+
+model PromotionStats {
+  id                    String              @id @default(uuid())
+  promotionId           String              @unique
+  impressions           Int                 @default(0) // Nombre de fois la bannière vue
+  clicks                Int                 @default(0) // Nombre de clics
+  conversions           Int                 @default(0) // Nombre d'achats
+  totalDiscount         Float               @default(0) // Montant total remboursé
+  ordersCount           Int                 @default(0)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  promotion             Promotion           @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+}
+
+model PromoHistory {
+  id                    String              @id @default(uuid())
+  promoCodeId           String
+  orderId               String?
+  numericCode           String              // Code unique pour traçabilité
+  appliedDiscount       Float               // Montant réel de réduction
+  createdAt             DateTime            @default(now())
+  
+  promoCode             PromoCode           @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  order                 Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  @@index([promoCodeId])
+  @@index([createdAt])
+  @@index([orderId])
+}
+
+model Settings {
+  id                    String   @id @default(uuid())
+  key                   String   @unique
+  value                 String   @db.Text
+  description           String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model TimeSlotConfig {
+  id                    String   @id @default(uuid())
+  dayOfWeek             Int      // 0 = Dimanche, 1 = Lundi, etc.
+  startTime             String   // Format HH:MM
+  endTime               String   // Format HH:MM
+  capacity              Int      @default(1) // Nombre maximum de commandes simultanées
+  intervalMinutes       Int      @default(30) // Intervalle entre créneaux en minutes
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([dayOfWeek, startTime, endTime])
+}
+
+model BlockedSlot {
+  id                    String   @id @default(uuid())
+  date                  DateTime // Date complète (YYYY-MM-DD)
+  startTime             String?  // Format HH:MM, null = journée entière
+  endTime               String?  // Format HH:MM, null = journée entière
+  reason                String   // Raison du blocage (fermeture exceptionnelle, jour férié, etc.)
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([date, startTime, endTime])
+}
+
+model AuditLog {
+  id                    String   @id @default(uuid())
+  userId                String
+  action                String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  entityType            String   // User, Order, Product, etc.
+  entityId              String?  // ID de l'entité concernée
+  oldValues             Json?    // Valeurs avant modification
+  newValues             Json?    // Valeurs après modification
+  ipAddress             String?
+  userAgent             String?
+  description           String   // Description de l'action
+  createdAt             DateTime @default(now())
+  
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String   // User ID or Admin ID
+  receiverId  String   // User ID or Admin ID  
+  content     String   @db.Text
+  type        String   // 'USER_TO_ADMIN', 'ADMIN_TO_USER'
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  sender      User     @relation("MessageSender", fields: [senderId], references: [id])
+  receiver    User     @relation("MessageReceiver", fields: [receiverId], references: [id])
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
 }

@@ -1,0 +1,145 @@
+// frontend/src/components/ClientNotifications.jsx
+import { useWebSocket } from '../context/WebSocketContext'
+import { useEffect, useState } from 'react'
+import { X, Bell, CheckCircle, AlertCircle, ShoppingBag, Truck, Package, Clock } from 'lucide-react'
+
+const ClientNotifications = () => {
+  const { notifications, removeNotification, isConnected } = useWebSocket()
+  const [visibleNotifications, setVisibleNotifications] = useState([])
+
+  useEffect(() => {
+    // Garder que les 5 dernières notifications
+    setVisibleNotifications(notifications.slice(0, 5))
+  }, [notifications])
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'ORDER_CREATED':
+        return <ShoppingBag className="w-5 h-5 text-green-500" />
+      case 'ORDER_STATUS_CHANGED':
+        return <Truck className="w-5 h-5 text-blue-500" />
+      case 'ORDER_CANCELLED':
+        return <AlertCircle className="w-5 h-5 text-red-500" />
+      case 'order_status_changed':
+        return <Clock className="w-5 h-5 text-yellow-500" />
+      case 'notification':
+        return <Bell className="w-5 h-5 text-gray-500" />
+      default:
+        return <Package className="w-5 h-5 text-sky-500" />
+    }
+  }
+
+  const getNotificationColor = (type) => {
+    switch (type) {
+      case 'ORDER_CREATED':
+        return 'bg-green-50 border-green-200 text-green-800'
+      case 'ORDER_STATUS_CHANGED':
+        return 'bg-blue-50 border-blue-200 text-blue-800'
+      case 'order_status_changed':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-800'
+      case 'ORDER_CANCELLED':
+        return 'bg-red-50 border-red-200 text-red-800'
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-800'
+    }
+  }
+
+  // Si pas connecté, afficher un indicateur discret
+  if (!isConnected) {
+    return (
+      <div className="fixed bottom-4 left-4 bg-gray-100 border border-gray-300 text-gray-500 px-3 py-1.5 rounded-full text-xs flex items-center gap-2 shadow-md">
+        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+        Notifications hors ligne
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm">
+      {visibleNotifications.length === 0 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-md opacity-75">
+          <div className="flex items-center gap-2 text-gray-500 text-sm">
+            <Bell size={16} />
+            <span>Aucune notification</span>
+          </div>
+        </div>
+      )}
+
+      {visibleNotifications.map((notification) => (
+        <div
+          key={notification.id}
+          className={`border rounded-lg p-4 shadow-lg animate-in fade-in slide-in-from-right transition-all duration-300 hover:shadow-xl ${getNotificationColor(notification.type)}`}
+          style={{
+            animation: 'slideIn 0.3s ease-out'
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              {getNotificationIcon(notification.type)}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm">
+                {notification.title}
+              </h3>
+              <p className="text-sm opacity-90 mt-1 break-words">
+                {notification.message}
+              </p>
+
+              {notification.orderId && (
+                <button
+                  onClick={() => {
+                    window.location.href = `/my-orders`
+                    removeNotification(notification.id)
+                  }}
+                  className="text-xs font-medium mt-2 text-blue-600 hover:text-blue-700 underline"
+                >
+                  Voir ma commande →
+                </button>
+              )}
+
+              <div className="text-xs opacity-50 mt-2">
+                {new Date(notification.timestamp).toLocaleTimeString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
+            </div>
+
+            <button
+              onClick={() => removeNotification(notification.id)}
+              className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+              title="Fermer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {notifications.length > 5 && (
+        <div className="text-center text-xs text-gray-500 bg-white p-2 rounded-lg border border-gray-200 shadow-md">
+          +{notifications.length - 5} notifications supplémentaires
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        .animate-in {
+          animation: slideIn 0.3s ease-out;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default ClientNotifications
