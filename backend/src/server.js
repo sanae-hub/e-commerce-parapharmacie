@@ -32,6 +32,7 @@ import {
   sendPasswordResetEmail,
   sendSlotReminder
 } from './services/emailService.js';
+import ordersRoutes from "./routes/orders.js";
 
 
 dotenv.config();
@@ -47,6 +48,10 @@ const io = new Server(httpServer, {
 });
 const prisma = new PrismaClient();
 setIo(io);
+
+app.use(express.json());
+
+app.use("/api/orders", ordersRoutes);
 
 // Middleware
 app.use(cors({
