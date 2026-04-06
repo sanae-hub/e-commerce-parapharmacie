@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, AlertTriangle, TrendingDown, TrendingUp, RefreshCw, ArrowLeft, Plus, BarChart2 } from 'lucide-react';
+import { Package, AlertTriangle, TrendingDown, TrendingUp, RefreshCw, ArrowLeft, Plus, Search, ToggleLeft, ToggleRight, Eye, EyeOff } from 'lucide-react';
 import adminApi from '../api/adminAxios';
+import axios from '../api/axios';
 
 const TYPE_LABELS = { SALE: 'Vente', RETURN: 'Retour', RESTOCK: 'Réapprovisionnement', ADJUSTMENT: 'Ajustement' };
 const TYPE_COLORS = {
@@ -13,7 +14,7 @@ const TYPE_COLORS = {
 
 const AdminStock = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('alerts');
+  const [activeTab, setActiveTab] = useState('products');
   const [alerts, setAlerts] = useState([]);
   const [movements, setMovements] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -21,28 +22,79 @@ const AdminStock = () => {
   const [typeFilter, setTypeFilter] = useState('');
   const [restockModal, setRestockModal] = useState(null);
   const [restockForm, setRestockForm] = useState({ quantity: '', reason: '' });
-  const [stats, setStats] = useState([]);
-  const [statsPeriod, setStatsPeriod] = useState('day');
-  const [statsLoading, setStatsLoading] = useState(false);
+  
+  // Products tab state
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterBrand, setFilterBrand] = useState('');
+  const [filterStatus, setFilterStatus] = useState(''); // all, active, inactive, outOfStock
+  const [searchTerm, setSearchTerm] = useState('');
+  const [productPagination, setProductPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [productLoading, setProductLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) adminApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchAlerts();
     fetchMovements(1, '');
+    fetchCategories();
+    fetchBrands();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'stats') fetchStats(statsPeriod);
-  }, [activeTab, statsPeriod]);
+    if (activeTab === 'products') {
+      fetchProducts(1);
+    }
+  }, [activeTab, filterCategory, filterBrand, filterStatus]);
 
-  const fetchStats = async (period) => {
-    setStatsLoading(true);
+  const fetchCategories = async () => {
     try {
-      const { data } = await adminApi.get(`/stock/stats?period=${period}`);
-      setStats(data);
-    } catch { setStats([]); }
-    finally { setStatsLoading(false); }
+      const { data } = await axios.get('/categories');
+      setCategories(Array.isArray(data) ? data : []);
+    } catch { setCategories([]); }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const { data } = await axios.get('/brands');
+      setBrands(Array.isArray(data) ? data : []);
+    } catch { setBrands([]); }
+  };
+
+  const fetchProducts = async (page = 1) => {
+    setProductLoading(true);
+    try {
+      const params = { 
+        page, 
+        limit: 20,
+        category: filterCategory || undefined,
+        brand: filterBrand || undefined,
+        search: searchTerm || undefined
+      };
+      
+      if (filterStatus === 'active') params.active = 'true';
+      else if (filterStatus === 'inactive') params.active = 'false';
+      else if (filterStatus === 'outOfStock') params.outOfStock = 'true';
+      
+      const { data } = await axios.get('/products', { params });
+      setProducts(data.products || data || []);
+      setProductPagination({
+        page: data.pagination?.currentPage || data.page || 1,
+        totalPages: data.pagination?.totalPages || data.totalPages || 1,
+        total: data.pagination?.total || data.total || 0
+      });
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+    } finally {
+      setProductLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchProducts(1);
   };
 
   const fetchAlerts = async () => {
@@ -77,28 +129,64 @@ const AdminStock = () => {
       setRestockForm({ quantity: '', reason: '' });
       fetchAlerts();
       fetchMovements(1, typeFilter);
+      fetchProducts(productPagination.page);
     } catch { alert('Erreur lors du réapprovisionnement'); }
+  };
+
+  // Toggle product active status
+  const toggleProductActive = async (product) => {
+    try {
+      await axios.put(`/products/${product.id}`, {
+        ...product,
+        active: !product.active
+      });
+      fetchProducts(productPagination.page);
+    } catch (error) {
+      console.error('Error toggling product status:', error);
+      alert('Erreur lors de la modification du statut');
+    }
+  };
+
+  // Mark product as out of stock (set stock to 0)
+  const markAsOutOfStock = async (product) => {
+    if (!window.confirm(`Marquer "${product.name}" comme rupture de stock ?`)) return;
+    try {
+      await axios.put(`/products/${product.id}`, {
+        ...product,
+        stock: 0
+      });
+      fetchProducts(productPagination.page);
+      fetchAlerts();
+    } catch (error) {
+      console.error('Error marking as out of stock:', error);
+      alert('Erreur lors de la modification du stock');
+    }
   };
 
   const criticalCount = alerts.filter(p => p.stock === 0).length;
   const lowCount = alerts.filter(p => p.stock > 0).length;
 
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.name : '—';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
-          <button onClick={() => navigate('/admin/admindashboard')} className="text-gray-500 hover:text-gray-700">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
+          <button onClick={() => navigate('/admin/dashboard')} className="text-gray-500 hover:text-gray-700">
             <ArrowLeft size={20} />
           </button>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Gestion du stock</h1>
-            <p className="text-xs text-gray-500">Mouvements en temps réel · Alertes critiques</p>
+            <p className="text-xs text-gray-500">Mouvements en temps réel · Alertes critiques · Catalogue produits</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* KPI cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl p-4 border border-red-100 shadow-sm">
@@ -138,6 +226,7 @@ const AdminStock = () => {
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
           {[
+            { id: 'products', label: 'Catalogue Produits' },
             { id: 'alerts', label: `Alertes (${alerts.length})` },
             { id: 'movements', label: 'Historique' },
             { id: 'stats', label: 'Stats par produit' },
@@ -150,6 +239,225 @@ const AdminStock = () => {
             </button>
           ))}
         </div>
+
+        {/* TAB: Products Catalog */}
+        {activeTab === 'products' && (
+          <div>
+            {/* Filters */}
+            <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un produit..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
+                  />
+                </div>
+
+                {/* Category Filter */}
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
+                >
+                  <option value="">Toutes les catégories</option>
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+
+                {/* Brand Filter */}
+                <select
+                  value={filterBrand}
+                  onChange={(e) => setFilterBrand(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
+                >
+                  <option value="">Toutes les marques</option>
+                  {brands.filter(b => b.active).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+
+                {/* Status Filter */}
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
+                >
+                  <option value="">Tous les statuts</option>
+                  <option value="active">Actifs</option>
+                  <option value="inactive">Inactifs</option>
+                  <option value="outOfStock">Rupture de stock</option>
+                </select>
+              </div>
+
+              <div className="flex justify-between items-center mt-4">
+                <span className="text-sm text-gray-500">
+                  {productPagination.total} produit(s) trouvé(s)
+                </span>
+                <button 
+                  onClick={() => {
+                    setFilterCategory('');
+                    setFilterBrand('');
+                    setFilterStatus('');
+                    setSearchTerm('');
+                    fetchProducts(1);
+                  }}
+                  className="text-sm text-sky-700 hover:text-sky-800"
+                >
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            </div>
+
+            {/* Products Table */}
+            {productLoading ? (
+              <div className="flex justify-center py-12 bg-white rounded-xl border border-gray-100">
+                <div className="w-8 h-8 border-4 border-sky-700 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-100 text-gray-400">
+                <Package size={40} className="mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">Aucun produit trouvé</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-100">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        {['Image', 'Nom', 'Marque', 'Catégorie', 'Prix', 'Stock', 'Statut', 'Actions'].map(h => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {products.map(product => (
+                        <tr key={product.id} className={`hover:bg-gray-50 ${!product.active ? 'bg-gray-50 opacity-75' : ''}`}>
+                          <td className="px-4 py-3">
+                            {product.image ? (
+                              <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded-lg" onError={(e) => { e.target.src = '/images/placeholder.jpg' }} />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Package size={20} className="text-gray-400" />
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                              <p className="text-xs text-gray-500 truncate max-w-xs">{product.description?.substring(0, 50) || '—'}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">{product.brand || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-500">{getCategoryName(product.categoryId)}</td>
+                          <td className="px-4 py-3">
+                            <div>
+                              <span className="text-sm font-semibold text-gray-900">{product.price.toFixed(2)} DH</span>
+                              {product.oldPrice && (
+                                <span className="text-xs text-gray-400 line-through ml-1">{product.oldPrice.toFixed(2)} DH</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              product.stock === 0 ? 'bg-red-100 text-red-700'
+                              : product.stock <= product.stockAlert ? 'bg-orange-100 text-orange-700'
+                              : 'bg-green-100 text-green-700'
+                            }`}>
+                              {product.stock}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-col gap-1">
+                              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                                product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                              }`}>
+                                {product.active ? 'Actif' : 'Inactif'}
+                              </span>
+                              {product.stock === 0 && (
+                                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700">
+                                  Rupture
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              {/* Toggle Active/Inactive */}
+                              <button
+                                onClick={() => toggleProductActive(product)}
+                                className={`p-1.5 rounded-lg transition-colors ${
+                                  product.active 
+                                    ? 'text-green-600 hover:bg-green-50' 
+                                    : 'text-gray-500 hover:bg-gray-100'
+                                }`}
+                                title={product.active ? 'Désactiver le produit' : 'Activer le produit'}
+                              >
+                                {product.active ? <Eye size={16} /> : <EyeOff size={16} />}
+                              </button>
+
+                              {/* Mark as out of stock (if has stock) */}
+                              {product.stock > 0 && (
+                                <button
+                                  onClick={() => markAsOutOfStock(product)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Marquer comme rupture de stock"
+                                >
+                                  <AlertTriangle size={16} />
+                                </button>
+                              )}
+
+                              {/* Quick restock button (if out of stock) */}
+                              {product.stock === 0 && (
+                                <button
+                                  onClick={() => { setRestockModal(product); setRestockForm({ quantity: '', reason: '' }); }}
+                                  className="p-1.5 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                  title="Réapprovisionner"
+                                >
+                                  <Plus size={16} />
+                                </button>
+                              )}
+
+                              {/* Edit button */}
+                              <button
+                                onClick={() => navigate(`/admin/products`)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Modifier"
+                              >
+                                <RefreshCw size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {productPagination.totalPages > 1 && (
+                  <div className="flex justify-center gap-2 mt-4 pb-4">
+                    <button disabled={productPagination.page === 1}
+                      onClick={() => fetchProducts(productPagination.page - 1)}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50">
+                      Précédent
+                    </button>
+                    <span className="px-3 py-1.5 text-sm text-gray-600">
+                      Page {productPagination.page} / {productPagination.totalPages}
+                    </span>
+                    <button disabled={productPagination.page === productPagination.totalPages}
+                      onClick={() => fetchProducts(productPagination.page + 1)}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50">
+                      Suivant
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TAB: Alerts */}
         {activeTab === 'alerts' && (

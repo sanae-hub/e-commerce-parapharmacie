@@ -84,7 +84,8 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
-      addToCart(product)
+      const success = addToCart(product);
+      if (!success) return; // Admin blocked
     }
     setIsAdded(true)
     setTimeout(() => setIsAdded(false), 2000)

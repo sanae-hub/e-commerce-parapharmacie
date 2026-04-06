@@ -56,7 +56,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<App />}>
-        {/* Home - redirige les admins vers dashboard */}
+        {/* Home - Page d'accueil publique pour tous les utilisateurs */}
         <Route index element={<HomeContent />} />
 
         {/* Public */}

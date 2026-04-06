@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronDown, Gift,
+  ChevronDown, Gift, Layers,
   Sparkle, Droplet, Wind, Waves, Smile, CircleDot, Bath,
   Baby, Milk, Heart, Tablets, Activity, Zap, Moon, Bug,
   Umbrella, Footprints, Armchair, Hand, Bone, Gauge,
   Package, ShoppingBag, Star, Truck, Shield, Clock, Calendar,
-  Users, Settings, Bell, Search, Home, Layers, Sun, Pill,
+  Users, Settings, Bell, Search, Home, Sun, Pill,
   Sparkles, Droplets, Stethoscope
 } from 'lucide-react'
 import axios from '../api/axios'
@@ -22,19 +22,34 @@ const ICON_MAP = {
   Layers // fallback
 }
 
-const getIcon = (name) => ICON_MAP[name] || Layers
+const getIcon = (name) => {
+  if (!name) return Layers
+  return ICON_MAP[name] || Layers
+}
 
 const CategoryBar = () => {
   const navigate = useNavigate()
-  const [categories, setCategories] = useState([])
   const [hoveredCategory, setHoveredCategory] = useState(null)
   const [activeCategory, setActiveCategory] = useState(null)
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
 
+  // Fetch categories from API
   useEffect(() => {
-    axios.get('/categories')
-      .then(({ data }) => setCategories(Array.isArray(data) ? data : []))
-      .catch(() => setCategories([]))
+    fetchCategories()
   }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get('/categories')
+      setCategories(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Erreur chargement catégories:', error)
+      setCategories([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleCategoryClick = (cat) => {
     if (cat.subcategories?.length > 0) {
@@ -61,10 +76,10 @@ const CategoryBar = () => {
 
   return (
     <div className="bg-white border-b border-gray-200 relative">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="w-full px-4 md:px-6">
 
         {/* Desktop */}
-        <div className="hidden md:flex flex-wrap gap-2 py-2">
+        <div className="hidden md:flex justify-between items-center py-3 gap-2">
           {categories.map((cat) => {
             const Icon = getIcon(cat.icon)
             const hasSubs = cat.subcategories?.length > 0
@@ -77,7 +92,7 @@ const CategoryBar = () => {
               >
                 <button
                   onClick={() => handleCategoryClick(cat)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs font-medium whitespace-nowrap ${
+                  className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all text-sm font-medium whitespace-nowrap flex-1 min-w-0 ${
                     isOpen(cat.id)
                       ? 'bg-sky-700 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -93,14 +108,14 @@ const CategoryBar = () => {
         </div>
 
         {/* Mobile */}
-        <div className="md:hidden flex flex-col gap-1.5 py-2">
+        <div className="md:hidden flex flex-col gap-2 py-2">
           {categories.map((cat) => {
             const Icon = getIcon(cat.icon)
             return (
               <button
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all w-full justify-start ${
                   activeCategory === cat.id
                     ? 'bg-sky-700 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -114,8 +129,8 @@ const CategoryBar = () => {
         </div>
       </div>
 
-      {/* Mega menus — one per category */}
-      {categories.map((cat) => {
+      {/* Mega menus — one per category */
+      categories.map((cat) => {
         if (!isOpen(cat.id) || !cat.subcategories?.length) return null
         return (
           <div

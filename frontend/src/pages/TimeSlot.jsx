@@ -27,6 +27,17 @@ const build15Days = () => {
   })
 }
 
+// Check if a date is Sunday (dimanche)
+const isSunday = (date) => date.getDay() === 0
+
+// Get the first non-Sunday day from the days array
+const getFirstAvailableDay = (days) => {
+  for (const d of days) {
+    if (!isSunday(d)) return d
+  }
+  return days[0]
+}
+
 // Compact occupancy bar
 const OccupancyBar = ({ reservations, capacity }) => {
   const pct = capacity > 0 ? Math.min(100, Math.round((reservations / capacity) * 100)) : 100
@@ -66,7 +77,9 @@ const TimeSlot = () => {
     const token = localStorage.getItem('token')
     if (!token) { navigate('/login'); return }
     if (cartItems.length === 0) { navigate('/cart'); return }
-    setSelectedDate(days[0])
+    // Auto-select the first non-Sunday day
+    const firstAvailableDay = getFirstAvailableDay(days)
+    setSelectedDate(firstAvailableDay)
     localStorage.setItem('orderMode', isDelivery ? 'DELIVERY' : 'CLICK_COLLECT')
   }, [])
 
@@ -164,23 +177,27 @@ const TimeSlot = () => {
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Sélectionnez une date</p>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {days.map((d, i) => {
+                  const isSun   = isSunday(d)
                   const isSel   = selectedDate?.toDateString() === d.toDateString()
                   const isToday = i === 0
                   return (
-                    <button key={i} onClick={() => setSelectedDate(d)}
+                    <button key={i} onClick={() => !isSun && setSelectedDate(d)}
+                      disabled={isSun}
                       className={`flex-shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border-2 transition-all min-w-[58px] ${
-                        isSel
-                          ? 'border-sky-700 bg-sky-700 text-white shadow-md'
-                          : 'border-gray-200 hover:border-sky-300 hover:bg-sky-50 text-gray-700'
+                        isSun
+                          ? 'border-gray-100 bg-gray-100 text-gray-300 cursor-not-allowed opacity-50'
+                          : isSel
+                            ? 'border-sky-700 bg-sky-700 text-white shadow-md'
+                            : 'border-gray-200 hover:border-sky-300 hover:bg-sky-50 text-gray-700'
                       }`}>
-                      <span className={`text-[10px] font-semibold uppercase ${isSel ? 'text-sky-100' : 'text-gray-400'}`}>
+                      <span className={`text-[10px] font-semibold uppercase ${isSun ? 'text-gray-300' : isSel ? 'text-sky-100' : 'text-gray-400'}`}>
                         {DAY_LABELS[d.getDay()]}
                       </span>
                       <span className="text-lg font-bold leading-tight">{d.getDate()}</span>
-                      <span className={`text-[10px] ${isSel ? 'text-sky-100' : 'text-gray-400'}`}>
+                      <span className={`text-[10px] ${isSun ? 'text-gray-300' : isSel ? 'text-sky-100' : 'text-gray-400'}`}>
                         {MONTH_LABELS[d.getMonth()]}
                       </span>
-                      {isToday && (
+                      {isToday && !isSun && (
                         <span className={`text-[9px] font-bold mt-0.5 ${isSel ? 'text-white' : 'text-sky-600'}`}>
                           Auj.
                         </span>
@@ -189,6 +206,9 @@ const TimeSlot = () => {
                   )
                 })}
               </div>
+              <p className="text-[10px] text-gray-400 mt-2">
+                * Nous sommes fermés le dimanche
+              </p>
             </div>
 
             {/* Time slots */}

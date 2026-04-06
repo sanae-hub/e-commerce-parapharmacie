@@ -29,6 +29,17 @@ const build15Days = () => {
   })
 }
 
+// Check if a date is Sunday (dimanche)
+const isSunday = (date) => date.getDay() === 0
+
+// Get the first non-Sunday day from the days array
+const getFirstAvailableDay = (days) => {
+  for (const d of days) {
+    if (!isSunday(d)) return d
+  }
+  return days[0]
+}
+
 const OccupancyBar = ({ reservations, capacity }) => {
   const pct = capacity > 0 ? Math.min(100, Math.round((reservations / capacity) * 100)) : 100
   const color = pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-orange-400' : 'bg-green-500'
@@ -70,7 +81,9 @@ const DeliveryPage = () => {
     if (user.address) setAddress(p => ({ ...p, street: user.address }))
     if (user.phone)   setAddress(p => ({ ...p, phone: user.phone }))
 
-    setSelectedDate(days[0])
+    // Auto-select the first non-Sunday day
+    const firstAvailableDay = getFirstAvailableDay(days)
+    setSelectedDate(firstAvailableDay)
     localStorage.setItem('orderMode', 'DELIVERY')
   }, [])
 
@@ -310,23 +323,27 @@ const DeliveryPage = () => {
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2">
                 {days.map((d, i) => {
+                  const isSun   = isSunday(d)
                   const isSel   = selectedDate?.toDateString() === d.toDateString()
                   const isToday = i === 0
                   return (
-                    <button key={i} onClick={() => setSelectedDate(d)}
+                    <button key={i} onClick={() => !isSun && setSelectedDate(d)}
+                      disabled={isSun}
                       className={`flex-shrink-0 flex flex-col items-center px-3.5 py-3 rounded-2xl border-2 transition-all min-w-[62px] ${
-                        isSel
-                          ? 'border-sky-700 bg-sky-700 text-white shadow-md'
-                          : 'border-gray-200 hover:border-sky-400 hover:bg-sky-50 text-gray-700'
+                        isSun
+                          ? 'border-gray-100 bg-gray-100 text-gray-300 cursor-not-allowed opacity-50'
+                          : isSel
+                            ? 'border-sky-700 bg-sky-700 text-white shadow-md'
+                            : 'border-gray-200 hover:border-sky-400 hover:bg-sky-50 text-gray-700'
                       }`}>
-                      <span className={`text-[11px] font-bold uppercase ${isSel ? 'text-sky-100' : 'text-gray-400'}`}>
+                      <span className={`text-[11px] font-bold uppercase ${isSun ? 'text-gray-300' : isSel ? 'text-sky-100' : 'text-gray-400'}`}>
                         {DAY_LABELS[d.getDay()]}
                       </span>
                       <span className="text-xl font-bold leading-tight mt-0.5">{d.getDate()}</span>
-                      <span className={`text-[11px] ${isSel ? 'text-sky-100' : 'text-gray-400'}`}>
+                      <span className={`text-[11px] ${isSun ? 'text-gray-300' : isSel ? 'text-sky-100' : 'text-gray-400'}`}>
                         {MONTH_LABELS[d.getMonth()]}
                       </span>
-                      {isToday && (
+                      {isToday && !isSun && (
                         <span className={`text-[10px] font-bold mt-0.5 ${isSel ? 'text-white' : 'text-sky-600'}`}>
                           Auj.
                         </span>
@@ -335,6 +352,9 @@ const DeliveryPage = () => {
                   )
                 })}
               </div>
+              <p className="text-[10px] text-gray-400 mt-2">
+                * Nous sommes fermés le dimanche
+              </p>
             </div>
 
             {/* Slots */}

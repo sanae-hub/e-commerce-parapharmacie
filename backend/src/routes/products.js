@@ -107,17 +107,51 @@ router.get('/', async (req, res) => {
   try {
     const {
       category,
+      categoryId,
+      brand,
+      brandId,
       subcategory,
       search,
       page = 1,
-      limit = 12
+      limit = 12,
+      active,
+      outOfStock
     } = req.query
 
-    const where = { active: true }
+    const where = {}
+    
+    // Only filter by active=true for public API (when active param is not provided)
+    if (active !== undefined) {
+      where.active = active === 'true'
+    } else {
+      where.active = true
+    }
+    
     const skip = (parseInt(page) - 1) * parseInt(limit)
 
+    // Filter by category ID
+    if (categoryId) {
+      where.categoryId = categoryId
+    }
+    
+    // Filter by category name
     if (category) {
       where.category = { name: { equals: category, mode: 'insensitive' } }
+    }
+    
+    // Filter by brand ID
+    if (brandId) {
+      where.brandId = brandId
+    }
+    
+    // Filter by brand name
+    if (brand) {
+      where.brand = { contains: brand, mode: 'insensitive' }
+    }
+    
+    // Filter out of stock products
+    if (outOfStock === 'true') {
+      where.stock = { lte: 0 }
     }
 
     // subcategory param = item name from CategoryBar

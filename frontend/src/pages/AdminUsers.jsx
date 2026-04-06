@@ -324,6 +324,8 @@ const checkAuth = () => {
               <option value="lastName_asc">Nom (A-Z)</option>
               <option value="lastName_desc">Nom (Z-A)</option>
               <option value="email_asc">Email (A-Z)</option>
+              <option value="orderCount_desc">Plus de commandes</option>
+              <option value="orderCount_asc">Moins de commandes</option>
             </select>
           </div>
         </div>
@@ -619,7 +621,7 @@ const checkAuth = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-medium text-gray-900">{order.total.toFixed(2)} €</div>
+                          <div className="font-medium text-gray-900">{order.total.toFixed(2)} DH</div>
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
                             order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
                             order.status === 'PREPARING' ? 'bg-blue-100 text-blue-800' :
