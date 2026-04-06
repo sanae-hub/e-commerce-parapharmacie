@@ -1,20 +1,50 @@
 import { useWebSocket } from '../context/WebSocketContext'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { X, Bell, CheckCircle, AlertCircle, ShoppingBag, Truck, Package, Clock, Tag } from 'lucide-react'
+
+const NOTIFICATION_DURATION = 5000; // 5 seconds
 
 const ClientNotifications = () => {
   const { notifications, removeNotification, isConnected } = useWebSocket()
-  const [visibleNotifications, setVisibleNotifications] = useState([])
+  const [dismissedIds, setDismissedIds] = useState(new Set()) // IDs of manually dismissed notifications
+  const timersRef = useRef(new Map())
+
+  // Filter out dismissed notifications
+  const visibleNotifications = notifications.filter(n => !dismissedIds.has(n.id)).slice(0, 5)
 
   useEffect(() => {
-    setVisibleNotifications(notifications.slice(0, 5))
-  }, [notifications])
+    // Set up auto-dismiss timers for new notifications
+    notifications.forEach(notification => {
+      if (!timersRef.current.has(notification.id)) {
+        const timer = setTimeout(() => {
+          removeNotification(notification.id)
+          timersRef.current.delete(notification.id)
+        }, NOTIFICATION_DURATION)
+        timersRef.current.set(notification.id, timer)
+      }
+    })
+    
+    // Clean up timers for notifications that are no longer in the list
+    const currentIds = new Set(notifications.map(n => n.id))
+    timersRef.current.forEach((timer, id) => {
+      if (!currentIds.has(id)) {
+        clearTimeout(timer)
+        timersRef.current.delete(id)
+      }
+    })
+    
+    return () => {
+      // Cleanup on unmount
+      timersRef.current.forEach((timer) => clearTimeout(timer))
+    }
+  }, [notifications, removeNotification])
 
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'ORDER_CREATED':        return <ShoppingBag className="w-5 h-5 text-green-500" />
       case 'ORDER_STATUS_CHANGED': return <Truck className="w-5 h-5 text-blue-500" />
       case 'ORDER_CANCELLED':      return <AlertCircle className="w-5 h-5 text-red-500" />
+      case 'ORDER_URGENT':         return <Clock className="w-5 h-5 text-orange-600 animate-pulse" />
       case 'order_status_changed': return <Clock className="w-5 h-5 text-yellow-500" />
       case 'PROMO_CODE':           return <Tag className="w-5 h-5 text-purple-500" />
       case 'notification':         return <Bell className="w-5 h-5 text-gray-500" />
@@ -26,6 +56,7 @@ const ClientNotifications = () => {
     switch (type) {
       case 'ORDER_CREATED':        return 'bg-green-50 border-green-200 text-green-800'
       case 'ORDER_STATUS_CHANGED': return 'bg-blue-50 border-blue-200 text-blue-800'
+      case 'ORDER_URGENT':         return 'bg-orange-50 border-orange-300 text-orange-800 border-2 animate-pulse'
       case 'order_status_changed': return 'bg-yellow-50 border-yellow-200 text-yellow-800'
       case 'ORDER_CANCELLED':      return 'bg-red-50 border-red-200 text-red-800'
       case 'PROMO_CODE':           return 'bg-purple-50 border-purple-200 text-purple-800'
@@ -67,7 +98,18 @@ const ClientNotifications = () => {
               {getNotificationIcon(notification.type)}
             </div>
 
-            <div className="flex-1 min-w-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDismissedIds(prev => new Set([...prev, notification.id]));
+              }}
+              className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              title="Fermer"
+            >
+              <X size={14} />
+            </button>
+
+            <div className="flex-1 min-w-0 pr-6">
               <h3 className="font-semibold text-sm">
                 {notification.title}
               </h3>
@@ -107,13 +149,6 @@ const ClientNotifications = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => removeNotification(notification.id)}
-              className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 transition-colors"
-              title="Fermer"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
         </div>
       ))}

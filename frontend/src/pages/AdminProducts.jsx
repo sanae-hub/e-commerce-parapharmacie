@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, Edit, Trash2, Search, Save, X, Loader2, Package, ChevronDown } from 'lucide-react'
 import adminAxios from '../api/adminAxios'
 import axios from '../api/axios'
+import ImageUpload from '../components/ImageUpload'
 
 const AdminProducts = () => {
   const navigate = useNavigate()
@@ -26,6 +27,7 @@ const AdminProducts = () => {
     price: '',
     oldPrice: '',
     image: '',
+    imagePublicId: '',
     stock: '',
     stockAlert: '10',
     categoryId: '',
@@ -148,7 +150,7 @@ const AdminProducts = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '', brand: '', price: '', oldPrice: '', image: '',
+      name: '', brand: '', price: '', oldPrice: '', image: '', imagePublicId: '',
       stock: '', stockAlert: '10',
       categoryId: '', subcategoryId: '', subcategoryItemId: '',
       description: '', utilisation: '', composition: '', benefits: '',
@@ -157,6 +159,14 @@ const AdminProducts = () => {
     setFormError('')
     setSubcategories([])
     setItems([])
+  }
+
+  const handleImageUpload = (url, publicId) => {
+    setFormData(prev => ({
+      ...prev,
+      image: url,
+      imagePublicId: publicId
+    }))
   }
 
   const handleEdit = (product) => {
@@ -397,15 +407,14 @@ const AdminProducts = () => {
                 </div>
               </div>
 
-              {/* Image */}
+              {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL de l'image</label>
-                <input type="text" name="image" value={formData.image} onChange={handleInputChange}
-                  placeholder="https://... ou /images/produit.jpg"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
-                {formData.image && (
-                  <img src={formData.image} alt="Aperçu" className="mt-2 w-16 h-16 object-cover rounded" />
-                )}
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image du produit</label>
+                <ImageUpload
+                  type="product"
+                  currentImage={formData.image}
+                  onUploadSuccess={handleImageUpload}
+                />
               </div>
 
               {/* Description */}

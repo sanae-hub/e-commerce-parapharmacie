@@ -1,6 +1,13 @@
 // backend/prisma/seed.js
+import { config } from 'dotenv'
+import { resolve } from 'path'
+import { fileURLToPath } from 'url'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+
+// Charger les variables d'environnement depuis .env
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+config({ path: resolve(__dirname, '../.env') })
 
 const prisma = new PrismaClient()
 

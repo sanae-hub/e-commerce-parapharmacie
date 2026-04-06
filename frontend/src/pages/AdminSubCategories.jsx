@@ -349,17 +349,6 @@ const AdminSubcategories = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                resetSubcategoryForm();
-                setEditingSubcategory(null);
-                setShowSubcategoryModal(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg transition-colors"
-            >
-              <Plus size={18} />
-              Nouvelle sous-catégorie
-            </button>
           </div>
         </div>
       </header>
@@ -382,119 +371,166 @@ const AdminSubcategories = () => {
           </div>
         )}
 
-        {/* Liste des sous-catégories */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="divide-y divide-gray-200">
-            {subcategories.length === 0 ? (
-              <div className="p-12 text-center">
-                <FolderTree size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Aucune sous-catégorie</p>
-                <button
-                  onClick={() => setShowSubcategoryModal(true)}
-                  className="mt-4 text-sky-700 hover:text-sky-800 font-medium"
-                >
-                  Créer une sous-catégorie
-                </button>
-              </div>
-            ) : (
-              subcategories.map((subcategory) => {
-                const IconComponent = getIconComponent(subcategory.icon);
-                return (
-                  <div key={subcategory.id} className="p-4 hover:bg-gray-50">
+      {/* Liste des sous-catégories - Groupées par catégorie parente */}
+      {subcategories.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <FolderTree size={48} className="mx-auto text-gray-300 mb-4" />
+          <p className="text-gray-500 text-lg mb-2">Aucune sous-catégorie</p>
+          <p className="text-gray-400 text-sm mb-4">Commencez par créer une sous-catégorie</p>
+          <button
+            onClick={() => setShowSubcategoryModal(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-sky-700 hover:bg-sky-800 text-white rounded-lg font-medium transition-colors"
+          >
+            <Plus size={18} />
+            Créer une sous-catégorie
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {/* Grouper les sous-catégories par catégorie parente */}
+          {(() => {
+            const grouped = {};
+            subcategories.forEach(sc => {
+              if (!grouped[sc.categoryId]) {
+                grouped[sc.categoryId] = [];
+              }
+              grouped[sc.categoryId].push(sc);
+            });
+            return Object.entries(grouped).map(([categoryId, categorySubcategories]) => {
+              const categoryName = getCategoryName(categoryId);
+              const category = categories.find(c => c.id === categoryId);
+              return (
+                <div key={categoryId} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  {/* En-tête de la catégorie */}
+                  <div className="px-6 py-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-gray-200">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <button
-                          onClick={() => toggleExpand(subcategory.id)}
-                          className="p-1 hover:bg-gray-200 rounded"
-                        >
-                          {expandedSubcategories[subcategory.id] ? (
-                            <ChevronDown size={18} className="text-gray-500" />
-                          ) : (
-                            <ChevronRight size={18} className="text-gray-500" />
-                          )}
-                        </button>
-                        
-                        {/* Affichage de l'icône avec le composant Lucide */}
-                        <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center">
-                          <IconComponent size={20} className="text-sky-700" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-sky-600 rounded-lg flex items-center justify-center">
+                          <FolderTree size={20} className="text-white" />
                         </div>
-                        
                         <div>
-                          <h3 className="font-semibold text-gray-900">{subcategory.title}</h3>
-                          <p className="text-sm text-gray-500">
-                            Catégorie: {getCategoryName(subcategory.categoryId)} • 
-                            Ordre: {subcategory.order} • 
-                            {subcategory.items?.length || 0} item(s)
-                          </p>
+                          <h2 className="text-lg font-bold text-gray-900">{categoryName}</h2>
+                          <p className="text-sm text-gray-500">{categorySubcategories.length} sous-catégorie(s)</p>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedSubcategory(subcategory);
-                            resetItemForm();
-                            setEditingItem(null);
-                            setShowItemModal(true);
-                          }}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                          title="Ajouter un item"
-                        >
-                          <Plus size={18} />
-                        </button>
-                        
-                        <button
-                          onClick={() => openEditSubcategoryModal(subcategory)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Modifier"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        
-                        <button
-                          onClick={() => handleDeleteSubcategory(subcategory)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => {
+                          setSubcategoryForm({ ...subcategoryForm, categoryId });
+                          setShowSubcategoryModal(true);
+                        }}
+                        className="inline-flex items-center gap-1 text-sm text-sky-700 hover:text-sky-800 font-medium px-3 py-2 bg-white hover:bg-sky-50 border border-sky-200 rounded-lg transition-colors"
+                      >
+                        <Plus size={16} />
+                        Ajouter sous-catégorie
+                      </button>
                     </div>
+                  </div>
 
-                    {/* Items de la sous-catégorie */}
-                    {expandedSubcategories[subcategory.id] && subcategory.items && subcategory.items.length > 0 && (
-                      <div className="ml-12 mt-3 pl-4 border-l-2 border-gray-200 space-y-2">
-                        {subcategory.items.map((item) => (
-                          <div key={item.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <Tag size={14} className="text-gray-400" />
-                              <span className="text-sm text-gray-700">{item.name}</span>
-                              <span className="text-xs text-gray-400">(ordre: {item.order})</span>
+                  {/* Grille des sous-catégories de cette catégorie */}
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {categorySubcategories.map((subcategory) => {
+                        const IconComponent = getIconComponent(subcategory.icon);
+                        return (
+                          <div key={subcategory.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                            {/* Header de la carte */}
+                            <div className="p-3 border-b border-gray-100 bg-gray-50">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <IconComponent size={18} className="text-sky-700" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-gray-900 truncate text-sm">{subcategory.title}</h3>
+                                    <p className="text-xs text-gray-500">Ordre: {subcategory.order}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                  <button
+                                    onClick={() => openEditSubcategoryModal(subcategory)}
+                                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                    title="Modifier"
+                                  >
+                                    <Edit size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSubcategory(subcategory)}
+                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                    title="Supprimer"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => openEditItemModal(item)}
-                                className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                              >
-                                <Edit size={14} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteItem(item)}
-                                className="p-1 text-red-600 hover:bg-red-100 rounded"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+
+                            {/* Section des items */}
+                            <div className="p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-gray-600">
+                                  {subcategory.items?.length || 0} item(s)
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    setSelectedSubcategory(subcategory);
+                                    resetItemForm();
+                                    setEditingItem(null);
+                                    setShowItemModal(true);
+                                  }}
+                                  className="text-xs text-sky-700 hover:text-sky-800 font-medium px-2 py-1 bg-sky-50 hover:bg-sky-100 rounded transition-colors"
+                                >
+                                  + Ajouter
+                                </button>
+                              </div>
+
+                              {subcategory.items && subcategory.items.length > 0 ? (
+                                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                                  {subcategory.items
+                                    .sort((a, b) => a.order - b.order)
+                                    .map((item) => (
+                                      <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
+                                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                          <Tag size={12} className="text-gray-400 flex-shrink-0" />
+                                          <span className="text-sm text-gray-700 truncate">{item.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                          <span className="text-xs text-gray-400 mr-0.5">#{item.order}</span>
+                                          <button
+                                            onClick={() => openEditItemModal(item)}
+                                            className="p-0.5 text-blue-600 hover:bg-blue-100 rounded"
+                                            title="Modifier"
+                                          >
+                                            <Edit size={10} />
+                                          </button>
+                                          <button
+                                            onClick={() => handleDeleteItem(item)}
+                                            className="p-0.5 text-red-600 hover:bg-red-100 rounded"
+                                            title="Supprimer"
+                                          >
+                                            <Trash2 size={10} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-3 text-gray-400 text-xs">
+                                  <Tag size={16} className="mx-auto mb-1 text-gray-300" />
+                                  Aucun item
+                                </div>
+                              )}
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </div>
-                );
-              })
-            )}
-          </div>
+                </div>
+              );
+            });
+          })()}
         </div>
+      )}
       </div>
 
       {/* Modal Sous-catégorie */}

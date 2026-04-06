@@ -1,5 +1,6 @@
 // frontend/src/context/WebSocketContext.jsx
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { io } from 'socket.io-client';
 
 const WebSocketContext = createContext();
 
@@ -15,9 +16,30 @@ export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const socketRef = useRef(null);
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
   const [isBackendAvailable, setIsBackendAvailable] = useState(true);
+  const [token, setToken] = useState(null);
+
+  // Watch for token changes in localStorage
+  useEffect(() => {
+    const updateToken = () => {
+      const currentToken = localStorage.getItem('token');
+      setToken(currentToken);
+    };
+
+    // Initial check
+    updateToken();
+
+    // Listen for storage events (for cross-tab sync)
+    window.addEventListener('storage', updateToken);
+
+    // Also check periodically for token changes within the same tab
+    const interval = setInterval(updateToken, 1000);
+
+    return () => {
+      window.removeEventListener('storage', updateToken);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Vérifier d'abord si le backend est accessible
   useEffect(() => {
@@ -25,12 +47,6 @@ export const WebSocketProvider = ({ children }) => {
       try {
         const response = await fetch('http://localhost:5000/api/health');
         setIsBackendAvailable(response.ok);
-        if (response.ok) {
-          console.log('✅ Backend accessible, tentative de connexion WebSocket...');
-          connectWebSocket();
-        } else {
-          console.warn('⚠️ Backend non accessible, WebSocket désactivé');
-        }
       } catch (error) {
         console.warn('⚠️ Impossible de contacter le backend:', error.message);
         setIsBackendAvailable(false);
@@ -41,97 +57,71 @@ export const WebSocketProvider = ({ children }) => {
     
     return () => {
       if (socketRef.current) {
-        socketRef.current.close();
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
     };
   }, []);
 
-  const connectWebSocket = () => {
-    const token = localStorage.getItem('token');
-    
+  // Connect socket when token becomes available
+  useEffect(() => {
+    if (token && isBackendAvailable && !socketRef.current) {
+      console.log('🔌 Socket.IO: Token détecté, tentative de connexion...');
+      connectSocket();
+    } else if (!token && socketRef.current) {
+      // Disconnect if token is removed (logout)
+      console.log('🔌 Socket.IO: Token supprimé, déconnexion...');
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setIsConnected(false);
+    }
+  }, [token, isBackendAvailable]);
+
+  const connectSocket = () => {
     if (!token) {
-      console.log('🔌 WebSocket: Pas de token, connexion désactivée');
+      console.log('🔌 Socket.IO: Pas de token, connexion désactivée');
       return;
     }
     
     if (!isBackendAvailable) {
-      console.log('🔌 WebSocket: Backend non disponible, WebSocket désactivé');
+      console.log('🔌 Socket.IO: Backend non disponible, Socket.IO désactivé');
       return;
     }
 
     try {
-      const socketUrl = 'ws://localhost:5000';
-      console.log('🔌 WebSocket: Connexion en cours...');
-      const socket = new WebSocket(socketUrl);
+      console.log('🔌 Socket.IO: Connexion en cours...');
+      const socket = io('http://localhost:5000', {
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5
+      });
       
-      // Timeout pour la connexion
-      const connectionTimeout = setTimeout(() => {
-        if (socket.readyState !== WebSocket.OPEN) {
-          console.warn('⚠️ WebSocket: Délai de connexion dépassé');
-          socket.close();
-          setIsConnected(false);
-        }
-      }, 5000);
-      
-      socket.onopen = () => {
-        clearTimeout(connectionTimeout);
-        console.log('✅ WebSocket: Connecté');
+      socket.on('connect', () => {
+        console.log('✅ Socket.IO: Connecté avec succès');
         setIsConnected(true);
-        reconnectAttempts.current = 0;
-        
-        // Envoyer le token après connexion
-        socket.send(JSON.stringify({
-          type: 'authenticate',
-          token: token
-        }));
-      };
+      });
 
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'authenticated') {
-            if (data.success) {
-              console.log('✅ WebSocket: Authentifié avec succès');
-            } else {
-              console.error('❌ WebSocket: Échec authentification:', data.error);
-            }
-            return;
-          }
-
-          // Socket.IO wraps events as arrays: [eventName, data]
-          if (Array.isArray(data) && data[0] === 'promo_code_created') {
-            handleNotification({ ...data[1], type: 'PROMO_CODE' });
-            return;
-          }
-          
-          // Gérer les notifications
-          handleNotification(data);
-        } catch (error) {
-          console.error('❌ WebSocket: Erreur parsing message:', error);
-        }
-      };
-
-      socket.onclose = (event) => {
-        console.log('❌ WebSocket: Déconnecté, code:', event.code);
+      socket.on('disconnect', (reason) => {
+        console.log('❌ Socket.IO: Déconnecté, raison:', reason);
         setIsConnected(false);
-        
-        // Ne pas tenter de reconnexion si le serveur a fermé proprement
-        if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
-          reconnectAttempts.current++;
-          console.log(`🔄 WebSocket: Reconnexion ${reconnectAttempts.current}/${maxReconnectAttempts} dans 5s...`);
-          setTimeout(connectWebSocket, 5000);
-        }
-      };
+      });
 
-      socket.onerror = (error) => {
-        console.warn('⚠️ WebSocket: Erreur (non bloquante)', error);
-        // Ne pas définir isConnected à false ici pour éviter les reconnexions intempestives
-      };
+      socket.on('connect_error', (error) => {
+        console.error('❌ Socket.IO: Erreur de connexion:', error.message);
+        setIsConnected(false);
+      });
+
+      // Gérer les notifications
+      socket.on('notification', (data) => {
+        console.log('📨 Socket.IO: Notification reçue:', data);
+        handleNotification(data);
+      });
 
       socketRef.current = socket;
     } catch (error) {
-      console.warn('⚠️ WebSocket: Impossible de créer la connexion', error.message);
+      console.warn('⚠️ Socket.IO: Impossible de créer la connexion', error.message);
       setIsConnected(false);
     }
   };
@@ -182,6 +172,17 @@ export const WebSocketProvider = ({ children }) => {
           data: data
         });
         break;
+        
+      case 'ORDER_URGENT':
+        addNotification({
+          title: '⚡ Commande urgente',
+          message: `Votre commande ${data.orderNumber} doit être retirée dans moins de 2 heures`,
+          type: 'ORDER_URGENT',
+          orderId: data.orderId,
+          isUrgent: true,
+          data: data
+        });
+        break;
 
       case 'PROMO_CODE':
         addNotification({
@@ -194,7 +195,7 @@ export const WebSocketProvider = ({ children }) => {
         break;
         
       default:
-        console.log('📨 WebSocket: Message non traité:', data.type);
+        console.log('📨 Socket.IO: Message non traité:', data.type);
     }
   };
 

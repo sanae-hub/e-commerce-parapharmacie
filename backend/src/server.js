@@ -3,7 +3,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import cron from 'node-cron';
 import { createServer } from 'http';
@@ -23,6 +22,16 @@ import brandsRouter from './routes/brands.js';
 import favoritesRouter from './routes/favorites.js';
 import suppliersRouter from './routes/suppliers.js';
 import { setIo, addClientSocket, removeClientSocket } from './io.js';
+
+// Import du service d'email
+import {
+  initializeTransporter,
+  isEmailConfigured,
+  sendOrderConfirmation,
+  sendOrderStatusNotification,
+  sendPasswordResetEmail,
+  sendSlotReminder
+} from './services/emailService.js';
 
 
 dotenv.config();
@@ -67,14 +76,14 @@ app.use('/api/admin', suppliersRouter);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
-// Configuration Nodemailer
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-})
+// Initialisation du service d'email
+initializeTransporter();
+if (isEmailConfigured()) {
+  console.log('✅ Service d\'email initialisé avec succès');
+} else {
+  console.log('⚠️ Service d\'email non configuré. Les notifications par email ne seront pas envoyées.');
+  console.log('   Configurez EMAIL_USER et EMAIL_PASSWORD dans le fichier .env');
+}
 
 // Middleware d'authentification
 const verifyToken = (req, res, next) => {
@@ -342,20 +351,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       },
     })
 
-    // Envoyer l'email
+    // Envoyer l'email avec le service d'email
     const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Réinitialisation de votre mot de passe',
-      html: `
-        <h2>Réinitialisation de mot de passe</h2>
-        <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
-        <a href="${resetLink}">Réinitialiser mon mot de passe</a>
-        <p>Ce lien expire dans 15 minutes.</p>
-        <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
-      `,
-    })
+    await sendPasswordResetEmail(user, resetLink)
 
     res.json({ message: 'Email de réinitialisation envoyé' })
   } catch (error) {
@@ -613,14 +611,13 @@ app.post('/api/orders/create', async (req, res) => {
       },
     })
 
-    // Décrémenter le stock pour chaque article
-    await decrementStock(items, order.orderNumber, userId)
+    // Note: Le stock n'est PAS décrémenté à la création, il sera décrémenté à la confirmation
 
     // Envoyer notification de création
     if (userId) {
       const user = await prisma.user.findUnique({ where: { id: userId } })
       if (user && user.notificationEmail) {
-        await sendStatusNotification(user, order, 'RECEIVED')
+        await sendOrderStatusNotification(user, order, 'RECEIVED')
       }
       // Notification WebSocket au client
       io.to(`user_${userId}`).emit('notification', {
@@ -692,6 +689,31 @@ app.post('/api/orders/send-confirmation', async (req, res) => {
         if (user) {
           userEmail = user.email
 
+          // Trouver la commande par orderNumber
+          const order = await prisma.order.findFirst({
+            where: { orderNumber },
+            include: {
+              items: {
+                include: {
+                  product: {
+                    select: { id: true, name: true, stock: true, stockAlert: true }
+                  }
+                }
+              }
+            }
+          })
+
+          if (order && order.status === 'RECEIVED') {
+            // Décrémenter le stock à la confirmation
+            await decrementStock(order.items, order.orderNumber, user.id)
+
+            // Mettre à jour le statut de la commande à CONFIRMED
+            await prisma.order.update({
+              where: { id: order.id },
+              data: { status: 'PREPARING' }
+            })
+          }
+
           const slotDate = new Date(timeSlot.date)
           const formattedDate = slotDate.toLocaleDateString('fr-FR', {
             weekday: 'long',
@@ -700,28 +722,17 @@ app.post('/api/orders/send-confirmation', async (req, res) => {
             day: 'numeric',
           })
 
-          await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: userEmail,
-            subject: `Confirmation Click & Collect - ${orderNumber}`,
-            html: `
-              <h2>🎉 Commande confirmée !</h2>
-              <p>Bonjour ${user.firstName},</p>
-              <p>Votre commande Click & Collect est confirmée.</p>
-              <h3>Détails du retrait :</h3>
-              <ul>
-                <li><strong>Numéro de commande :</strong> ${orderNumber}</li>
-                <li><strong>Date :</strong> ${formattedDate}</li>
-                <li><strong>Créneau :</strong> ${timeSlot.slot.time} - ${timeSlot.slot.endTime}</li>
-                <li><strong>Lieu :</strong> Pharmacie ParaClick, 123 Avenue de la République, Alger</li>
-              </ul>
-              <p><strong>Paiement au comptoir lors du retrait</strong></p>
-              <p>Vous recevrez un rappel 2 heures avant votre créneau.</p>
-              <p>Présentez votre QR code en pharmacie.</p>
-              <br>
-              <p>À bientôt !</p>
-            `,
-          })
+          // Envoyer email de confirmation avec le service d'email
+          const confirmationOrder = {
+            orderNumber,
+            total: 0,
+            type: 'CLICK_COLLECT',
+            timeSlotDate: new Date(timeSlot.date),
+            timeSlotStart: timeSlot.slot.time,
+            timeSlotEnd: timeSlot.slot.endTime,
+            items: []
+          };
+          await sendOrderConfirmation(user, confirmationOrder);
 
           // Envoyer notification WebSocket aux admins de confirmation de commande
           io.to('admin_room').emit('admin_order_confirmed', {
@@ -817,7 +828,7 @@ app.put('/api/orders/:orderId/cancel', verifyToken, async (req, res) => {
 
     // Envoyer notification d'annulation
     if (order.user && order.user.notificationEmail) {
-      await sendStatusNotification(order.user, updatedOrder, 'CANCELLED')
+      await sendOrderStatusNotification(order.user, updatedOrder, 'CANCELLED')
     }
     
     // Notification WebSocket au client
@@ -886,7 +897,7 @@ app.put('/api/orders/:orderId/status', async (req, res) => {
 
     // Envoyer notification de changement de statut
     if (order.user && order.user.notificationEmail) {
-      await sendStatusNotification(order.user, updatedOrder, status)
+      await sendOrderStatusNotification(order.user, updatedOrder, status)
     }
     
     // Notification WebSocket au client
@@ -938,60 +949,8 @@ app.put('/api/orders/:orderId/status', async (req, res) => {
   }
 })
 
-// Fonction pour envoyer les notifications de statut
-async function sendStatusNotification(user, order, status) {
-  const statusMessages = {
-    RECEIVED: {
-      subject: '✅ Commande reçue',
-      title: 'Commande reçue !',
-      message: 'Nous avons bien reçu votre commande et nous la préparons.'
-    },
-    PREPARING: {
-      subject: '⏳ Commande en préparation',
-      title: 'Commande en préparation',
-      message: 'Votre commande est actuellement en cours de préparation.'
-    },
-    READY: {
-      subject: '🎉 Commande prête',
-      title: 'Commande prête !',
-      message: 'Votre commande est prête à être retirée. Rendez-vous en pharmacie avec votre QR code.'
-    },
-    COMPLETED: {
-      subject: '✨ Commande récupérée',
-      title: 'Merci pour votre visite !',
-      message: 'Votre commande a été récupérée avec succès. À bientôt !'
-    },
-    CANCELLED: {
-      subject: '❌ Commande annulée',
-      title: 'Commande annulée',
-      message: 'Votre commande a été annulée comme demandé.'
-    }
-  }
-
-  const statusInfo = statusMessages[status] || statusMessages.RECEIVED
-
-  try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: `${statusInfo.subject} - ${order.orderNumber}`,
-      html: `
-        <h2>${statusInfo.title}</h2>
-        <p>Bonjour ${user.firstName},</p>
-        <p>${statusInfo.message}</p>
-        <h3>Détails de la commande :</h3>
-        <ul>
-          <li><strong>Numéro :</strong> ${order.orderNumber}</li>
-          <li><strong>Montant :</strong> ${order.total.toFixed(2)} DA</li>
-          ${order.timeSlotDate ? `<li><strong>Retrait prévu :</strong> ${new Date(order.timeSlotDate).toLocaleDateString('fr-FR')} à ${order.timeSlotStart}</li>` : ''}
-        </ul>
-        <p>Cordialement,<br>L'équipe ParaClick</p>
-      `
-    })
-  } catch (error) {
-    console.error('Error sending status notification:', error)
-  }
-}
+// La fonction sendStatusNotification a été déplacée vers emailService.js
+// et est maintenant disponible via sendOrderStatusNotification
 // backend/src/server.js
 // Ajoutez cette route APRÈS les autres routes, avant app.listen
 
@@ -1003,10 +962,13 @@ app.get('/api/time-slots/available', async (req, res) => {
     const { date } = req.query;
     if (!date) return res.status(400).json({ message: 'Date requise' });
 
-    // Normaliser la date : minuit UTC pour éviter les décalages de fuseau horaire
+    // Normaliser la date : on utilise la date telle quelle en UTC
+    // La date envoyée par le frontend est déjà au format YYYY-MM-DD
     const targetDateStart = new Date(date + 'T00:00:00.000Z');
     const targetDateEnd   = new Date(date + 'T23:59:59.999Z');
     const dayOfWeek = targetDateStart.getUTCDay();
+    
+    console.log(`[TimeSlots] Query date: ${date}, Start: ${targetDateStart.toISOString()}, End: ${targetDateEnd.toISOString()}`);
 
     // Créneaux bloqués actifs
     const blockedSlots = await prisma.blockedSlot.findMany({
@@ -1021,27 +983,25 @@ app.get('/api/time-slots/available', async (req, res) => {
     if (isDayBlocked) return res.json([]);
 
     // Vérifier si le jour de la semaine est désactivé via TimeSlotConfig
-    // Un jour est désactivé si au moins une config existe ET toutes sont inactives
+    // Un jour est désactivé si aucune config n'existe OU si toutes les configs sont inactives
     const allDayConfigs = await prisma.timeSlotConfig.findMany({ where: { dayOfWeek } });
+    
+    // Si aucune config n'existe pour ce jour, il est considéré comme fermé
+    if (allDayConfigs.length === 0) {
+      return res.json([]);
+    }
+    
     const hasActiveConfig = allDayConfigs.some(c => c.active);
-    const hasInactiveConfig = allDayConfigs.some(c => !c.active);
-    // Si une config inactive existe et aucune active : jour désactivé
-    if (hasInactiveConfig && !hasActiveConfig) {
+    
+    // Si toutes les configs sont inactives, le jour est fermé
+    if (!hasActiveConfig) {
       return res.json([]);
     }
 
     // Récupérer config admin active si elle existe (réutiliser allDayConfigs)
     const configs = allDayConfigs.filter(c => c.active).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-    // Paramètres par défaut si aucune config
-    const DEFAULT_START    = '08:00';
-    const DEFAULT_END      = '20:00';
-    const DEFAULT_INTERVAL = 60;
-    const DEFAULT_CAPACITY = 5;
-
-    const slots = configs.length > 0
-      ? configs.map(c => ({ startTime: c.startTime, endTime: c.endTime, intervalMinutes: c.intervalMinutes, capacity: c.capacity }))
-      : [{ startTime: DEFAULT_START, endTime: DEFAULT_END, intervalMinutes: DEFAULT_INTERVAL, capacity: DEFAULT_CAPACITY }];
+    const slots = configs.map(c => ({ startTime: c.startTime, endTime: c.endTime, intervalMinutes: c.intervalMinutes, capacity: c.capacity }));
 
     // Commandes existantes pour cette date (plage UTC pour éviter les décalages)
     const existingOrders = await prisma.order.findMany({
@@ -1052,10 +1012,21 @@ app.get('/api/time-slots/available', async (req, res) => {
       },
       select: { timeSlotStart: true }
     });
+    
+    // Debug logging
+    console.log(`[TimeSlots] Date: ${date}, Found ${existingOrders.length} orders for this date`);
+    console.log(`[TimeSlots] Orders: ${JSON.stringify(existingOrders.map(o => o.timeSlotStart))}`);
+    
     const reservationsCount = {};
     existingOrders.forEach(o => {
-      reservationsCount[o.timeSlotStart] = (reservationsCount[o.timeSlotStart] || 0) + 1;
+      // Normalize time format to HH:MM
+      const timeKey = o.timeSlotStart ? o.timeSlotStart.trim() : null;
+      if (timeKey) {
+        reservationsCount[timeKey] = (reservationsCount[timeKey] || 0) + 1;
+      }
     });
+    
+    console.log(`[TimeSlots] Reservations count: ${JSON.stringify(reservationsCount)}`);
 
     // Overrides de capacité par créneau pour ce jour
     const overrides = await prisma.slotCapacityOverride.findMany({ where: { dayOfWeek } });
@@ -1295,25 +1266,44 @@ cron.schedule('*/15 * * * *', async () => {
     })
 
     for (const order of orders) {
-      if (order.user && order.user.email && order.user.notificationEmail) {
-        // Envoyer email de rappel
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: order.user.email,
-          subject: `⏰ Rappel - Retrait dans 2h - ${order.orderNumber}`,
-          html: `
-            <h2>🔔 Rappel de retrait</h2>
-            <p>Bonjour ${order.user.firstName},</p>
-            <p>Votre commande Click & Collect est prête à être retirée dans 2 heures.</p>
-            <h3>Détails :</h3>
-            <ul>
-              <li><strong>Numéro :</strong> ${order.orderNumber}</li>
-              <li><strong>Créneau :</strong> ${order.timeSlotStart} - ${order.timeSlotEnd}</li>
-              <li><strong>Lieu :</strong> Pharmacie ParaClick, 123 Avenue Mohammed V, Casablanca</li>
-            </ul>
-            <p>N'oubliez pas votre QR code !</p>
-          `,
+      // Marquer la commande comme urgente
+      if (!order.isUrgent) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { isUrgent: true }
         })
+        
+        // Notification WebSocket au client pour commande urgente
+        if (order.userId) {
+          io.to(`user_${order.userId}`).emit('notification', {
+            type: 'ORDER_URGENT',
+            title: '⚡ Commande urgente',
+            message: `Votre commande ${order.orderNumber} doit être retirée dans moins de 2 heures`,
+            orderId: order.id,
+            isUrgent: true,
+            timestamp: new Date()
+          })
+        }
+        
+        // Notification WebSocket aux admins pour commande urgente
+        io.to('admin_room').emit('admin_urgent_order', {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Client anonyme',
+          customerPhone: order.user?.phone,
+          timeSlotDate: order.timeSlotDate,
+          timeSlotStart: order.timeSlotStart,
+          timeSlotEnd: order.timeSlotEnd,
+          status: order.status,
+          isUrgent: true,
+          urgentReason: 'Retrait dans moins de 2 heures',
+          timestamp: new Date()
+        })
+      }
+      
+      if (order.user && order.user.email && order.user.notificationEmail) {
+        // Envoyer email de rappel avec le service d'email
+        await sendSlotReminder(order.user, order);
 
         // Marquer le rappel comme envoyé
         await prisma.order.update({

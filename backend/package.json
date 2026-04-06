@@ -13,7 +13,7 @@
     "test-sms": "node test-sms.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-   "prisma": {
+  "prisma": {
     "seed": "node prisma/seed.js"
   },
   "keywords": [],
@@ -34,6 +34,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.2",
+    "pdfkit": "^0.18.0",
     "prisma": "^5.8.0",
     "psql": "^0.0.1",
     "sharp": "^0.34.5",

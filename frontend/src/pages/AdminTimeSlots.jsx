@@ -1,20 +1,73 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Calendar, Plus, Trash2, X, Download, Settings, Ban, ArrowLeft, Sliders } from 'lucide-react';
+import { Clock, Calendar, Plus, Trash2, X, Ban, ArrowLeft } from 'lucide-react';
 import adminApi from '../api/adminAxios';
 
-const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-const DEFAULT_START = '08:00';
-const DEFAULT_END   = '20:00';
+const DAYS_ALL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAYS_DOW = [0, 1, 2, 3, 4, 5, 6]; // Corresponding day of week numbers
 const DEFAULT_INTERVAL = 60;
 const DEFAULT_CAPACITY = 5;
+
+// Helper to get ordered days starting from current day (Morocco timezone)
+// If past 18:00, starts from tomorrow instead
+const getOrderedDays = () => {
+  const now = new Date();
+  const options = { timeZone: 'Africa/Casablanca' };
+  const moroccoStr = now.toLocaleString('en-US', options);
+  const moroccoDate = new Date(moroccoStr);
+  let moroccoDay = moroccoDate.getDay();
+  const currentHour = moroccoDate.getHours();
+  const currentMinute = moroccoDate.getMinutes();
+  
+  // If past 18:00, start from tomorrow
+  if (currentHour >= 18) {
+    moroccoDay = (moroccoDay + 1) % 7;
+  }
+  
+  const orderedDays = [];
+  const orderedDows = [];
+  
+  for (let i = 0; i < 7; i++) {
+    const dayIndex = (moroccoDay + i) % 7;
+    orderedDays.push(DAYS_ALL[dayIndex]);
+    orderedDows.push(DAYS_DOW[dayIndex]);
+  }
+  
+  // Get current time in Morocco as minutes since midnight
+  const currentTimeMinutes = currentHour * 60 + currentMinute;
+  
+  return { 
+    orderedDays, 
+    orderedDows, 
+    currentDow: moroccoDay,
+    currentTimeMinutes,
+    currentHour,
+    currentMinute
+  };
+};
+
+// Helper to convert time string (HH:MM) to minutes since midnight
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+// Helper to get minimum time for today (current time rounded up to next 30 min)
+const getMinTimeForToday = (currentTimeMinutes) => {
+  // Round up to next 30 minutes
+  const rounded = Math.ceil(currentTimeMinutes / 30) * 30;
+  const hours = Math.floor(rounded / 60);
+  const minutes = rounded % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
 
 const AdminTimeSlots = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('days');
+  const [{ orderedDays, orderedDows, currentDow, currentTimeMinutes }, setDayOrder] = useState(getOrderedDays());
 
-  // Per-day configs (one entry per dayOfWeek max)
+  // Per-day configs (multiple entries per dayOfWeek for multiple time periods)
   const [configs, setConfigs] = useState([]);
   // Blocked slots
   const [blockedSlots, setBlockedSlots] = useState([]);
@@ -22,18 +75,20 @@ const AdminTimeSlots = () => {
   const [blockForm, setBlockForm] = useState({ date: '', startTime: '', endTime: '', reason: '' });
   // Today reservations
   const [todayReservations, setTodayReservations] = useState([]);
-  // Edit modal for a day's hours
+  
+  // Edit modal for a day's hours - now supports multiple periods
   const [editDay, setEditDay] = useState(null);
-  // Slot capacity overrides
-  const [selectedDow, setSelectedDow] = useState(1); // day for capacity tab
-  const [slotOverrides, setSlotOverrides] = useState([]);
-  const [previewSlots, setPreviewSlots] = useState([]); // generated slots for selected day
-  const [savingSlot, setSavingSlot] = useState(null); // { dayOfWeek, id?, startTime, endTime, intervalMinutes, capacity }
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) adminApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchAll();
+    // Update day order on mount and every minute to stay synchronized
+    setDayOrder(getOrderedDays());
+    const interval = setInterval(() => {
+      setDayOrder(getOrderedDays());
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
   }, []);
 
   const fetchAll = async () => {
@@ -67,56 +122,47 @@ const AdminTimeSlots = () => {
     } catch { setTodayReservations([]); }
   };
 
-  // Fetch overrides + generate preview slots for selected day
-  const fetchOverrides = async (dow) => {
-    try {
-      const { data } = await adminApi.get(`/time-slots/slot-capacities?dayOfWeek=${dow}`);
-      setSlotOverrides(data);
-    } catch { setSlotOverrides([]); }
-    generatePreviewSlots(dow);
-  };
-
-  // Generate the list of slot times for a given day based on config or defaults
-  const generatePreviewSlots = (dow) => {
-    const cfg = getConfig(dow);
-    const start = cfg?.startTime || DEFAULT_START;
-    const end = cfg?.endTime || DEFAULT_END;
-    const interval = cfg?.intervalMinutes || DEFAULT_INTERVAL;
-    const defaultCap = cfg?.capacity || DEFAULT_CAPACITY;
-
-    const slots = [];
-    const [sh, sm] = start.split(':').map(Number);
-    const [eh, em] = end.split(':').map(Number);
-    let cur = sh * 60 + sm;
-    const endMin = eh * 60 + em;
-    while (cur < endMin) {
-      const h = String(Math.floor(cur / 60)).padStart(2, '0');
-      const m = String(cur % 60).padStart(2, '0');
-      slots.push({ time: `${h}:${m}`, defaultCapacity: defaultCap });
-      cur += interval;
-    }
-    setPreviewSlots(slots);
-  };
-
   useEffect(() => {
-    if (activeTab === 'capacities') fetchOverrides(selectedDow);
-  }, [activeTab, selectedDow, configs]);
+    // Refresh data when tab changes
+    if (activeTab === 'blocked') {
+      fetchBlocked();
+    } else if (activeTab === 'export') {
+      fetchTodayReservations();
+    }
+  }, [activeTab]);
 
-  // Get config for a given dayOfWeek (or null = using defaults)
-  const getConfig = (dow) => configs.find(c => c.dayOfWeek === dow) || null;
+  // Get configs for a given dayOfWeek (returns array of configs)
+  const getConfigsForDay = (dow) => configs.filter(c => c.dayOfWeek === dow);
 
-  // Toggle a day: if active config exists → deactivate; if inactive → activate; if none → create default
+  // Check if a day has any active config
+  const isDayActive = (dow) => {
+    const dayConfigs = getConfigsForDay(dow);
+    return dayConfigs.length > 0 && dayConfigs.some(c => c.active);
+  };
+
+  // Toggle a day: if has active config → deactivate all; if inactive → activate all
+  // Sunday (dow=0) is always disabled
   const toggleDay = async (dow) => {
-    const cfg = getConfig(dow);
+    // Sunday is always disabled
+    if (dow === 0) {
+      alert('Le dimanche est toujours fermé.');
+      return;
+    }
+    const dayConfigs = getConfigsForDay(dow);
+    const hasActive = dayConfigs.some(c => c.active);
+    
     try {
-      if (!cfg) {
-        // Create default config for this day
+      if (dayConfigs.length === 0) {
+        // Create default config for this day (08:00 - 20:00)
         await adminApi.post('/time-slots/config', {
-          dayOfWeek: dow, startTime: DEFAULT_START, endTime: DEFAULT_END,
-          capacity: DEFAULT_CAPACITY, intervalMinutes: DEFAULT_INTERVAL, active: false
+          dayOfWeek: dow, startTime: '08:00', endTime: '20:00',
+          capacity: DEFAULT_CAPACITY, intervalMinutes: DEFAULT_INTERVAL, active: true
         });
       } else {
-        await adminApi.put(`/time-slots/config/${cfg.id}`, { active: !cfg.active });
+        // Toggle all configs for this day
+        for (const cfg of dayConfigs) {
+          await adminApi.put(`/time-slots/config/${cfg.id}`, { active: !hasActive });
+        }
       }
       fetchConfigs();
     } catch { alert('Erreur lors de la mise à jour'); }
@@ -124,31 +170,89 @@ const AdminTimeSlots = () => {
 
   // Open edit modal for a day's hours
   const openEditDay = (dow) => {
-    const cfg = getConfig(dow);
+    const dayConfigs = getConfigsForDay(dow);
+    let periods;
+    
+    if (dayConfigs.length > 0) {
+      periods = dayConfigs.map(c => ({ 
+        id: c.id, 
+        startTime: c.startTime, 
+        endTime: c.endTime, 
+        intervalMinutes: c.intervalMinutes || DEFAULT_INTERVAL, 
+        capacity: c.capacity || DEFAULT_CAPACITY 
+      }));
+    } else {
+      // For today, set minimum start time to current time (rounded up)
+      const isToday = dow === currentDow;
+      const minStartTime = isToday ? getMinTimeForToday(currentTimeMinutes) : '08:00';
+      periods = [{ 
+        id: null, 
+        startTime: minStartTime, 
+        endTime: '20:00', 
+        intervalMinutes: DEFAULT_INTERVAL, 
+        capacity: DEFAULT_CAPACITY 
+      }];
+    }
+    
     setEditDay({
       dayOfWeek: dow,
-      id: cfg?.id || null,
-      startTime: cfg?.startTime || DEFAULT_START,
-      endTime: cfg?.endTime || DEFAULT_END,
-      intervalMinutes: cfg?.intervalMinutes || DEFAULT_INTERVAL,
-      capacity: cfg?.capacity || DEFAULT_CAPACITY,
+      periods: periods,
+      isToday: dow === currentDow
     });
+  };
+
+  // Add a new period to edit modal
+  const addPeriod = () => {
+    // Set default start time based on last period's end time if available
+    const lastPeriod = editDay.periods[editDay.periods.length - 1];
+    const defaultStart = lastPeriod ? lastPeriod.endTime : '08:00';
+    setEditDay({
+      ...editDay,
+      periods: [...editDay.periods, { id: null, startTime: defaultStart, endTime: '20:00', intervalMinutes: DEFAULT_INTERVAL, capacity: DEFAULT_CAPACITY }]
+    });
+  };
+
+  // Remove a period from edit modal
+  const removePeriod = (index) => {
+    if (editDay.periods.length > 1) {
+      const newPeriods = editDay.periods.filter((_, i) => i !== index);
+      setEditDay({ ...editDay, periods: newPeriods });
+    }
+  };
+
+  // Update a period in edit modal
+  const updatePeriod = (index, field, value) => {
+    const newPeriods = [...editDay.periods];
+    newPeriods[index] = { ...newPeriods[index], [field]: value };
+    setEditDay({ ...editDay, periods: newPeriods });
   };
 
   const saveEditDay = async (e) => {
     e.preventDefault();
     try {
-      if (editDay.id) {
-        await adminApi.put(`/time-slots/config/${editDay.id}`, {
-          startTime: editDay.startTime, endTime: editDay.endTime,
-          intervalMinutes: editDay.intervalMinutes, capacity: editDay.capacity
-        });
-      } else {
-        await adminApi.post('/time-slots/config', {
-          dayOfWeek: editDay.dayOfWeek, startTime: editDay.startTime,
-          endTime: editDay.endTime, intervalMinutes: editDay.intervalMinutes,
-          capacity: editDay.capacity, active: true
-        });
+      // Delete configs that are no longer in the form
+      const currentIds = editDay.periods.filter(p => p.id).map(p => p.id);
+      const dayConfigs = getConfigsForDay(editDay.dayOfWeek);
+      for (const cfg of dayConfigs) {
+        if (!currentIds.includes(cfg.id)) {
+          await adminApi.delete(`/time-slots/config/${cfg.id}`);
+        }
+      }
+      
+      // Create or update periods
+      for (const period of editDay.periods) {
+        if (period.id) {
+          await adminApi.put(`/time-slots/config/${period.id}`, {
+            startTime: period.startTime, endTime: period.endTime,
+            intervalMinutes: period.intervalMinutes, capacity: period.capacity
+          });
+        } else {
+          await adminApi.post('/time-slots/config', {
+            dayOfWeek: editDay.dayOfWeek, startTime: period.startTime,
+            endTime: period.endTime, intervalMinutes: period.intervalMinutes,
+            capacity: period.capacity, active: true
+          });
+        }
       }
       setEditDay(null);
       fetchConfigs();
@@ -203,7 +307,7 @@ const AdminTimeSlots = () => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Gestion des créneaux</h1>
-              <p className="text-xs text-gray-500">Tous les jours sont actifs par défaut (08h–20h)</p>
+              <p className="text-xs text-gray-500">Configurez les horaires d\'ouverture par jour</p>
             </div>
           </div>
         </div>
@@ -214,9 +318,7 @@ const AdminTimeSlots = () => {
         <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
           {[
             { id: 'days', label: 'Jours & Horaires', icon: Calendar },
-            { id: 'capacities', label: 'Capacités par créneau', icon: Sliders },
             { id: 'blocked', label: 'Créneaux bloqués', icon: Ban },
-            { id: 'export', label: 'Export du jour', icon: Download },
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -231,30 +333,29 @@ const AdminTimeSlots = () => {
         {activeTab === 'days' && (
           <div>
             <p className="text-sm text-gray-500 mb-4">
-              Par défaut, tous les jours sont disponibles de <strong>08h00 à 20h00</strong> (créneaux d'1h, capacité 5).
-              Désactivez un jour ou modifiez ses horaires selon vos besoins.
+              Configurez les horaires d\'ouverture pour chaque jour. Vous pouvez ajouter plusieurs plages horaires par jour (ex: matin et après-midi).
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {DAYS.map((dayName, dow) => {
-                const cfg = getConfig(dow);
-                // A day is "active" if no config exists (default) OR config exists with active=true
-                const isActive = !cfg || cfg.active;
-                const start = cfg?.startTime || DEFAULT_START;
-                const end = cfg?.endTime || DEFAULT_END;
-                const interval = cfg?.intervalMinutes || DEFAULT_INTERVAL;
-                const capacity = cfg?.capacity || DEFAULT_CAPACITY;
+              {orderedDays.map((dayName, idx) => {
+                const dow = orderedDows[idx];
+                const dayConfigs = getConfigsForDay(dow);
+                const isActive = dow !== 0 && isDayActive(dow);
+                
+                // Format periods for display
+                const periods = dayConfigs.filter(c => c.active).map(c => `${c.startTime} – ${c.endTime}`);
 
                 return (
                   <div key={dow} className={`bg-white rounded-xl border-2 p-4 transition-all ${
                     isActive ? 'border-green-200' : 'border-gray-200 opacity-60'
                   }`}>
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-semibold text-gray-900">{dayName}</span>
+                      <span className={`font-semibold ${dow === 0 ? 'text-gray-400' : 'text-gray-900'}`}>{dayName}</span>
                       <button
                         onClick={() => toggleDay(dow)}
+                        disabled={dow === 0}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           isActive ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
+                        } ${dow === 0 ? 'cursor-not-allowed opacity-50' : ''}`}
                       >
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
                           isActive ? 'translate-x-6' : 'translate-x-1'
@@ -264,19 +365,21 @@ const AdminTimeSlots = () => {
                     {isActive && (
                       <>
                         <div className="text-sm text-gray-600 space-y-1 mb-3">
-                          <div className="flex items-center gap-1.5">
-                            <Clock size={13} className="text-sky-600" />
-                            <span>{start} – {end}</span>
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            Intervalle : {interval} min · Capacité : {capacity} commandes
-                          </div>
+                          {periods.map((period, i) => (
+                            <div key={i} className="flex items-center gap-1.5">
+                              <Clock size={13} className="text-sky-600" />
+                              <span>{period}</span>
+                            </div>
+                          ))}
+                          {periods.length === 0 && (
+                            <div className="text-xs text-gray-400">Aucun horaire configuré</div>
+                          )}
                         </div>
                         <button
                           onClick={() => openEditDay(dow)}
                           className="w-full text-xs text-sky-700 border border-sky-200 rounded-lg py-1.5 hover:bg-sky-50 transition-colors flex items-center justify-center gap-1"
                         >
-                          <Settings size={12} /> Modifier les horaires
+                          Modifier les horaires
                         </button>
                       </>
                     )}
@@ -287,70 +390,6 @@ const AdminTimeSlots = () => {
                 );
               })}
             </div>
-          </div>
-        )}
-
-        {/* TAB: Capacités par créneau */}
-        {activeTab === 'capacities' && (
-          <div>
-            <p className="text-sm text-gray-500 mb-4">
-              Définissez une capacité spécifique pour chaque créneau horaire.
-              Laissez la valeur par défaut pour utiliser la capacité du jour.
-            </p>
-
-            {/* Day selector */}
-            <div className="flex gap-2 mb-6 flex-wrap">
-              {DAYS.map((name, dow) => (
-                <button key={dow} onClick={() => setSelectedDow(dow)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                    selectedDow === dow
-                      ? 'bg-sky-700 text-white border-sky-700'
-                      : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-                  }`}>
-                  {name}
-                </button>
-              ))}
-            </div>
-
-            {previewSlots.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-gray-100">
-                <Clock size={32} className="mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">Aucun créneau configuré pour ce jour</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-100">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créneau</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacité par défaut</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacité spécifique</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {previewSlots.map(({ time, defaultCapacity }) => {
-                      const override = slotOverrides.find(o => o.slotTime === time);
-                      const currentCap = override ? override.capacity : defaultCapacity;
-                      const isOverridden = !!override;
-
-                      return (
-                        <SlotCapacityRow
-                          key={time}
-                          time={time}
-                          defaultCapacity={defaultCapacity}
-                          currentCapacity={currentCap}
-                          isOverridden={isOverridden}
-                          saving={savingSlot === time}
-                          onSave={(cap) => handleSaveSlotCapacity(time, cap, defaultCapacity)}
-                        />
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         )}
 
@@ -404,97 +443,72 @@ const AdminTimeSlots = () => {
             )}
           </div>
         )}
-
-        {/* TAB: Export */}
-        {activeTab === 'export' && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-gray-900">
-                Réservations du {new Date().toLocaleDateString('fr-FR')}
-              </h2>
-              <button onClick={handleExportPDF}
-                className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg">
-                <Download size={15} /> Exporter PDF
-              </button>
-            </div>
-            {todayReservations.length === 0 ? (
-              <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-gray-100">
-                <Clock size={36} className="mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">Aucune réservation aujourd'hui</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-100">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      {['N° Commande', 'Client', 'Créneau', 'Statut', 'Montant'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {todayReservations.map(order => (
-                      <tr key={order.id}>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{order.orderNumber}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{order.user.firstName} {order.user.lastName}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{order.timeSlotStart} – {order.timeSlotEnd}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                            order.status === 'RECEIVED' ? 'bg-yellow-100 text-yellow-800' :
-                            order.status === 'PREPARING' ? 'bg-blue-100 text-blue-800' :
-                            order.status === 'READY' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>{order.status}</span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{order.total.toFixed(2)} DH</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Modal: Edit day hours */}
+      {/* Modal: Edit day hours with multiple periods */}
       {editDay && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-gray-900">Horaires — {DAYS[editDay.dayOfWeek]}</h3>
+              <h3 className="font-bold text-gray-900">Horaires — {DAYS_ALL[editDay.dayOfWeek]}</h3>
               <button onClick={() => setEditDay(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
             <form onSubmit={saveEditDay} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Heure début</label>
-                  <input type="time" value={editDay.startTime}
-                    onChange={e => setEditDay({ ...editDay, startTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Heure fin</label>
-                  <input type="time" value={editDay.endTime}
-                    onChange={e => setEditDay({ ...editDay, endTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
-                </div>
+              <div className="space-y-4">
+                {editDay.periods.map((period, index) => (
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs font-semibold text-gray-600 uppercase">Plage {index + 1}</span>
+                      {editDay.periods.length > 1 && (
+                        <button type="button" onClick={() => removePeriod(index)}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors">
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Début</label>
+                        {editDay.isToday && index === 0 && (
+                          <p className="text-xs text-orange-600 mb-1">
+                            ⚠️ Heure min: {getMinTimeForToday(currentTimeMinutes)} (heure actuelle arrondie)
+                          </p>
+                        )}
+                        <input type="time" value={period.startTime}
+                          onChange={e => updatePeriod(index, 'startTime', e.target.value)}
+                          min={editDay.isToday && index === 0 ? getMinTimeForToday(currentTimeMinutes) : undefined}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Fin</label>
+                        <input type="time" value={period.endTime}
+                          onChange={e => updatePeriod(index, 'endTime', e.target.value)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Intervalle (min)</label>
+                        <select value={period.intervalMinutes}
+                          onChange={e => updatePeriod(index, 'intervalMinutes', parseInt(e.target.value))}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500">
+                          {[15, 30, 45, 60, 90, 120].map(v => <option key={v} value={v}>{v} min</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Capacité</label>
+                        <input type="number" min="1" max="50" value={period.capacity}
+                          onChange={e => updatePeriod(index, 'capacity', parseInt(e.target.value) || 1)}
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Intervalle (min)</label>
-                  <select value={editDay.intervalMinutes}
-                    onChange={e => setEditDay({ ...editDay, intervalMinutes: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500">
-                    {[30, 60, 90, 120].map(v => <option key={v} value={v}>{v} min</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Capacité</label>
-                  <input type="number" min="1" max="20" value={editDay.capacity}
-                    onChange={e => setEditDay({ ...editDay, capacity: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
-                </div>
-              </div>
+              
+              <button type="button" onClick={addPeriod}
+                className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg text-sm hover:border-sky-500 hover:text-sky-600 transition-colors flex items-center justify-center gap-1">
+                <Plus size={15} /> Ajouter une plage horaire
+              </button>
+
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setEditDay(null)}
                   className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">
@@ -562,56 +576,6 @@ const AdminTimeSlots = () => {
         </div>
       )}
     </div>
-  );
-};
-
-// Inline editable row for slot capacity
-const SlotCapacityRow = ({ time, defaultCapacity, currentCapacity, isOverridden, saving, onSave }) => {
-  const [value, setValue] = useState(currentCapacity);
-
-  // Sync if parent updates
-  useEffect(() => { setValue(currentCapacity); }, [currentCapacity]);
-
-  const isDirty = parseInt(value) !== currentCapacity;
-
-  return (
-    <tr className={isOverridden ? 'bg-sky-50' : ''}>
-      <td className="px-4 py-3 text-sm font-semibold text-gray-900">{time}</td>
-      <td className="px-4 py-3 text-sm text-gray-500">{defaultCapacity} places</td>
-      <td className="px-4 py-3">
-        <input
-          type="number" min="0" max="50"
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500"
-        />
-      </td>
-      <td className="px-4 py-3">
-        {isOverridden ? (
-          <span className="px-2 py-0.5 text-xs bg-sky-100 text-sky-700 rounded-full font-medium">Personnalisé</span>
-        ) : (
-          <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-500 rounded-full">Défaut</span>
-        )}
-      </td>
-      <td className="px-4 py-3">
-        <button
-          onClick={() => onSave(value)}
-          disabled={saving || !isDirty}
-          className="px-3 py-1 text-xs bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          {saving ? '...' : 'Enregistrer'}
-        </button>
-        {isOverridden && (
-          <button
-            onClick={() => { setValue(defaultCapacity); onSave(defaultCapacity); }}
-            disabled={saving}
-            className="ml-2 px-3 py-1 text-xs border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
-          >
-            Réinitialiser
-          </button>
-        )}
-      </td>
-    </tr>
   );
 };
 
