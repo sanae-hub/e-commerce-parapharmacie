@@ -95,6 +95,90 @@ body {
   border-color: var(--border-color);
 }
 
+/* Promotion Slider Dark Theme Styles */
+[data-theme="dark"] .promotion-slider-section {
+  background: linear-gradient(to bottom, var(--bg-secondary), var(--bg-primary));
+}
+
+[data-theme="dark"] .promotion-slider-section .bg-gradient-to-r.from-orange-50.to-red-50 {
+  background: linear-gradient(to right, rgba(249, 115, 22, 0.15), rgba(239, 68, 68, 0.15));
+}
+
+[data-theme="dark"] .promotion-slider-section .text-orange-600 {
+  color: #fb923c;
+}
+
+[data-theme="dark"] .promotion-slider-section .text-orange-700 {
+  color: #fdba74;
+}
+
+[data-theme="dark"] .promotion-slider-section .text-orange-500 {
+  color: #fb923c;
+}
+
+[data-theme="dark"] .promotion-slider-section .text-gray-900 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .promotion-slider-section .bg-gradient-to-r.from-red-200.to-orange-200 {
+  background: linear-gradient(to right, rgba(239, 68, 68, 0.3), rgba(249, 115, 22, 0.3));
+}
+
+[data-theme="dark"] .promotion-slider-section .border-sky-700 {
+  border-color: #22d3ee;
+}
+
+[data-theme="dark"] .promotion-slider-section .bg-white\/90 {
+  background-color: rgba(31, 41, 55, 0.9);
+}
+
+[data-theme="dark"] .promotion-slider-section .text-gray-700 {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .promotion-slider-section .bg-gray-300 {
+  background-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .promotion-slider-section .hover\:bg-gray-400:hover {
+  background-color: #4b5563;
+}
+
+[data-theme="dark"] .promotion-slider-section .bg-gray-800 {
+  background-color: #374151;
+}
+
+/* Admin Promotions Dark Theme Styles */
+[data-theme="dark"] .min-h-screen.bg-gray-50 {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="dark"] .bg-white.border-b.border-gray-200 {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .text-gray-900 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .text-gray-600 {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .text-gray-500 {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .border-gray-200 {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .bg-white.rounded-lg.border.border-gray-200 {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+}
+
 /* Search bar specific styles */
 .search-input:focus {
   border-color: var(--border-color);

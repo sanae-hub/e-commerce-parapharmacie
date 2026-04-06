@@ -2,7 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { getIo, broadcastToClients } from '../io.js';
+import { getIo } from '../io.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -550,21 +550,25 @@ router.post('/promo-codes', verifyAdmin, async (req, res) => {
       }
     });
 
-    // Notifier tous les clients connectés du nouveau code promo (plain JSON)
-    broadcastToClients({
-      type: 'PROMO_CODE',
-      title: '🎉 Nouveau code promo !',
-      message: `Utilisez le code ${promoCode.code} pour bénéficier de ${
-        promoCode.discountType === 'percentage'
-          ? `${promoCode.discountValue}% de réduction`
-          : `${promoCode.discountValue} DH de réduction`
-      }${promoCode.expiryDate ? ` jusqu'au ${new Date(promoCode.expiryDate).toLocaleDateString('fr-FR')}` : ''}`,
-      code: promoCode.code,
-      discountType: promoCode.discountType,
-      discountValue: promoCode.discountValue,
-      expiryDate: promoCode.expiryDate,
-      timestamp: new Date()
-    });
+    // Notifier tous les clients connectés du nouveau code promo via Socket.IO
+    const io = getIo();
+    if (io) {
+      io.emit('notification', {
+        type: 'PROMO_CODE',
+        title: '🎉 Nouveau code promo !',
+        message: `Utilisez le code ${promoCode.code} pour bénéficier de ${
+          promoCode.discountType === 'percentage'
+            ? `${promoCode.discountValue}% de réduction`
+            : `${promoCode.discountValue} DH de réduction`
+        }${promoCode.expiryDate ? ` jusqu'au ${new Date(promoCode.expiryDate).toLocaleDateString('fr-FR')}` : ''}`,
+        code: promoCode.code,
+        discountType: promoCode.discountType,
+        discountValue: promoCode.discountValue,
+        expiryDate: promoCode.expiryDate,
+        timestamp: new Date()
+      });
+      console.log('📢 Notification promo code envoyée à tous les clients');
+    }
 
     res.status(201).json({ message: 'Code promo créé', promoCode });
   } catch (error) {
@@ -1616,6 +1620,171 @@ router.get('/reports/bottom-products', verifyAdmin, async (req, res) => {
   }
 });
 
+// GET /admin/reports/weekly - Rapport hebdomadaire détaillé
+router.get('/reports/weekly', verifyAdmin, async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 jours par défaut
+    const end = endDate ? new Date(endDate) : new Date();
+
+    // Récupérer toutes les commandes confirmées dans la période
+    const orders = await prisma.order.findMany({
+      where: {
+        createdAt: { gte: start, lte: end },
+        status: { in: ['PREPARING', 'READY', 'PICKED_UP', 'DELIVERED', 'COMPLETED'] }
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true
+          }
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                brand: true,
+                price: true,
+                category: {
+                  select: { name: true }
+                }
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Agréger par semaine
+    const weeklyData = {};
+    let totalRevenue = 0;
+    let totalOrders = 0;
+    let totalCustomers = new Set();
+    let totalItemsSold = 0;
+
+    orders.forEach(order => {
+      // Calculer la semaine (ISO week)
+      const orderDate = new Date(order.createdAt);
+      const weekStart = new Date(orderDate);
+      weekStart.setDate(orderDate.getDate() - orderDate.getDay()); // Dimanche de la semaine
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+
+      const weekKey = `Semaine ${weekStart.toISOString().split('T')[0]}`;
+
+      if (!weeklyData[weekKey]) {
+        weeklyData[weekKey] = {
+          weekStart: weekStart.toISOString().split('T')[0],
+          weekEnd: weekEnd.toISOString().split('T')[0],
+          orders: [],
+          customers: new Set(),
+          revenue: 0,
+          totalOrders: 0,
+          totalItems: 0
+        };
+      }
+
+      weeklyData[weekKey].orders.push(order);
+      weeklyData[weekKey].customers.add(order.userId);
+      weeklyData[weekKey].revenue += order.total;
+      weeklyData[weekKey].totalOrders += 1;
+      order.items.forEach(item => {
+        weeklyData[weekKey].totalItems += item.quantity;
+      });
+
+      totalRevenue += order.total;
+      totalOrders += 1;
+      totalCustomers.add(order.userId);
+      totalItemsSold += order.items.reduce((sum, item) => sum + item.quantity, 0);
+    });
+
+    // Détails par client
+    const customerDetails = {};
+    orders.forEach(order => {
+      if (!order.userId) return;
+
+      if (!customerDetails[order.userId]) {
+        customerDetails[order.userId] = {
+          userId: order.userId,
+          firstName: order.user?.firstName,
+          lastName: order.user?.lastName,
+          email: order.user?.email,
+          phone: order.user?.phone,
+          totalOrders: 0,
+          totalSpent: 0,
+          orders: []
+        };
+      }
+
+      customerDetails[order.userId].totalOrders += 1;
+      customerDetails[order.userId].totalSpent += order.total;
+      customerDetails[order.userId].orders.push({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        date: order.createdAt,
+        total: order.total,
+        status: order.status,
+        items: order.items.map(item => ({
+          productName: item.product.name,
+          brand: item.product.brand,
+          category: item.product.category?.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      });
+    });
+
+    // Produits les plus vendus de la période
+    const productStats = {};
+    orders.forEach(order => {
+      order.items.forEach(item => {
+        const key = item.product.id;
+        if (!productStats[key]) {
+          productStats[key] = {
+            productId: item.product.id,
+            productName: item.product.name,
+            brand: item.product.brand,
+            category: item.product.category?.name,
+            quantity: 0,
+            revenue: 0
+          };
+        }
+        productStats[key].quantity += item.quantity;
+        productStats[key].revenue += item.price * item.quantity;
+      });
+    });
+
+    const topProducts = Object.values(productStats)
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 10);
+
+    res.json({
+      period: { startDate: start, endDate: end },
+      summary: {
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        totalOrders,
+        totalCustomers: totalCustomers.size,
+        totalItemsSold,
+        averageOrderValue: parseFloat((totalRevenue / (totalOrders || 1)).toFixed(2)),
+        averageCustomerSpent: parseFloat((totalRevenue / (totalCustomers.size || 1)).toFixed(2))
+      },
+      weeklyBreakdown: Object.values(weeklyData).sort((a, b) => a.weekStart.localeCompare(b.weekStart)),
+      customerDetails: Object.values(customerDetails).sort((a, b) => b.totalSpent - a.totalSpent),
+      topProducts
+    });
+  } catch (error) {
+    console.error('Weekly report error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
 // GET /admin/reports/click-collect - Rapport Click & Collect
 router.get('/reports/click-collect', verifyAdmin, async (req, res) => {
   try {
@@ -1709,40 +1878,18 @@ router.get('/reports/click-collect', verifyAdmin, async (req, res) => {
 router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
   try {
     const { type } = req.params;
-    const { format = 'json', startDate, endDate } = req.query;
+    const { format = 'csv', startDate, endDate } = req.query;
 
     let reportData;
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
     // Récupérer les données selon le type
-    if (type === 'sales') {
+    if (type === 'products') {
       const orders = await prisma.order.findMany({
         where: {
           createdAt: { gte: start, lte: end },
-          status: { in: ['RECEIVED', 'PREPARING', 'READY', 'PICKED_UP', 'DELIVERED'] }
-        },
-        select: {
-          id: true,
-          orderNumber: true,
-          total: true,
-          createdAt: true,
-          items: { select: { quantity: true, price: true } }
-        }
-      });
-
-      reportData = orders.map(order => ({
-        'Numéro Commande': order.orderNumber,
-        'Montant': order.total,
-        'Articles': order.items.length,
-        'Quantité': order.items.reduce((sum, item) => sum + item.quantity, 0),
-        'Date': new Date(order.createdAt).toLocaleDateString('fr-FR')
-      }));
-    } else if (type === 'products') {
-      const orders = await prisma.order.findMany({
-        where: {
-          createdAt: { gte: start, lte: end },
-          status: { in: ['RECEIVED', 'PREPARING', 'READY', 'PICKED_UP', 'DELIVERED'] }
+          status: { in: ['PREPARING', 'READY', 'PICKED_UP', 'DELIVERED', 'COMPLETED'] }
         },
         select: {
           items: {
@@ -1762,7 +1909,7 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
           if (!productStats[key]) {
             productStats[key] = {
               produit: item.product.name,
-              marque: item.product.brand,
+              marque: item.product.brand || '-',
               quantité: 0,
               revenu: 0
             };
@@ -1773,9 +1920,189 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
       });
 
       reportData = Object.values(productStats);
+    } else if (type === 'top-products') {
+      const orders = await prisma.order.findMany({
+        where: {
+          createdAt: { gte: start, lte: end },
+          status: { in: ['PREPARING', 'READY', 'PICKED_UP', 'DELIVERED', 'COMPLETED'] }
+        },
+        select: {
+          items: {
+            select: {
+              quantity: true,
+              price: true,
+              product: { select: { name: true, brand: true } }
+            }
+          }
+        }
+      });
+
+      const productStats = {};
+      orders.forEach(order => {
+        order.items.forEach(item => {
+          if (!productStats[item.product.name]) {
+            productStats[item.product.name] = {
+              produit: item.product.name,
+              marque: item.product.brand || '-',
+              quantité: 0,
+              revenu: 0
+            };
+          }
+          productStats[item.product.name].quantité += item.quantity;
+          productStats[item.product.name].revenu += item.price * item.quantity;
+        });
+      });
+
+      reportData = Object.values(productStats)
+        .sort((a, b) => b.quantité - a.quantité)
+        .slice(0, 10);
+    } else if (type === 'bottom-products') {
+      const allProducts = await prisma.product.findMany({
+        select: { id: true, name: true, brand: true }
+      });
+
+      const orders = await prisma.order.findMany({
+        where: {
+          createdAt: { gte: start, lte: end },
+          status: { in: ['PREPARING', 'READY', 'PICKED_UP', 'DELIVERED', 'COMPLETED'] }
+        },
+        select: {
+          items: {
+            select: {
+              quantity: true,
+              product: { select: { id: true } }
+            }
+          }
+        }
+      });
+
+      const soldCounts = {};
+      orders.forEach(order => {
+        order.items.forEach(item => {
+          soldCounts[item.product.id] = (soldCounts[item.product.id] || 0) + item.quantity;
+        });
+      });
+
+      reportData = allProducts
+        .map(p => ({
+          produit: p.name,
+          marque: p.brand || '-',
+          quantité: soldCounts[p.id] || 0
+        }))
+        .sort((a, b) => a.quantité - b.quantité)
+        .slice(0, 10);
+    } else if (type === 'click-collect') {
+      const clickCollectOrders = await prisma.order.findMany({
+        where: {
+          timeSlotDate: { gte: start, lte: end },
+          timeSlotStart: { not: null }
+        },
+        select: {
+          timeSlotDate: true,
+          timeSlotStart: true,
+          status: true
+        }
+      });
+
+      const slotStats = {};
+      clickCollectOrders.forEach(order => {
+        const dateStr = order.timeSlotDate.toISOString().split('T')[0];
+        const slotKey = `${dateStr}_${order.timeSlotStart}`;
+        if (!slotStats[slotKey]) {
+          slotStats[slotKey] = {
+            date: dateStr,
+            heure: order.timeSlotStart,
+            réservées: 0,
+            retirées: 0,
+            annulées: 0
+          };
+        }
+        slotStats[slotKey].réservées += 1;
+        if (['PICKED_UP', 'DELIVERED'].includes(order.status)) {
+          slotStats[slotKey].retirées += 1;
+        }
+        if (order.status === 'CANCELLED') {
+          slotStats[slotKey].annulées += 1;
+        }
+      });
+
+      reportData = Object.values(slotStats);
+    } else {
+      return res.status(400).json({ message: 'Type de rapport non supporté' });
     }
 
-    if (format === 'csv') {
+    if (format === 'pdf') {
+      const PDFDocument = (await import('pdfkit')).default;
+      const doc = new PDFDocument({ 
+        margin: 30,
+        size: 'A4',
+        autoFirstPage: true
+      });
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="rapport_${type}_${Date.now()}.pdf"`);
+      
+      doc.pipe(res);
+      
+      // Titre
+      doc.fontSize(18).text(`Rapport: ${type}`, { align: 'center' });
+      doc.moveDown();
+      
+      // Période
+      doc.fontSize(12).text(`Période: ${start.toLocaleDateString('fr-FR')} au ${end.toLocaleDateString('fr-FR')}`);
+      doc.moveDown();
+      
+      // Nombre de résultats
+      doc.fontSize(11).text(`Total: ${reportData.length} enregistrements`);
+      doc.moveDown();
+      
+      // Tableau des données
+      if (reportData.length > 0) {
+        const headers = Object.keys(reportData[0]);
+        const tableTop = doc.y;
+        const tableLeft = 30;
+        const rowHeight = 20;
+        const colWidth = (550 - tableLeft) / headers.length;
+        
+        // En-têtes (avec fond gris)
+        doc.fontSize(10).font('Helvetica-Bold');
+        headers.forEach((header, i) => {
+          const x = tableLeft + (i * colWidth);
+          doc.rect(x, tableTop, colWidth, rowHeight).fill('#f3f4f6').stroke();
+          doc.text(header.substring(0, 15), x + 2, tableTop + 5, { width: colWidth - 4, align: 'left' });
+        });
+        
+        // Données
+        doc.font('Helvetica');
+        let currentY = tableTop + rowHeight;
+        
+        reportData.forEach((row, rowIndex) => {
+          // Vérifier si on doit créer une nouvelle page
+          if (currentY + rowHeight > 780) {
+            doc.addPage();
+            currentY = 30;
+          }
+          
+          headers.forEach((header, colIndex) => {
+            const x = tableLeft + (colIndex * colWidth);
+            const value = row[header] || '';
+            // Ajouter " DH" pour les colonnes de revenus/prix
+            const displayValue = (header.toLowerCase().includes('revenu') || header.toLowerCase().includes('prix')) 
+              ? `${value} DH` 
+              : String(value);
+            doc.text(displayValue.substring(0, 15), x + 2, currentY + 5, { width: colWidth - 4, align: 'left' });
+          });
+          
+          // Ligne de séparation
+          doc.moveTo(tableLeft, currentY + rowHeight - 1).lineTo(tableLeft + (headers.length * colWidth), currentY + rowHeight - 1).stroke();
+          currentY += rowHeight;
+        });
+      } else {
+        doc.fontSize(12).text('Aucune donnée disponible pour cette période.', { align: 'center' });
+      }
+      
+      doc.end();
+    } else if (format === 'csv') {
       const { parse } = await import('json2csv');
       const csv = parse(reportData);
       res.header('Content-Type', 'text/csv; charset=utf-8');
@@ -2118,6 +2445,14 @@ router.get('/users', verifyAdmin, async (req, res) => {
       where.isActive = status === 'ACTIVE';
     }
 
+    // Gérer le tri spécial par nombre de commandes
+    let orderByClause;
+    if (sortBy === 'orderCount') {
+      orderByClause = { orders: { _count: sortOrder } };
+    } else {
+      orderByClause = { [sortBy]: sortOrder };
+    }
+
     // Récupérer les utilisateurs
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -2138,7 +2473,7 @@ router.get('/users', verifyAdmin, async (req, res) => {
             }
           }
         },
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: orderByClause,
         skip,
         take: parseInt(limit)
       }),
@@ -2715,6 +3050,55 @@ router.delete('/categories/items/:itemId', verifyAdmin, async (req, res) => {
 });
 
 // ===== GESTION DU STOCK =====
+
+// GET /admin/stock/stats - Statistiques par produit (totaux jour/mois par type)
+router.get('/stock/stats', verifyAdmin, async (req, res) => {
+  try {
+    const { period = 'day' } = req.query; // 'day' | 'month'
+    const now = new Date();
+    let since;
+    if (period === 'day') {
+      since = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else {
+      since = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    const movements = await prisma.stockMovement.findMany({
+      where: { createdAt: { gte: since } },
+      include: {
+        product: { select: { id: true, name: true, image: true, brand: true, stock: true, stockAlert: true } }
+      }
+    });
+
+    // Agréger par produit
+    const byProduct = {};
+    movements.forEach(m => {
+      const pid = m.productId;
+      if (!byProduct[pid]) {
+        byProduct[pid] = {
+          productId: pid,
+          productName: m.product?.name || '—',
+          brand: m.product?.brand || '—',
+          image: m.product?.image || null,
+          currentStock: m.product?.stock ?? 0,
+          stockAlert: m.product?.stockAlert ?? 0,
+          sales: 0,
+          returns: 0,
+          restocks: 0,
+          adjustments: 0,
+        };
+      }
+      if (m.type === 'SALE')       byProduct[pid].sales      += Math.abs(m.quantity);
+      if (m.type === 'RETURN')     byProduct[pid].returns    += Math.abs(m.quantity);
+      if (m.type === 'RESTOCK')    byProduct[pid].restocks   += Math.abs(m.quantity);
+      if (m.type === 'ADJUSTMENT') byProduct[pid].adjustments += m.quantity;
+    });
+
+    res.json(Object.values(byProduct).sort((a, b) => b.sales - a.sales));
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
 
 // GET /admin/stock/movements - Historique des mouvements de stock
 router.get('/stock/movements', verifyAdmin, async (req, res) => {

@@ -47,6 +47,24 @@ export const CartProvider = ({ children }) => {
   }, [promoCode])
 
   const addToCart = (product) => {
+    // Check if user is admin and prevent ordering
+    // Get user role from localStorage
+    const userStr = localStorage.getItem('user');
+    let userRole = null;
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        userRole = user.role;
+      } catch (e) {
+        // ignore parsing errors
+      }
+    }
+    
+    if (userRole === 'ADMIN' || userRole === 'PREPARATEUR' || userRole === 'CAISSIER') {
+      alert('⚠️ Vous êtes administrateur, vous ne pouvez pas commander.');
+      return false;
+    }
+    
     const existingItem = cartItems.find(item => item.id === product.id)
     
     if (existingItem) {
@@ -58,6 +76,7 @@ export const CartProvider = ({ children }) => {
     } else {
       setCartItems([...cartItems, { ...product, quantity: 1 }])
     }
+    return true;
   }
 
   const removeFromCart = (productId) => {

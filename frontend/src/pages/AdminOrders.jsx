@@ -32,6 +32,18 @@ const AdminOrders = () => {
     CANCELLED: { label: 'Annulé', color: 'bg-red-100 text-red-700 border-red-300', icon: XCircle }
   };
 
+  // Check if order is urgent (within 2 hours of pickup time)
+  const isOrderUrgent = (order) => {
+    if (!order.timeSlotDate || !order.timeSlotStart) return false;
+    const now = new Date();
+    const pickupTime = new Date(order.timeSlotDate);
+    const [hours, minutes] = order.timeSlotStart.split(':').map(Number);
+    pickupTime.setHours(hours, minutes, 0, 0);
+    const timeDiff = pickupTime - now;
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    return timeDiff > 0 && timeDiff <= twoHoursInMs;
+  };
+
   const statusWorkflow = {
     RECEIVED: ['PREPARING', 'CANCELLED'],
     PREPARING: ['READY', 'CANCELLED'],
@@ -316,13 +328,21 @@ const AdminOrders = () => {
                   key={order.id}
                   className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-start justify-between mb-4">
+                  <div className={`flex items-start justify-between mb-4 ${isOrderUrgent(order) ? 'bg-orange-50 -mx-2 -my-2 p-4 rounded-lg' : ''}`}>
                     <div className="flex items-start gap-4">
                       <div className="p-3 bg-sky-50 rounded-lg">
                         <Package size={24} className="text-sky-700" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">{order.orderNumber}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-bold text-gray-900">{order.orderNumber}</h3>
+                          {isOrderUrgent(order) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full animate-pulse">
+                              <Clock className="w-3 h-3" />
+                              Urgent
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-600">
                           {order.user?.firstName} {order.user?.lastName}
                         </p>

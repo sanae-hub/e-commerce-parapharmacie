@@ -92,7 +92,7 @@ const AdminNotifications = () => {
                     <strong>Client:</strong> {notification.order.customerName}
                   </div>
                   <div>
-                    <strong>Montant:</strong> {notification.order.total?.toFixed(2)} €
+                    <strong>Montant:</strong> {notification.order.total?.toFixed(2)} DH
                   </div>
                   {notification.order.timeSlotDate && (
                     <div>

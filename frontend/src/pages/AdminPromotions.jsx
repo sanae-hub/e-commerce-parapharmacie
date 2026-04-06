@@ -40,6 +40,19 @@ const AdminPromotions = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [previewImage, setPreviewImage] = useState('');
+  
+  // Dark mode detection
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' || document.documentElement.getAttribute('data-theme') === 'dark';
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkTheme(document.documentElement.getAttribute('data-theme') === 'dark');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -304,21 +317,21 @@ const handleCreatePromotion = async (data) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${isDarkTheme ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+      <header className={`sticky top-0 z-10 shadow-sm ${isDarkTheme ? 'bg-gray-800 border-b border-gray-700' : 'bg-white border-b border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Tag size={28} className="text-purple-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Gestion des Promotions</h1>
-                <p className="text-sm text-gray-600">Codes promo et bannières promotionnelles</p>
+                <h1 className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Gestion des Promotions</h1>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Codes promo et bannières promotionnelles</p>
               </div>
             </div>
             <button
               onClick={() => navigate('/admin/dashboard')}
-              className="text-gray-600 hover:text-gray-900"
+              className={`${isDarkTheme ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
             >
               ← Retour
             </button>
@@ -329,24 +342,24 @@ const handleCreatePromotion = async (data) => {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Messages */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-red-800">{error}</p>
-            <button onClick={() => setError('')} className="ml-auto text-red-600">
+          <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${isDarkTheme ? 'bg-red-900/30 border border-red-800' : 'bg-red-50 border border-red-200'}`}>
+            <AlertCircle size={20} className={`${isDarkTheme ? 'text-red-400' : 'text-red-600'} flex-shrink-0 mt-0.5`} />
+            <p className={isDarkTheme ? 'text-red-300' : 'text-red-800'}>{error}</p>
+            <button onClick={() => setError('')} className={`ml-auto ${isDarkTheme ? 'text-red-400' : 'text-red-600'}`}>
               <X size={18} />
             </button>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <Check size={20} className="inline mr-2 text-green-600" />
-            <span className="text-green-800">{success}</span>
+          <div className={`mb-6 p-4 rounded-lg ${isDarkTheme ? 'bg-green-900/30 border border-green-800' : 'bg-green-50 border border-green-200'}`}>
+            <Check size={20} className={`inline mr-2 ${isDarkTheme ? 'text-green-400' : 'text-green-600'}`} />
+            <span className={isDarkTheme ? 'text-green-300' : 'text-green-800'}>{success}</span>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-gray-200">
+        <div className={`flex gap-4 mb-6 border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
           <button
             onClick={() => {
               setActiveTab('promo-codes');
@@ -355,7 +368,7 @@ const handleCreatePromotion = async (data) => {
             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
               activeTab === 'promo-codes'
                 ? 'border-purple-600 text-purple-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                : `border-transparent ${isDarkTheme ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
             }`}
           >
             <Tag size={18} className="inline mr-2" />
@@ -369,7 +382,7 @@ const handleCreatePromotion = async (data) => {
             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
               activeTab === 'promotions'
                 ? 'border-purple-600 text-purple-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                : `border-transparent ${isDarkTheme ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
             }`}
           >
             <Percent size={18} className="inline mr-2" />
@@ -380,14 +393,18 @@ const handleCreatePromotion = async (data) => {
         {/* Controls */}
         <div className="mb-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Filter size={18} className="text-gray-600" />
+            <Filter size={18} className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'} />
             <select
               value={filter}
               onChange={(e) => {
                 setFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+              className={`px-3 py-2 border rounded-lg text-sm ${
+                isDarkTheme 
+                  ? 'bg-gray-800 border-gray-700 text-gray-300' 
+                  : 'bg-white border-gray-300 text-gray-700'
+              }`}
             >
               <option value="all">Tous</option>
               <option value="active">Actifs</option>
@@ -397,13 +414,17 @@ const handleCreatePromotion = async (data) => {
 
           <div className="flex-1 max-w-xs">
             <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`} />
               <input
                 type="text"
                 placeholder="Rechercher..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg text-sm ${
+                  isDarkTheme 
+                    ? 'bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500' 
+                    : 'bg-white border-gray-300 text-gray-700 placeholder-gray-400'
+                }`}
               />
             </div>
           </div>
@@ -426,12 +447,12 @@ const handleCreatePromotion = async (data) => {
           <div className="space-y-4">
             {loading ? (
               <div className="text-center py-12">
-                <div className="inline-block w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <div className={`inline-block w-12 h-12 border-4 rounded-full animate-spin ${isDarkTheme ? 'border-gray-700 border-t-purple-600' : 'border-purple-200 border-t-purple-600'}`}></div>
               </div>
             ) : promoCodes.length === 0 ? (
-              <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+              <div className={`rounded-lg border p-12 text-center ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <Tag size={48} className="mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600 mb-2">Aucun code promo</p>
+                <p className={isDarkTheme ? 'text-gray-400 mb-2' : 'text-gray-600 mb-2'}>Aucun code promo</p>
                 <button
                   onClick={() => setShowForm(true)}
                   className="text-purple-600 hover:text-purple-700 font-medium"
@@ -442,29 +463,29 @@ const handleCreatePromotion = async (data) => {
             ) : (
               <div className="grid gap-4">
                 {promoCodes.map((promo) => (
-                  <div key={promo.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div key={promo.id} className={`rounded-lg border p-6 hover:shadow-md transition-shadow ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <code className="text-lg font-mono font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded">
+                          <code className={`text-lg font-mono font-bold px-3 py-1 rounded ${isDarkTheme ? 'text-purple-400 bg-purple-900/30' : 'text-purple-600 bg-purple-50'}`}>
                             {promo.code}
                           </code>
                           <button
                             onClick={() => copyToClipboard(promo.code)}
-                            className="text-gray-400 hover:text-gray-600"
+                            className={isDarkTheme ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}
                             title="Copier le code"
                           >
                             <Copy size={16} />
                           </button>
                           {!promo.active && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-medium">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${isDarkTheme ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700'}`}>
                               <EyeOff size={14} />
                               Désactivé
                             </span>
                           )}
                         </div>
                         {promo.description && (
-                          <p className="text-gray-600 text-sm">{promo.description}</p>
+                          <p className={isDarkTheme ? 'text-gray-400 text-sm' : 'text-gray-600 text-sm'}>{promo.description}</p>
                         )}
                       </div>
                       <div className="flex gap-2">
@@ -473,7 +494,7 @@ const handleCreatePromotion = async (data) => {
                             setFormData(promo);
                             setShowForm(true);
                           }}
-                          className="p-2 text-gray-400 hover:text-gray-600"
+                          className={isDarkTheme ? 'p-2 text-gray-500 hover:text-gray-300' : 'p-2 text-gray-400 hover:text-gray-600'}
                           title="Modifier"
                         >
                           <Edit2 size={18} />
@@ -488,28 +509,28 @@ const handleCreatePromotion = async (data) => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b border-gray-200">
+                    <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Réduction</p>
-                        <p className="text-lg font-semibold text-gray-900">
+                        <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Réduction</p>
+                        <p className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                           {promo.discountValue}{promo.discountType === 'percentage' ? '%' : ' DH'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Type</p>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Type</p>
+                        <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>
                           {promo.applicableOn === 'global' ? 'Global' : promo.applicableOn === 'product' ? 'Produit' : 'Catégorie'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Utilisations</p>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Utilisations</p>
+                        <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>
                           {promo.usageCount}{promo.usageLimit ? `/${promo.usageLimit}` : ''}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Expiration</p>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Expiration</p>
+                        <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>
                           {promo.expiryDate ? formatDate(promo.expiryDate) : 'Sans limite'}
                         </p>
                       </div>
@@ -517,7 +538,7 @@ const handleCreatePromotion = async (data) => {
 
                     <div className="flex items-center justify-between pt-4">
                       {promo.minPurchaseAmount > 0 && (
-                        <span className="text-xs text-gray-500">
+                        <span className={`text-xs ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>
                           Montant minimum: {formatCurrency(promo.minPurchaseAmount)}
                         </span>
                       )}
@@ -525,8 +546,8 @@ const handleCreatePromotion = async (data) => {
                         onClick={() => togglePromoCodeStatus(promo.id, promo.active)}
                         className={`ml-auto px-3 py-1 rounded text-sm font-medium transition-colors ${
                           promo.active
-                            ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? isDarkTheme ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
+                            : isDarkTheme ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
                         {promo.active ? 'Actif' : 'Inactif'}
@@ -539,15 +560,19 @@ const handleCreatePromotion = async (data) => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
+              <div className={`flex items-center justify-between mt-6 pt-6 border-t ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Affichage {(currentPage - 1) * limit + 1} à {Math.min(currentPage * limit, total)} sur {total}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                    className={`px-4 py-2 border rounded-lg disabled:opacity-50 ${
+                      isDarkTheme 
+                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
                     Précédent
                   </button>
@@ -569,7 +594,9 @@ const handleCreatePromotion = async (data) => {
                         className={`px-3 py-2 rounded-lg transition-colors ${
                           pageNum === currentPage
                             ? 'bg-purple-600 text-white'
-                            : 'border border-gray-300 hover:bg-gray-50'
+                            : isDarkTheme 
+                              ? 'border border-gray-600 text-gray-300 hover:bg-gray-700' 
+                              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         {pageNum}
@@ -579,7 +606,11 @@ const handleCreatePromotion = async (data) => {
                   <button
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                    className={`px-4 py-2 border rounded-lg disabled:opacity-50 ${
+                      isDarkTheme 
+                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
                     Suivant
                   </button>
@@ -594,12 +625,12 @@ const handleCreatePromotion = async (data) => {
           <div className="space-y-4">
             {loading ? (
               <div className="text-center py-12">
-                <div className="inline-block w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <div className={`inline-block w-12 h-12 border-4 rounded-full animate-spin ${isDarkTheme ? 'border-gray-700 border-t-purple-600' : 'border-purple-200 border-t-purple-600'}`}></div>
               </div>
             ) : promotions.length === 0 ? (
-              <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+              <div className={`rounded-lg border p-12 text-center ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <Percent size={48} className="mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600 mb-2">Aucune promotion</p>
+                <p className={isDarkTheme ? 'text-gray-400 mb-2' : 'text-gray-600 mb-2'}>Aucune promotion</p>
                 <button
                   onClick={() => setShowForm(true)}
                   className="text-purple-600 hover:text-purple-700 font-medium"
@@ -610,10 +641,10 @@ const handleCreatePromotion = async (data) => {
             ) : (
               <div className="grid gap-4">
                 {promotions.map((promotion) => (
-                  <div key={promotion.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                  <div key={promotion.id} className={`rounded-lg border overflow-hidden hover:shadow-md transition-shadow ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <div className="flex flex-col md:flex-row">
                       {/* Image */}
-                      <div className="w-full md:w-48 h-32 md:h-auto bg-gradient-to-r from-purple-50 to-pink-50 flex items-center justify-center p-4">
+                      <div className={`w-full md:w-48 h-32 md:h-auto flex items-center justify-center p-4 ${isDarkTheme ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30' : 'bg-gradient-to-r from-purple-50 to-pink-50'}`}>
                         {promotion.bannerImage ? (
                           <img
                             src={promotion.bannerImage}
@@ -621,7 +652,7 @@ const handleCreatePromotion = async (data) => {
                             className="w-full h-full object-contain"
                           />
                         ) : (
-                          <Image size={48} className="text-gray-300" />
+                          <Image size={48} className={isDarkTheme ? 'text-gray-600' : 'text-gray-300'} />
                         )}
                       </div>
 
@@ -629,9 +660,9 @@ const handleCreatePromotion = async (data) => {
                       <div className="flex-1 p-6">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{promotion.title}</h3>
+                            <h3 className={`text-lg font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{promotion.title}</h3>
                             {promotion.subtitle && (
-                              <p className="text-sm text-gray-500">{promotion.subtitle}</p>
+                              <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{promotion.subtitle}</p>
                             )}
                           </div>
                           <div className="flex gap-2">
@@ -640,7 +671,7 @@ const handleCreatePromotion = async (data) => {
                                 setFormData(promotion);
                                 setShowForm(true);
                               }}
-                              className="p-2 text-gray-400 hover:text-gray-600"
+                              className={isDarkTheme ? 'p-2 text-gray-500 hover:text-gray-300' : 'p-2 text-gray-400 hover:text-gray-600'}
                               title="Modifier"
                             >
                               <Edit2 size={18} />
@@ -656,49 +687,49 @@ const handleCreatePromotion = async (data) => {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3 mt-2">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded text-sm font-medium">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium ${isDarkTheme ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
                             {promotion.discountValue}{promotion.discountType === 'percentage' ? '%' : ' DH'} de réduction
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-sm font-medium">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium ${isDarkTheme ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700'}`}>
                             {new Date(promotion.startDate) <= new Date() && new Date(promotion.endDate) >= new Date() ? 'En cours' : 'À venir'}
                           </span>
                           {!promotion.active && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded text-sm font-medium">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium ${isDarkTheme ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700'}`}>
                               <EyeOff size={14} />
                               Désactivée
                             </span>
                           )}
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-200">
+                        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Début</p>
-                            <p className="text-sm font-medium text-gray-900">{formatDate(promotion.startDate)}</p>
+                            <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Début</p>
+                            <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{formatDate(promotion.startDate)}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Fin</p>
-                            <p className="text-sm font-medium text-gray-900">{formatDate(promotion.endDate)}</p>
+                            <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Fin</p>
+                            <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{formatDate(promotion.endDate)}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Produit</p>
-                            <p className="text-sm font-medium text-gray-900">{promotion.productName || 'Tous produits'}</p>
+                            <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Produit</p>
+                            <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{promotion.productName || 'Tous produits'}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Ordre</p>
-                            <p className="text-sm font-medium text-gray-900">{promotion.order}</p>
+                            <p className={`text-xs mb-1 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Ordre</p>
+                            <p className={`text-sm font-medium ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{promotion.order}</p>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between mt-4">
                           {promotion.stock && promotion.stock < 50 && (
-                            <span className="text-xs text-orange-600">Plus que {promotion.stock} exemplaires</span>
+                            <span className={isDarkTheme ? 'text-xs text-orange-400' : 'text-xs text-orange-600'}>Plus que {promotion.stock} exemplaires</span>
                           )}
                           <button
                             onClick={() => togglePromotionStatus(promotion.id, promotion.active)}
                             className={`ml-auto px-3 py-1 rounded text-sm font-medium transition-colors ${
                               promotion.active
-                                ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? isDarkTheme ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                : isDarkTheme ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                           >
                             {promotion.active ? 'Activée' : 'Désactivée'}
@@ -713,15 +744,19 @@ const handleCreatePromotion = async (data) => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
+              <div className={`flex items-center justify-between mt-6 pt-6 border-t ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Affichage {(currentPage - 1) * limit + 1} à {Math.min(currentPage * limit, total)} sur {total}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                    className={`px-4 py-2 border rounded-lg disabled:opacity-50 ${
+                      isDarkTheme 
+                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
                     Précédent
                   </button>
@@ -743,7 +778,9 @@ const handleCreatePromotion = async (data) => {
                         className={`px-3 py-2 rounded-lg transition-colors ${
                           pageNum === currentPage
                             ? 'bg-purple-600 text-white'
-                            : 'border border-gray-300 hover:bg-gray-50'
+                            : isDarkTheme 
+                              ? 'border border-gray-600 text-gray-300 hover:bg-gray-700' 
+                              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         {pageNum}
@@ -753,7 +790,11 @@ const handleCreatePromotion = async (data) => {
                   <button
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                    className={`px-4 py-2 border rounded-lg disabled:opacity-50 ${
+                      isDarkTheme 
+                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
                     Suivant
                   </button>

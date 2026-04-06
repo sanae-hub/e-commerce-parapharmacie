@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BarChart3, LineChart, TrendingUp, Download, Calendar,
-  ArrowUp, ArrowDown, Package, DollarSign, Eye
+  TrendingUp, Download, ArrowDown, Package, Eye, FileBarChart, Trophy, AlertTriangle, Clock, CalendarCheck, Users, Percent
 } from 'lucide-react';
 import {
-  BarChart, Bar, LineChart as LineChartComponent, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  Cell, PieChart, Pie, AreaChart, Area
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import adminApi from '../api/adminAxios';
 
 const AdminReports = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [activeReport, setActiveReport] = useState('sales');
-  const [salesData, setSalesData] = useState(null);
+  const [activeReport, setActiveReport] = useState('products');
   const [productsData, setProductsData] = useState(null);
-  const [categoriesData, setCategoriesData] = useState(null);
   const [topProductsData, setTopProductsData] = useState(null);
   const [bottomProductsData, setBottomProductsData] = useState(null);
   const [clickCollectData, setClickCollectData] = useState(null);
@@ -72,19 +67,9 @@ const AdminReports = () => {
     try {
       const params = { startDate, endDate };
       
-      if (activeReport === 'sales' || activeReport === 'all') {
-        const { data } = await adminApi.get('/reports/sales', { params: { ...params, period: periodType } });
-        setSalesData(data);
-      }
-
       if (activeReport === 'products' || activeReport === 'all') {
         const { data } = await adminApi.get('/reports/products', { params });
         setProductsData(data);
-      }
-
-      if (activeReport === 'categories' || activeReport === 'all') {
-        const { data } = await adminApi.get('/reports/categories', { params });
-        setCategoriesData(data);
       }
 
       if (activeReport === 'top' || activeReport === 'all') {
@@ -101,6 +86,7 @@ const AdminReports = () => {
         const { data } = await adminApi.get('/reports/click-collect', { params });
         setClickCollectData(data);
       }
+
     } catch (error) {
       console.error('Error fetching reports:', error);
       if (error.response?.status === 403 || error.response?.status === 401) {
@@ -114,9 +100,41 @@ const AdminReports = () => {
 
   const handleExport = async (reportType) => {
     try {
+      const token = localStorage.getItem('token');
       const params = { startDate, endDate, format: exportFormat };
       const queryString = new URLSearchParams(params).toString();
-      window.location.href = `http://localhost:5000/api/admin/reports/export/${reportType}?${queryString}`;
+      
+      const response = await fetch(`http://localhost:5000/api/admin/reports/export/${reportType}?${queryString}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('Session expirée. Veuillez vous reconnecter.');
+          navigate('/admin/login');
+          return;
+        }
+        throw new Error('Erreur lors de l\'export');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : `rapport_${reportType}_${Date.now()}.${exportFormat === 'pdf' ? 'pdf' : 'csv'}`;
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error exporting report:', error);
       alert('Erreur lors de l\'export');
@@ -178,7 +196,7 @@ const AdminReports = () => {
               />
             </div>
 
-            {(activeReport === 'sales' || activeReport === 'all') && (
+            {(activeReport === 'products' || activeReport === 'all') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Périodicité</label>
                 <select
@@ -186,7 +204,6 @@ const AdminReports = () => {
                   onChange={(e) => setPeriodType(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="daily">Quotidien</option>
                   <option value="weekly">Hebdomadaire</option>
                   <option value="monthly">Mensuel</option>
                 </select>
@@ -200,8 +217,8 @@ const AdminReports = () => {
                 onChange={(e) => setExportFormat(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="json">JSON</option>
-                <option value="csv">CSV (Excel)</option>
+                <option value="csv">Excel (CSV)</option>
+                <option value="pdf">PDF</option>
               </select>
             </div>
 
@@ -220,10 +237,8 @@ const AdminReports = () => {
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
             {[
-              { id: 'sales', label: 'Ventes Globales', icon: LineChart },
               { id: 'products', label: 'Par Produit', icon: Package },
-              { id: 'categories', label: 'Par Catégorie', icon: BarChart3 },
-              { id: 'top', label: 'Top Produits', icon: TrendingUp },
+              { id: 'top', label: 'Top Ventes', icon: TrendingUp },
               { id: 'bottom', label: 'Moins Vendus', icon: ArrowDown },
               { id: 'clickcollect', label: 'Click & Collect', icon: Eye }
             ].map((tab) => (
@@ -242,81 +257,6 @@ const AdminReports = () => {
             ))}
           </nav>
         </div>
-
-        {/* Rapport de Ventes Globales */}
-        {(activeReport === 'sales' || activeReport === 'all') && salesData && (
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Rapport de Ventes Globales</h2>
-              <button
-                onClick={() => handleExport('sales')}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exporter
-              </button>
-            </div>
-
-            {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center">
-                  <DollarSign className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Chiffre d'affaires</p>
-                    <p className="text-2xl font-bold text-gray-900">{salesData.summary.totalRevenue.toFixed(2)} €</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center">
-                  <Package className="h-8 w-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Commandes</p>
-                    <p className="text-2xl font-bold text-gray-900">{salesData.summary.totalOrders}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-orange-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Panier moyen</p>
-                    <p className="text-2xl font-bold text-gray-900">{salesData.summary.averageOrderValue.toFixed(2)} €</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center">
-                  <Package className="h-8 w-8 text-purple-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Articles vendus</p>
-                    <p className="text-2xl font-bold text-gray-900">{salesData.summary.totalItems}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Graphique de ventes */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-md font-medium text-gray-900 mb-4">Évolution des ventes</h3>
-              <ResponsiveContainer width="100%" height={400}>
-                <AreaChart data={salesData.data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Area type="monotone" dataKey="revenue" fill="#3b82f6" stroke="#3b82f6" />
-                  <Area type="monotone" dataKey="orders" fill="#10b981" stroke="#10b981" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
 
         {/* Rapport Par Produit */}
         {(activeReport === 'products' || activeReport === 'all') && productsData && (
@@ -363,7 +303,7 @@ const AdminReports = () => {
                         {product.quantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {product.revenue.toFixed(2)} €
+                        {product.revenue.toFixed(2)} DH
                       </td>
                     </tr>
                   ))}
@@ -378,87 +318,10 @@ const AdminReports = () => {
           </div>
         )}
 
-        {/* Rapport Par Catégorie */}
-        {(activeReport === 'categories' || activeReport === 'all') && categoriesData && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Rapport Par Catégorie</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-md font-medium text-gray-900 mb-4">Revenu par catégorie</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={categoriesData.data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="categoryName" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="revenue" fill="#3b82f6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-md font-medium text-gray-900 mb-4">Part des ventes (quantité)</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={categoriesData.data}
-                      dataKey="quantity"
-                      nameKey="categoryName"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label
-                    >
-                      {categoriesData.data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 5]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-white shadow-sm rounded-lg overflow-hidden mt-6">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Catégorie
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Quantité
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Revenu
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {categoriesData.data.map((category) => (
-                    <tr key={category.categoryId} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {category.categoryName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {category.quantity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {category.revenue.toFixed(2)} €
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
         {/* Top Produits */}
         {(activeReport === 'top' || activeReport === 'all') && topProductsData && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">🏆 Top 10 Produits Les Plus Vendus</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-6"><Trophy className="inline w-5 h-5 mr-2" />Top 10 Produits Les Plus Vendus</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -501,7 +364,7 @@ const AdminReports = () => {
         {/* Moins Vendus */}
         {(activeReport === 'bottom' || activeReport === 'all') && bottomProductsData && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">📉 Top 10 Produits Les Moins Vendus</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-6"><AlertTriangle className="inline w-5 h-5 mr-2" />Top 10 Produits Les Moins Vendus</h2>
 
             <div className="bg-white shadow-sm rounded-lg overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
@@ -658,6 +521,7 @@ const AdminReports = () => {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

@@ -115,6 +115,16 @@ export const AdminWebSocketProvider = ({ children }) => {
                 });
                 break;
                 
+              case 'admin_urgent_order':
+                console.log('⚡ Commande urgente:', data.orderNumber);
+                addNotification({
+                  title: '⚡ Commande urgente',
+                  message: `Commande ${data.orderNumber} - Retrait dans moins de 2h`,
+                  type: 'urgent',
+                  data: data
+                });
+                break;
+                
               default:
                 console.log('📨 Message non traité:', data.type);
             }
@@ -157,19 +167,23 @@ export const AdminWebSocketProvider = ({ children }) => {
     };
   }, []);
 
-  const addNotification = (notification) => {
-    setNotifications(prev => [
-      {
-        ...notification,
-        id: Date.now(),
-        timestamp: new Date()
-      },
-      ...prev
-    ].slice(0, 50));
-  };
-
   const removeNotification = (id) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const addNotification = (notification) => {
+    const newNotification = {
+      ...notification,
+      id: Date.now(),
+      timestamp: new Date()
+    };
+    
+    setNotifications(prev => [newNotification, ...prev].slice(0, 50));
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+      removeNotification(newNotification.id);
+    }, 5000);
   };
 
   const clearNotifications = () => {

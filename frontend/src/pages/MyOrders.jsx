@@ -20,6 +20,18 @@ const MyOrders = () => {
     { key: 'COMPLETED', label: 'Récupérée', icon: CheckCircle }
   ]
 
+  // Check if order is urgent (within 2 hours of pickup time)
+  const isOrderUrgent = (order) => {
+    if (!order.timeSlotDate || !order.timeSlotStart) return false;
+    const now = new Date();
+    const pickupTime = new Date(order.timeSlotDate);
+    const [hours, minutes] = order.timeSlotStart.split(':').map(Number);
+    pickupTime.setHours(hours, minutes, 0, 0);
+    const timeDiff = pickupTime - now;
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    return timeDiff > 0 && timeDiff <= twoHoursInMs;
+  }
+
   useEffect(() => {
     fetchOrders()
   }, [])
@@ -140,10 +152,18 @@ const MyOrders = () => {
 
               return (
                 <div key={order.id} className="bg-white rounded-lg shadow overflow-hidden">
-                  <div className="p-6">
+                  <div className={`p-6 ${isOrderUrgent(order) ? 'bg-orange-50' : ''}`}>
                     <div className="flex justify-between items-start mb-6">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-800">{order.orderNumber}</h3>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-semibold text-gray-800">{order.orderNumber}</h3>
+                          {isOrderUrgent(order) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full animate-pulse">
+                              <Clock className="w-3 h-3" />
+                              Urgent
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-500 mt-1">
                           {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                             year: 'numeric',
@@ -154,8 +174,9 @@ const MyOrders = () => {
                           })}
                         </p>
                         {order.timeSlotDate && (
-                          <p className="text-sm text-sky-700 font-medium mt-1">
+                          <p className={`text-sm font-medium mt-1 ${isOrderUrgent(order) ? 'text-orange-700' : 'text-sky-700'}`}>
                             Retrait: {new Date(order.timeSlotDate).toLocaleDateString('fr-FR')} à {order.timeSlotStart}
+                            {isOrderUrgent(order) && ' - Dans moins de 2h!'}
                           </p>
                         )}
                       </div>
