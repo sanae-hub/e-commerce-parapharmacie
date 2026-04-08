@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
@@ -23,8 +23,14 @@ import favoritesRouter from './routes/favorites.js';
 import suppliersRouter from './routes/suppliers.js';
 import { setIo, addClientSocket, removeClientSocket } from './io.js';
 
-import ordersRoutes from "./routes/orders.js";
-import { sendOrderConfirmation, sendOrderStatusUpdate } from "./services/emailService.js";
+import {
+  initializeTransporter,
+  isEmailConfigured,
+  sendOrderConfirmation,
+  sendOrderStatusNotification,
+  sendPasswordResetEmail,
+  sendSlotReminder
+} from './services/emailService.js';
 
 dotenv.config();
 
@@ -1140,12 +1146,6 @@ app.put('/api/orders/:orderId/status', async (req, res) => {
   }
 })
 
-// backend/src/server.js
-// Ajoutez cette route APRÈS les autres routes, avant app.listen
-
-// ============ ROUTES PUBLIQUES POUR LES CRÉNEAUX ============
-
-// GET /api/time-slots/available - Récupérer les créneaux disponibles (public)
 app.get('/api/time-slots/available', async (req, res) => {
   try {
     const { date } = req.query;
@@ -1501,3 +1501,4 @@ cron.schedule('*/15 * * * *', async () => {
     console.error('Cron reminder error:', error)
   }
 })
+

@@ -176,6 +176,22 @@ export const CartProvider = ({ children }) => {
       return false
     }
 
+    }
+
+    const existingItem = cartItems.find(item => item.id === product.id)
+    const currentQty = existingItem ? existingItem.quantity : 0
+    const availableStock = product.stock ?? 0
+
+    // Vérification stock insuffisant
+    if (availableStock <= 0) {
+      setStockError(`"${product.name}" est en rupture de stock.`)
+      return false
+    }
+    if (currentQty >= availableStock) {
+      setStockError(`Stock insuffisant pour "${product.name}". Il ne reste que ${availableStock} unité(s) disponible(s).`)
+      return false
+    }
+
     // Check stock availability
     const availableStock = product.stock || 0;
     if (availableStock <= 0) {
