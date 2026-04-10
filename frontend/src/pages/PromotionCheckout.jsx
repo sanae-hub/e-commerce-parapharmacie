@@ -38,28 +38,49 @@ const PromotionCheckout = () => {
     if (!promo) return
     setAdding(true)
 
-    // Construire l'article à ajouter au panier
-    const cartItem = {
-      id: promo.productId || `promo-${promo.id}`,
-      name: promo.productName || promo.title,
-      price: promo.price || promo.discountValue,
-      image: promo.bannerImage || promo.productImage || null,
-      quantity,
-      isPromo: true,
-      promoId: promo.id,
-      promoTitle: promo.title,
-    }
+    try {
+      // Récupérer ou créer le vrai produit en base
+      const { data } = await api.post(`/promotions/${promo.id}/get-or-create-product`)
+      const realProductId = data.productId
 
-    addToCart(cartItem)
+      // Vider les anciens items promo avec faux ID du localStorage
+      try {
+        const u = JSON.parse(localStorage.getItem('user') || '{}')
+        const cartKey = u?.id ? `cart_${u.id}` : 'cart_guest'
+        const saved = JSON.parse(localStorage.getItem(cartKey) || '[]')
+        const cleaned = saved.filter(i => !String(i.id).startsWith('promo-'))
+        localStorage.setItem(cartKey, JSON.stringify(cleaned))
+      } catch {}
 
-    setTimeout(() => {
-      setAdding(false)
-      if (selectedMode === 'collect') {
-        navigate('/checkout/time-slot')
-      } else {
-        navigate('/checkout/delivery')
+      // Construire l'article avec le vrai ID produit et la quantité choisie
+      const cartItem = {
+        id: realProductId,
+        name: promo.productName || promo.title,
+        price: promo.price || promo.discountValue || 0,
+        image: promo.productImage || promo.bannerImage || null,
+        stock: promo.stock || 999,
+        quantity: 1,
+        isPromo: true,
+        promoId: promo.id,
+        promoTitle: promo.title,
       }
-    }, 600)
+
+      // Ajouter au panier (quantity fois via addToCart qui incrémente)
+      for (let i = 0; i < quantity; i++) {
+        addToCart(cartItem)
+      }
+
+      // Mémoriser le mode choisi pour le checkout
+      localStorage.setItem('orderMode', selectedMode === 'collect' ? 'CLICK_COLLECT' : 'DELIVERY')
+
+      // Passer par le checkout standard
+      navigate('/checkout')
+    } catch (err) {
+      console.error('Erreur ajout au panier:', err)
+      alert('Une erreur est survenue. Veuillez réessayer.')
+    } finally {
+      setAdding(false)
+    }
   }
 
   if (loading) return (
@@ -91,9 +112,9 @@ const PromotionCheckout = () => {
       <div className="max-w-4xl mx-auto">
 
         {/* Back */}
-        <button onClick={() => navigate('/')}
+        <button onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sky-700 font-semibold mb-6 hover:text-sky-900">
-          <ArrowLeft size={20} /> Retour à l'accueil
+          <ArrowLeft size={20} /> Retour
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

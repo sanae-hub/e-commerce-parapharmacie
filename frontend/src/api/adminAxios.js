@@ -27,11 +27,15 @@ adminApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Flag pour éviter les redirections répétées
+let isRedirecting = false;
+
 // Intercepteur pour gérer les erreurs
 adminApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 403 || error.response?.status === 401) {
+    if ((error.response?.status === 403 || error.response?.status === 401) && !isRedirecting) {
+      isRedirecting = true;
       // Nettoyer le localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -41,6 +45,8 @@ adminApi.interceptors.response.use(
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
+      // Réinitialiser le flag après une courte attente
+      setTimeout(() => { isRedirecting = false; }, 1000);
     }
     return Promise.reject(error);
   }

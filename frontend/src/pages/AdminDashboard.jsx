@@ -179,7 +179,10 @@ const AdminDashboard = () => {
               </button>
 
               <button
-                onClick={() => navigate('/')}
+                onClick={() => {
+                  localStorage.removeItem('lastVisitedPath');
+                  navigate('/');
+                }}
                 className="flex items-center gap-1.5 px-3 py-2 text-sm bg-sky-700 hover:bg-sky-800 text-white rounded-lg transition-colors"
               >
                 <ExternalLink size={16} />

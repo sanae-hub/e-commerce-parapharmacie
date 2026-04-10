@@ -2,9 +2,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar, X } from 'lucide-react'
-// Supprimez cette ligne
-// import Navbar from '../components/Navbar'
 import { useWebSocket } from '../context/WebSocketContext'
+import AdminBackButton from '../components/AdminBackButton'
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([])
@@ -257,7 +256,9 @@ const MyOrders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
+      <AdminBackButton />
+
       {/* Supprimez cette ligne */}
       {/* <Navbar /> */}
       

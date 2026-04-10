@@ -42,7 +42,9 @@ const CategoryBar = () => {
   const fetchCategories = async () => {
     try {
       const { data } = await axios.get('/categories')
-      setCategories(Array.isArray(data) ? data : [])
+      // Filtrer la catégorie "Promotions"
+      const filtered = Array.isArray(data) ? data.filter(cat => cat.name !== 'Promotions') : []
+      setCategories(filtered)
     } catch (error) {
       console.error('Erreur chargement catégories:', error)
       setCategories([])

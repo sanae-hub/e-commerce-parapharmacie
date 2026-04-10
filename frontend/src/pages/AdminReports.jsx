@@ -367,7 +367,16 @@ const AdminReports = () => {
         {/* Top Produits */}
         {(activeReport === 'top' || activeReport === 'all') && topProductsData && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6"><Trophy className="inline w-5 h-5 mr-2" />Top 10 Produits Les Plus Vendus</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-semibold text-gray-900"><Trophy className="inline w-5 h-5 mr-2" />Top 10 Produits Les Plus Vendus</h2>
+              <button
+                onClick={() => handleExport('top-products')}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Exporter
+              </button>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -454,7 +463,16 @@ const AdminReports = () => {
         {/* Click & Collect */}
         {(activeReport === 'clickcollect' || activeReport === 'all') && clickCollectData && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Click & Collect - Rapport d'Activité</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Click & Collect - Rapport d'Activité</h2>
+              <button
+                onClick={() => handleExport('click-collect')}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Exporter
+              </button>
+            </div>
 
             {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">

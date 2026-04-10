@@ -89,7 +89,10 @@ router.get('/search', async (req, res) => {
     // normalization works regardless of DB collation.
     // (Pharmacy catalogs are small enough for this to be fast.)
     const all = await prisma.product.findMany({
-      where: { active: true },
+      where: {
+        active: true,
+        NOT: { category: { name: 'Promotions' } }
+      },
       select: {
         id: true, name: true, brand: true, price: true, oldPrice: true,
         image: true, stock: true,
@@ -134,6 +137,12 @@ router.get('/', async (req, res) => {
       where.active = active === 'true'
     } else {
       where.active = true
+    }
+
+    // Exclure la catégorie "Promotions" des listes publiques
+    const promoCategory = await prisma.category.findFirst({ where: { name: 'Promotions' } })
+    if (promoCategory) {
+      where.NOT = { categoryId: promoCategory.id }
     }
     
     const skip = (parseInt(page) - 1) * parseInt(limit)

@@ -13,22 +13,25 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
-  // Initialisation synchrone depuis localStorage — pas de flash
-  const [user, setUser] = useState(() => {
-    try {
-      const token = localStorage.getItem('token')
-      const stored = localStorage.getItem('user')
-      if (token && stored) return JSON.parse(stored)
-    } catch {}
-    return null
-  })
-  const [loading, setLoading] = useState(true)
+  // Ne pas restaurer automatiquement la session - toujours commencer déconnecté
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const fetchUserProfile = useCallback(async () => {
     try {
       const response = await axios.get('/user/profile')
       const userData = response.data
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+      // Éviter les erreurs JSON.parse avec une approche plus sûre
+      let currentUser = {}
+      try {
+        const userStr = localStorage.getItem('user')
+        if (userStr) {
+          currentUser = JSON.parse(userStr)
+        }
+      } catch (parseError) {
+        console.warn('Erreur parsing localStorage user:', parseError)
+        localStorage.removeItem('user') // Nettoyer les données corrompues
+      }
       const mergedUser = { ...userData, role: currentUser.role || userData.role }
       setUser(mergedUser)
       localStorage.setItem('user', JSON.stringify(mergedUser))
@@ -45,14 +48,8 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
-    if (token && storedUser) {
-      // Valider le token auprès du serveur
-      fetchUserProfile()
-    } else {
-      setLoading(false)
-    }
+    // Ne pas restaurer automatiquement la session - l'utilisateur doit se connecter explicitement
+    setLoading(false)
   }, [fetchUserProfile])
 
   const login = useCallback(async (email, password) => {
@@ -91,7 +88,6 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    localStorage.removeItem('lastVisitedPath')
     setUser(null)
   }, [])
 
