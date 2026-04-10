@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield, User, UserRound, Fingerprint } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Shield, User, UserRound, Fingerprint } from 'lucide-react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -68,27 +68,15 @@ const Login = () => {
 
   const redirectAfterLogin = (userData) => {
     const isAdminRole = ['ADMIN', 'CAISSIER', 'PREPARATEUR'].includes(userData.role)
-    if (redirectTo) {
-      // Redirection depuis un PrivateRoute ou AdminRoute
-      const dest = redirectTo.startsWith('/admin') && !isAdminRole ? '/' : redirectTo
-      localStorage.removeItem('lastVisitedPath')
-      navigate(dest)
+
+    if (isAdminRole) {
+      navigate('/admin/admindashboard')
+    } else if (redirectTo && !redirectTo.startsWith('/admin')) {
+      // Rediriger vers la page demandée si ce n'est pas une page admin
+      navigate(redirectTo)
     } else {
-      // Redirection vers la dernière page mémorisée
-      const last = localStorage.getItem('lastVisitedPath')
-      localStorage.removeItem('lastVisitedPath')
-      if (last && last !== '/') {
-        // Vérifier que l'utilisateur a les droits
-        if (last.startsWith('/admin') && !isAdminRole) {
-          navigate('/')
-        } else {
-          navigate(last)
-        }
-      } else if (isAdminRole) {
-        navigate('/admin/admindashboard')
-      } else {
-        navigate('/')
-      }
+      // Sinon, aller à l'accueil
+      navigate('/')
     }
   }
 
@@ -108,6 +96,15 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 flex items-center justify-center px-4 py-8">
+      {/* Bouton Retour à l'accueil */}
+      <Link
+        to="/"
+        className="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg shadow-md border border-gray-200 transition-colors"
+      >
+        <ArrowLeft size={16} />
+        <span>Retour à l'accueil</span>
+      </Link>
+
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
           <div className="text-center mb-8">

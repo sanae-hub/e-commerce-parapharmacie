@@ -605,13 +605,16 @@ app.post('/api/orders/create', async (req, res) => {
 
     // ── Règle 2 : Vérification du stock avant création ──
     for (const item of items) {
+      if (!item.id || String(item.id).startsWith('promo-')) {
+        return res.status(400).json({ message: 'Produit invalide. Videz votre panier.', code: 'INVALID_PRODUCT_ID' })
+      }
       const product = await prisma.product.findUnique({
         where: { id: item.id },
         select: { id: true, name: true, stock: true }
       })
       if (!product) {
         return res.status(400).json({
-          message: `Produit introuvable : ${item.id}`,
+          message: 'Produit introuvable. Videz votre panier et reessayez.',
           code: 'PRODUCT_NOT_FOUND'
         })
       }
@@ -1107,7 +1110,6 @@ app.put('/api/orders/:orderId/status', async (req, res) => {
         order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && order.status !== 'RETURNED') {
       await restoreStock(orderId, null, order.status)
     }
-
     // Notification WebSocket au client
     if (order.userId) {
       const statusMessages = {
@@ -1467,15 +1469,17 @@ socket.on('admin_authenticate', (adminToken) => {
 cron.schedule('*/15 * * * *', async () => {
   try {
     const now = new Date()
+    const todayUtcStart = new Date(now.toISOString().slice(0, 10) + 'T00:00:00.000Z')
     const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000)
 
-    // Trouver les commandes dont le créneau est dans 2h et qui n'ont pas reçu de rappel
+    // Trouver les commandes candidates dont le créneau tombe aujourd'hui ou dans les 2 prochaines heures.
     const orders = await prisma.order.findMany({
       where: {
         status: { in: ['RECEIVED', 'PREPARING', 'READY'] },
         reminderSent: false,
+        timeSlotStart: { not: null },
         timeSlotDate: {
-          gte: now,
+          gte: todayUtcStart,
           lte: twoHoursLater,
         },
       },
@@ -1485,6 +1489,16 @@ cron.schedule('*/15 * * * *', async () => {
     })
 
     for (const order of orders) {
+      if (!order.timeSlotDate || !order.timeSlotStart) continue
+
+      const [hours, minutes] = order.timeSlotStart.split(':').map(Number)
+      const dateStr = order.timeSlotDate.toISOString().slice(0, 10)
+      const slotDateUtc = new Date(`${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.000Z`)
+      const slotDateTime = new Date(slotDateUtc.getTime() - 60 * 60 * 1000)
+      const diffMs = slotDateTime.getTime() - now.getTime()
+
+      if (diffMs < 0 || diffMs > 2 * 60 * 60 * 1000) continue
+
       // Marquer la commande comme urgente
       if (!order.isUrgent) {
         await prisma.order.update({

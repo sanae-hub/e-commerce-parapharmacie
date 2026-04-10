@@ -1,7 +1,7 @@
 // frontend/src/main.jsx
-import React, { useEffect } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, useLocation } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { FavoritesProvider } from './context/FavoritesContext'
@@ -33,7 +33,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <FavoritesProvider>
             <AdminWebSocketProvider>
               <WebSocketProvider>
-                <LastPageTracker />
                 <AppRoutes />
               </WebSocketProvider>
             </AdminWebSocketProvider>

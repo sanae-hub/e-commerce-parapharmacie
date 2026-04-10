@@ -105,6 +105,59 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+// POST /api/promotions/:id/get-or-create-product
+// Retourne le productId réel lié à la promotion,
+// ou crée un produit temporaire en base si aucun n'est lié.
+router.post('/:id/get-or-create-product', async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const promo = await prisma.promotion.findUnique({ where: { id } })
+    if (!promo) return res.status(404).json({ error: 'Promotion introuvable' })
+
+    // Si un vrai produit est déjà lié, le retourner directement
+    if (promo.productId) {
+      const product = await prisma.product.findUnique({ where: { id: promo.productId } })
+      if (product) return res.json({ productId: product.id })
+    }
+
+    // Trouver ou créer une catégorie "Promotions"
+    let category = await prisma.category.findFirst({ where: { name: 'Promotions' } })
+    if (!category) {
+      category = await prisma.category.create({
+        data: { name: 'Promotions', icon: 'Tag', order: 99 }
+      })
+    }
+
+    // Créer un produit réel en base à partir des données de la promotion
+    const product = await prisma.product.create({
+      data: {
+        name: promo.productName || promo.title,
+        description: promo.description || promo.subtitle || '',
+        price: promo.price || 0,
+        oldPrice: promo.oldPrice || null,
+        image: promo.productImage || promo.bannerImage || null,
+        brand: promo.badge || null,
+        stock: promo.stock || 999,
+        stockAlert: 5,
+        categoryId: category.id,
+        active: true,
+      }
+    })
+
+    // Lier le produit créé à la promotion pour les prochains appels
+    await prisma.promotion.update({
+      where: { id },
+      data: { productId: product.id }
+    })
+
+    res.json({ productId: product.id })
+  } catch (error) {
+    console.error('get-or-create-product error:', error)
+    res.status(500).json({ error: 'Erreur serveur', details: error.message })
+  }
+})
+
 // POST /api/promotions/:id/view - Enregistrer une vue
 router.post('/:id/view', async (req, res) => {
   try {

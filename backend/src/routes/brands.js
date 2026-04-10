@@ -14,8 +14,10 @@ const verifyAdmin = async (req, res, next) => {
   
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-    if (!user || user.role !== 'ADMIN') return res.status(403).json({ error: 'Accès refusé' });
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'CAISSIER' && user.role !== 'PREPARATEUR')) {
+      return res.status(403).json({ error: 'Accès refusé' });
+    }
     req.user = user;
     next();
   } catch (error) {
