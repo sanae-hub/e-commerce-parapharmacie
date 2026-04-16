@@ -25,6 +25,7 @@ const LastPageTracker = () => {
   return null
 }
 
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

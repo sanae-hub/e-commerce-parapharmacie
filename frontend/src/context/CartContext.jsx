@@ -44,10 +44,6 @@ export const CartProvider = ({ children }) => {
           localStorage.setItem(cartKey, JSON.stringify(cleanedCart))
         }
         setCartItems(cleanedCart)
-        // Only load if not empty post-logout clear
-        if (parsedCart.length > 0) {
-          setCartItems(parsedCart)
-        }
       } catch (error) {
         console.error('Erreur lors du chargement du panier:', error)
       }
