@@ -248,13 +248,14 @@ router.get('/sales-chart', verifyAdmin, async (req, res) => {
 router.get('/urgent-orders', verifyAdmin, async (req, res) => {
   try {
     const now = new Date();
+    const todayUtcStart = new Date(now.toISOString().slice(0, 10) + 'T00:00:00.000Z');
 
     // Chercher les commandes actives des 3 prochains jours qui ont un créneau
     const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     const candidates = await prisma.order.findMany({
       where: {
-        timeSlotDate: { gte: now, lte: threeDaysLater },
+        timeSlotDate: { gte: todayUtcStart, lte: threeDaysLater },
         timeSlotStart: { not: null },
         status: { in: ['RECEIVED', 'PREPARING'] }
       },
@@ -283,7 +284,6 @@ router.get('/urgent-orders', verifyAdmin, async (req, res) => {
 
         // Construire le datetime du créneau en UTC (Maroc = UTC+1, donc soustraire 1h)
         const slotDatetime = new Date(`${dateStr}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00.000Z`);
-        // Convertir de l'heure Maroc (UTC+1) vers UTC : soustraire 1h
         const slotDatetimeUTC = new Date(slotDatetime.getTime() - 60 * 60 * 1000);
 
         const diffMs = slotDatetimeUTC.getTime() - now.getTime();
@@ -1914,15 +1914,18 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
     const { format = 'csv', startDate, endDate } = req.query;
 
     let reportData;
+    let summaryData = null;
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
     // Récupérer les données selon le type
     if (type === 'products') {
+      // Récupérer le résumé des ventes d'abord
+      const SALE_STATUSES = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
       const orders = await prisma.order.findMany({
         where: {
           createdAt: { gte: start, lte: end },
-          status: { in: ['PREPARING', 'READY', 'PICKED_UP', 'DELIVERED', 'COMPLETED'] }
+          status: { in: SALE_STATUSES }
         },
         select: {
           items: {
@@ -1935,29 +1938,68 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
         }
       });
 
+      // Calculer le résumé
+      let totalRevenue = 0;
+      let totalOrders = orders.length;
+      orders.forEach(order => {
+        order.items.forEach(item => {
+          totalRevenue += item.price * item.quantity;
+        });
+      });
+      const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+      summaryData = {
+        'CA Total (HT)': `${totalRevenue.toFixed(2)} DH`,
+        'CA Total (TTC 20%)': `${(totalRevenue * 1.20).toFixed(2)} DH`,
+        'Commandes': totalOrders,
+        'Panier moyen': `${averageOrderValue.toFixed(2)} DH`
+      };
+
+      // Calculer les statistiques par produit
       const productStats = {};
       orders.forEach(order => {
         order.items.forEach(item => {
           const key = item.product.name;
           if (!productStats[key]) {
             productStats[key] = {
-              produit: item.product.name,
-              marque: item.product.brand || '-',
-              quantité: 0,
-              revenu: 0
+              'Produit': item.product.name,
+              'Marque': item.product.brand || '-',
+              'Qté vendue': 0,
+              'Prix unitaire': 0,
+              'Total HT': 0,
+              'Total TTC (20%)': 0
             };
           }
-          productStats[key].quantité += item.quantity;
-          productStats[key].revenu += item.price * item.quantity;
+          productStats[key]['Qté vendue'] += item.quantity;
+          productStats[key]['Total HT'] += item.price * item.quantity;
         });
       });
 
-      reportData = Object.values(productStats);
+      // Calculer le prix unitaire et TTC pour chaque produit
+      Object.values(productStats).forEach(product => {
+        if (product['Qté vendue'] > 0) {
+          product['Prix unitaire'] = (product['Total HT'] / product['Qté vendue']).toFixed(2);
+        }
+        product['Total TTC (20%)'] = (product['Total HT'] * 1.20).toFixed(2);
+        product['Total HT'] = product['Total HT'].toFixed(2);
+        product['Prix unitaire'] += ' DH';
+        product['Total HT'] += ' DH';
+        product['Total TTC (20%)'] += ' DH';
+      });
+
+      reportData = Object.values(productStats)
+        .sort((a, b) => {
+          const aTotal = parseFloat(a['Total HT'].split(' ')[0]);
+          const bTotal = parseFloat(b['Total HT'].split(' ')[0]);
+          return bTotal - aTotal;
+        })
+        .slice(0, 20);
     } else if (type === 'top-products') {
+      const SALE_STATUSES = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
       const orders = await prisma.order.findMany({
         where: {
           createdAt: { gte: start, lte: end },
-          status: { in: ['PREPARING', 'READY', 'PICKED_UP', 'DELIVERED', 'COMPLETED'] }
+          status: { in: SALE_STATUSES }
         },
         select: {
           items: {
@@ -1975,19 +2017,28 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
         order.items.forEach(item => {
           if (!productStats[item.product.name]) {
             productStats[item.product.name] = {
-              produit: item.product.name,
-              marque: item.product.brand || '-',
-              quantité: 0,
-              revenu: 0
+              'Produit': item.product.name,
+              'Marque': item.product.brand || '-',
+              'Qté vendue': 0,
+              'Total HT': 0,
+              'Total TTC (20%)': 0
             };
           }
-          productStats[item.product.name].quantité += item.quantity;
-          productStats[item.product.name].revenu += item.price * item.quantity;
+          productStats[item.product.name]['Qté vendue'] += item.quantity;
+          productStats[item.product.name]['Total HT'] += item.price * item.quantity;
         });
       });
 
+      // Calculer TTC et formater
+      Object.values(productStats).forEach(product => {
+        product['Total TTC (20%)'] = (product['Total HT'] * 1.20).toFixed(2);
+        product['Total HT'] = product['Total HT'].toFixed(2);
+        product['Total HT'] += ' DH';
+        product['Total TTC (20%)'] += ' DH';
+      });
+
       reportData = Object.values(productStats)
-        .sort((a, b) => b.quantité - a.quantité)
+        .sort((a, b) => b['Qté vendue'] - a['Qté vendue'])
         .slice(0, 10);
     } else if (type === 'bottom-products') {
       const SALE_STATUSES_EXP = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
@@ -1999,10 +2050,17 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
       ordersExp.forEach(o => o.items.forEach(item => {
         if (!item.product) return;
         const k = item.product.id;
-        if (!statsExp[k]) statsExp[k] = { produit: item.product.name, marque: item.product.brand || '-', quantité: 0 };
-        statsExp[k].quantité += item.quantity;
+        if (!statsExp[k]) statsExp[k] = { 'Produit': item.product.name, 'Marque': item.product.brand || '-', 'Qté vendue': 0, 'Commandes': 0 };
+        statsExp[k]['Qté vendue'] += item.quantity;
+        statsExp[k]['Commandes'] += 1;
       }));
-      reportData = Object.values(statsExp).sort((a, b) => a.quantité - b.quantité).slice(0, 10);
+
+      // Ajouter le statut
+      Object.values(statsExp).forEach(product => {
+        product['Statut'] = product['Qté vendue'] === 0 ? 'Jamais vendu' : 'Faibles ventes';
+      });
+
+      reportData = Object.values(statsExp).sort((a, b) => a['Qté vendue'] - b['Qté vendue']).slice(0, 10);
     } else if (type === 'click-collect') {
       const clickCollectOrders = await prisma.order.findMany({
         where: {
@@ -2022,20 +2080,28 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
         const slotKey = `${dateStr}_${order.timeSlotStart}`;
         if (!slotStats[slotKey]) {
           slotStats[slotKey] = {
-            date: dateStr,
-            heure: order.timeSlotStart,
-            réservées: 0,
-            retirées: 0,
-            annulées: 0
+            'Date': dateStr,
+            'Heure': order.timeSlotStart,
+            'Réservées': 0,
+            'Retirées': 0,
+            'Annulées': 0
           };
         }
-        slotStats[slotKey].réservées += 1;
+        slotStats[slotKey]['Réservées'] += 1;
         if (['PICKED_UP', 'DELIVERED'].includes(order.status)) {
-          slotStats[slotKey].retirées += 1;
+          slotStats[slotKey]['Retirées'] += 1;
         }
         if (order.status === 'CANCELLED') {
-          slotStats[slotKey].annulées += 1;
+          slotStats[slotKey]['Annulées'] += 1;
         }
+      });
+
+      // Ajouter le taux de retrait pour chaque créneau
+      Object.values(slotStats).forEach(slot => {
+        const pickupRate = slot['Réservées'] > 0 
+          ? ((slot['Retirées'] / slot['Réservées']) * 100).toFixed(1) 
+          : 0;
+        slot['Taux de retrait %'] = `${pickupRate}%`;
       });
 
       reportData = Object.values(slotStats);
@@ -2057,15 +2123,26 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
       doc.pipe(res);
       
       // Titre
-      doc.fontSize(18).text(`Rapport: ${type}`, { align: 'center' });
+      doc.fillColor('black').fontSize(18).text(`Rapport: ${type}`, { align: 'center' });
       doc.moveDown();
       
       // Période
-      doc.fontSize(12).text(`Période: ${start.toLocaleDateString('fr-FR')} au ${end.toLocaleDateString('fr-FR')}`);
+      doc.fillColor('black').fontSize(12).text(`Période: ${start.toLocaleDateString('fr-FR')} au ${end.toLocaleDateString('fr-FR')}`);
       doc.moveDown();
       
+      // Résumé des ventes (si disponible)
+      if (summaryData) {
+        doc.fillColor('black').fontSize(14).text('Résumé des ventes:', { underline: true });
+        doc.moveDown(0.5);
+        doc.fillColor('black').fontSize(11);
+        Object.entries(summaryData).forEach(([key, value]) => {
+          doc.fillColor('black').text(`${key}: ${value}`);
+        });
+        doc.moveDown();
+      }
+      
       // Nombre de résultats
-      doc.fontSize(11).text(`Total: ${reportData.length} enregistrements`);
+      doc.fillColor('black').fontSize(11).text(`Total: ${reportData.length} enregistrements`);
       doc.moveDown();
       
       // Tableau des données
@@ -2074,18 +2151,18 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
         const tableTop = doc.y;
         const tableLeft = 30;
         const rowHeight = 20;
-        const colWidth = (550 - tableLeft) / headers.length;
+        const colWidth = Math.min(100, (550 - tableLeft) / headers.length); // Ajuster la largeur des colonnes
         
         // En-têtes (avec fond gris)
-        doc.fontSize(10).font('Helvetica-Bold');
+        doc.fillColor('black').fontSize(9).font('Helvetica-Bold');
         headers.forEach((header, i) => {
           const x = tableLeft + (i * colWidth);
           doc.rect(x, tableTop, colWidth, rowHeight).fill('#f3f4f6').stroke();
-          doc.text(header.substring(0, 15), x + 2, tableTop + 5, { width: colWidth - 4, align: 'left' });
+          doc.fillColor('black').text(header, x + 2, tableTop + 5, { width: colWidth - 4, align: 'left' });
         });
         
         // Données
-        doc.font('Helvetica');
+        doc.fillColor('black').font('Helvetica').fontSize(8);
         let currentY = tableTop + rowHeight;
         
         reportData.forEach((row, rowIndex) => {
@@ -2098,11 +2175,7 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
           headers.forEach((header, colIndex) => {
             const x = tableLeft + (colIndex * colWidth);
             const value = row[header] || '';
-            // Ajouter " DH" pour les colonnes de revenus/prix
-            const displayValue = (header.toLowerCase().includes('revenu') || header.toLowerCase().includes('prix')) 
-              ? `${value} DH` 
-              : String(value);
-            doc.text(displayValue.substring(0, 15), x + 2, currentY + 5, { width: colWidth - 4, align: 'left' });
+            doc.fillColor('black').text(String(value), x + 2, currentY + 5, { width: colWidth - 4, align: 'left' });
           });
           
           // Ligne de séparation
@@ -2110,20 +2183,29 @@ router.get('/reports/export/:type', verifyAdmin, async (req, res) => {
           currentY += rowHeight;
         });
       } else {
-        doc.fontSize(12).text('Aucune donnée disponible pour cette période.', { align: 'center' });
+        doc.fillColor('black').fontSize(12).text('Aucune donnée disponible pour cette période.', { align: 'center' });
       }
       
       doc.end();
     } else if (format === 'csv') {
       const { parse } = await import('json2csv');
-      const csv = parse(reportData);
+      
+      // Ajouter le résumé au début du CSV si disponible
+      let csvData = reportData;
+      if (summaryData) {
+        const summaryRow = { 'Résumé': 'Valeurs', ...summaryData };
+        csvData = [summaryRow, {}, ...reportData]; // Ajouter une ligne vide pour séparer
+      }
+      
+      const csv = parse(csvData);
       res.header('Content-Type', 'text/csv; charset=utf-8');
       res.header('Content-Disposition', `attachment; filename="rapport_${type}_${Date.now()}.csv"`);
       res.send('\ufeff' + csv); // BOM pour UTF-8
     } else {
       res.header('Content-Type', 'application/json; charset=utf-8');
       res.header('Content-Disposition', `attachment; filename="rapport_${type}_${Date.now()}.json"`);
-      res.send(JSON.stringify(reportData, null, 2));
+      const exportData = summaryData ? { summary: summaryData, data: reportData } : reportData;
+      res.send(JSON.stringify(exportData, null, 2));
     }
   } catch (error) {
     console.error('Export report error:', error);
@@ -3160,22 +3242,14 @@ router.get('/stock/movements', verifyAdmin, async (req, res) => {
 router.get('/stock/alerts', verifyAdmin, async (req, res) => {
   try {
     const products = await prisma.product.findMany({
-      where: {
-        active: true,
-        stock: { lte: prisma.product.fields.stockAlert }
-      },
-      select: { id: true, name: true, image: true, brand: true, stock: true, stockAlert: true },
-      orderBy: { stock: 'asc' }
-    });
-    res.json(products);
-  } catch {
-    // Fallback: fetch all and filter in JS
-    const products = await prisma.product.findMany({
       where: { active: true },
       select: { id: true, name: true, image: true, brand: true, stock: true, stockAlert: true },
       orderBy: { stock: 'asc' }
     });
+    // Filtrer en JS : stock <= stockAlert
     res.json(products.filter(p => p.stock <= p.stockAlert));
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 });
 

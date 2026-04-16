@@ -75,7 +75,7 @@ const Cart = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Votre panier est vide</h2>
             <p className="text-gray-600 mb-6">Ajoutez des produits pour commencer vos achats</p>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/products')}
               className="px-6 py-3 bg-sky-700 hover:bg-sky-800 text-white font-semibold rounded-lg transition-colors"
             >
               Découvrir nos produits

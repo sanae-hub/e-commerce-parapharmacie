@@ -1,10 +1,32 @@
 @import "tailwindcss";
 
-* {
-  font-family: 'Poppins', sans-serif;
+/* ── Reset responsive ── */
+html {
+  overflow-x: hidden;
+  width: 100%;
 }
 
-/* Dark theme styles */
+body {
+  overflow-x: hidden;
+  width: 100%;
+  min-width: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Theme variables */
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f3f4f6;
@@ -27,12 +49,6 @@
   --border-color: #374151;
   --card-bg: #111827;
   --shadow-color: rgba(0, 0, 0, 0.3);
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Apply theme variables to Tailwind classes */
@@ -77,7 +93,8 @@ body {
 }
 
 /* Card and container backgrounds */
-.card, .bg-white:not([class*="bg-"]) {
+.card, 
+.bg-white:not([class*="bg-"]) {
   background-color: var(--card-bg);
 }
 
@@ -158,10 +175,6 @@ body {
   border-color: var(--border-color);
 }
 
-[data-theme="dark"] .text-gray-900 {
-  color: var(--text-primary);
-}
-
 [data-theme="dark"] .text-gray-600 {
   color: var(--text-secondary);
 }
@@ -199,7 +212,6 @@ body {
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
-/* Search bar border styles for dark theme */
 [data-theme="dark"] .border-gray-300 {
   border-color: var(--border-color);
 }
@@ -212,10 +224,6 @@ body {
   border-color: #22d3ee;
 }
 
-[data-theme="dark"] .shadow-lg {
-  box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
-}
-
 /* Text areas and inputs */
 input, textarea {
   background-color: var(--card-bg);
@@ -223,11 +231,12 @@ input, textarea {
   border-color: var(--border-color);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder, 
+textarea::placeholder {
   color: var(--text-muted);
 }
 
-/* frontend/src/index.css */
+/* Animations */
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }

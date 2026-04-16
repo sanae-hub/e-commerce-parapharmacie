@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Plus, Edit, Trash2, Save, X, FolderTree, 
+  Plus, Edit, Trash2, Save, X, FolderTree, 
   ChevronDown, ChevronRight, Tag, Layers, AlertCircle,
   // Import de toutes les icônes possibles pour les sous-catégories
   Sparkle, Droplet, Wind, Waves, Smile, CircleDot, Bath, 
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import axios from '../api/axios';
 import adminApi from '../api/adminAxios';
+import AdminBackButton from '../components/AdminBackButton';
 
 // Dictionnaire des icônes disponibles
 const iconComponents = {
@@ -332,15 +333,10 @@ const AdminSubcategories = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <AdminBackButton />
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/admin/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft size={20} className="text-gray-600" />
-              </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Gestion des Sous-catégories</h1>
                 <p className="text-sm text-gray-600">

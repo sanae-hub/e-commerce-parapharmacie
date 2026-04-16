@@ -52,14 +52,6 @@ const HomeContent = () => {
     )
   }
 
-  // Connecté + dernière page mémorisée → redirection directe
-  if (user) {
-    const last = localStorage.getItem('lastVisitedPath')
-    if (last && last !== '/') {
-      return <Navigate to={last} replace />
-    }
-  }
-
   return (
     <>
       <CategoryBar />

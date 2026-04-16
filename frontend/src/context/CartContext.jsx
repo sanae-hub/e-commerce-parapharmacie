@@ -1,6 +1,7 @@
 // frontend/src/context/CartContext.jsx
 import { createContext, useState, useContext, useEffect, useCallback } from 'react'
 import api from '../api/axios'
+import { useAuth } from './AuthContext'
 
 const CartContext = createContext()
 
@@ -14,6 +15,8 @@ export const CartProvider = ({ children }) => {
   const [validating, setValidating] = useState(false)
   const [stockError, setStockError] = useState('')
   const [isSyncing, setIsSyncing] = useState(false)
+
+  const { isAdmin, isAuthenticated } = useAuth()
 
   // Get current user ID for per-user cart storage
   const getCurrentUserId = () => {
@@ -36,7 +39,11 @@ export const CartProvider = ({ children }) => {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart)
-        setCartItems(parsedCart)
+        const cleanedCart = parsedCart.filter(item => !String(item.id).startsWith('promo-'))
+        if (cleanedCart.length !== parsedCart.length) {
+          localStorage.setItem(cartKey, JSON.stringify(cleanedCart))
+        }
+        setCartItems(cleanedCart)
       } catch (error) {
         console.error('Erreur lors du chargement du panier:', error)
       }
@@ -150,64 +157,34 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     setStockError('')
-    // Check if user is admin and prevent ordering
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (['ADMIN', 'PREPARATEUR', 'CAISSIER'].includes(user.role)) {
-          alert('⚠️ Vous êtes administrateur, vous ne pouvez pas commander.');
-          return false;
-        }
-      } catch {}
-    }
 
-    const existingItem = cartItems.find(item => item.id === product.id)
-    const currentQty = existingItem ? existingItem.quantity : 0
-    const availableStock = product.stock ?? 0
-
-    // Vérification stock insuffisant
-    if (availableStock <= 0) {
-      setStockError(`"${product.name}" est en rupture de stock.`)
-      return false
-    }
-    if (currentQty >= availableStock) {
-      setStockError(`Stock insuffisant pour "${product.name}". Il ne reste que ${availableStock} unité(s) disponible(s).`)
-      return false
-    }
-
-    }
-
-    const existingItem = cartItems.find(item => item.id === product.id)
-    const currentQty = existingItem ? existingItem.quantity : 0
-    const availableStock = product.stock ?? 0
-
-    // Vérification stock insuffisant
-    if (availableStock <= 0) {
-      setStockError(`"${product.name}" est en rupture de stock.`)
-      return false
-    }
-    if (currentQty >= availableStock) {
-      setStockError(`Stock insuffisant pour "${product.name}". Il ne reste que ${availableStock} unité(s) disponible(s).`)
-      return false
-    }
-
-    // Check stock availability
-    const availableStock = product.stock || 0;
-    if (availableStock <= 0) {
-      alert('❌ Ce produit est en rupture de stock.');
+    // Vérifier si l'utilisateur connecté est un administrateur
+    if (isAuthenticated && isAdmin) {
+      alert('⚠️ Vous êtes administrateur, vous ne pouvez pas commander.');
       return false;
     }
 
-    // Check if product is already in cart - if yes, do not add more
-    const existingItem = cartItems.find(item => item.id === product.id);
+    const availableStock = product.stock ?? 0;
+    if (availableStock <= 0) {
+      setStockError(`"${product.name}" est en rupture de stock.`)
+      return false
+    }
+
+    const existingItem = cartItems.find(item => item.id === product.id)
+    const currentQty = existingItem ? existingItem.quantity : 0
+
+    if (currentQty >= availableStock) {
+      setStockError(`Stock insuffisant pour "${product.name}". Il ne reste que ${availableStock} unité(s) disponible(s).`)
+      return false
+    }
+
     if (existingItem) {
-      alert('ℹ️ Ce produit est déjà dans votre panier. Utilisez le bouton "+" dans le panier pour augmenter la quantité.');
-      return false;
+      setCartItems(cartItems.map(item =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      ))
+    } else {
+      setCartItems([...cartItems, { ...product, quantity: 1 }])
     }
-    
-    // Add product with quantity 1 only
-    setCartItems([...cartItems, { ...product, quantity: 1 }])
     return true;
   }
 

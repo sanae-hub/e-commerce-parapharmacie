@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import adminApi from '../api/adminAxios';
 import { useAdminWebSocket } from '../context/AdminWebSocketContext';
+import AdminBackButton from '../components/AdminBackButton';
 
 const AdminOrders = () => {
   const navigate = useNavigate();
@@ -25,19 +26,13 @@ const AdminOrders = () => {
   const { socket, isConnected } = useAdminWebSocket();
 
   const statusConfig = {
-    RECEIVED:  { label: 'Reçu',              color: 'bg-yellow-100 text-yellow-700 border-yellow-300', icon: Package },
-    PREPARING: { label: 'En Préparation',    color: 'bg-blue-100 text-blue-700 border-blue-300',     icon: Clock },
-    READY:     { label: 'Prêt',              color: 'bg-green-100 text-green-700 border-green-300',   icon: CheckCircle },
-    COMPLETED: { label: 'Récupéré',          color: 'bg-gray-100 text-gray-700 border-gray-300',     icon: CheckCircle },
-    CANCELLED: { label: 'Annulé',            color: 'bg-red-100 text-red-700 border-red-300',         icon: XCircle },
-    RETURNED:  { label: 'Retour produit',    color: 'bg-purple-100 text-purple-700 border-purple-300', icon: XCircle },
-    REFUNDED:  { label: 'Remboursé',         color: 'bg-orange-100 text-orange-700 border-orange-300', icon: XCircle },
-    RECEIVED: { label: 'Reçu', color: 'bg-yellow-100 text-yellow-700 border-yellow-300', icon: Package },
-    PREPARING: { label: 'En Préparation', color: 'bg-blue-100 text-blue-700 border-blue-300', icon: Clock },
-    READY: { label: 'Prêt', color: 'bg-green-100 text-green-700 border-green-300', icon: CheckCircle },
-    COMPLETED: { label: 'Récupéré', color: 'bg-gray-100 text-gray-700 border-gray-300', icon: CheckCircle },
-    CANCELLED: { label: 'Annulé', color: 'bg-red-100 text-red-700 border-red-300', icon: XCircle },
-    RETURNED: { label: 'Retourné', color: 'bg-purple-100 text-purple-700 border-purple-300', icon: RefreshCw }
+    RECEIVED:  { label: 'Reçu',           color: 'bg-yellow-100 text-yellow-700 border-yellow-300',  icon: Package },
+    PREPARING: { label: 'En Préparation', color: 'bg-blue-100 text-blue-700 border-blue-300',        icon: Clock },
+    READY:     { label: 'Prêt',           color: 'bg-green-100 text-green-700 border-green-300',     icon: CheckCircle },
+    COMPLETED: { label: 'Récupéré',       color: 'bg-gray-100 text-gray-700 border-gray-300',       icon: CheckCircle },
+    CANCELLED: { label: 'Annulé',         color: 'bg-red-100 text-red-700 border-red-300',           icon: XCircle },
+    RETURNED:  { label: 'Retour produit', color: 'bg-purple-100 text-purple-700 border-purple-300', icon: XCircle },
+    REFUNDED:  { label: 'Remboursé',      color: 'bg-orange-100 text-orange-700 border-orange-300', icon: XCircle },
   };
 
   // Check if order is urgent (within 2 hours of pickup time)
@@ -60,10 +55,6 @@ const AdminOrders = () => {
     CANCELLED: [],
     RETURNED:  [],
     REFUNDED:  [],
-    READY: ['COMPLETED', 'CANCELLED'],
-    COMPLETED: ['RETURNED'],
-    CANCELLED: [],
-    RETURNED: []
   };
 
   useEffect(() => {
@@ -273,15 +264,10 @@ const AdminOrders = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <AdminBackButton />
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/admin/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft size={20} className="text-gray-600" />
-              </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Gestion des Commandes</h1>
                 <p className="text-sm text-gray-600">{filteredOrders.length} commande(s)</p>
