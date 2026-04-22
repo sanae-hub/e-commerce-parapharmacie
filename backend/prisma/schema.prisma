@@ -37,6 +37,10 @@ model User {
   sentMessages     Message[]  @relation("MessageSender")
   receivedMessages Message[]  @relation("MessageReceiver")
   searchHistory    SearchHistory[]
+  timeSlotConfigs  TimeSlotConfig[] @relation("UserTimeSlots")
+  employeeSlotReservations EmployeeSlotReservation[] @relation("EmployeeSlotReservations")
+  employeeOrders   Order[] @relation("EmployeeOrders")
+  resolvedConflicts SlotConflict[] @relation("SlotConflictResolver")
 }
 
 model SearchHistory {
@@ -277,11 +281,14 @@ model Order {
 
   deliveryCity     DeliveryCity?     @relation(fields: [deliveryCityId], references: [id], onDelete: SetNull)
   deliveryDistrict DeliveryDistrict? @relation(fields: [deliveryDistrictId], references: [id], onDelete: SetNull)
+  employeeId       String?
+  employee         User?             @relation("EmployeeOrders", fields: [employeeId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
   @@index([status])
   @@index([userId])
   @@index([timeSlotDate])
+  @@index([employeeId])
 }
 
 model OrderItem {
@@ -464,11 +471,18 @@ model TimeSlotConfig {
   endTime         String // Format HH:MM
   capacity        Int      @default(5) // Capacité par défaut pour tous les créneaux du jour
   intervalMinutes Int      @default(60)
+  excludeHours    Json?    @default("[]") // Heures à exclure (ex: [13, 14] pour pause 13-15)
   active          Boolean  @default(true)
+  type            String   @default("STORE") // STORE, EMPLOYEE
+  userId          String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  @@unique([dayOfWeek, startTime, endTime])
+  user User? @relation("UserTimeSlots", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Index sur dayOfWeek et startTime pour recherche rapide
+  @@index([dayOfWeek, startTime])
+  @@index([userId])
 }
 
 // Capacité spécifique par créneau horaire (override du défaut du jour)
@@ -601,4 +615,45 @@ model StockNotification {
   @@index([productId])
   @@index([userId])
   @@index([notified])
+}
+
+
+// Réservations d'employés pour les créneaux
+model EmployeeSlotReservation {
+  id          String   @id @default(uuid())
+  employeeId  String
+  date        DateTime // Date complète
+  startTime   String // Format HH:MM
+  endTime     String // Format HH:MM
+  status      String @default("ACTIVE") // ACTIVE, CANCELLED, ON_LEAVE
+  reason      String? // Raison si congé ou annulation
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employee User @relation("EmployeeSlotReservations", fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, date, startTime, endTime])
+  @@index([employeeId])
+  @@index([date])
+  @@index([status])
+}
+
+// Historique des conflits de créneaux
+model SlotConflict {
+  id          String   @id @default(uuid())
+  date        DateTime // Date du conflit
+  time        String // Format HH:MM
+  conflictType String // OVER_CAPACITY, SCHEDULE_MISMATCH, EMPLOYEE_UNAVAILABLE
+  description String? @db.Text
+  resolved    Boolean @default(false)
+  resolvedAt  DateTime?
+  resolvedBy  String? // ID de l'admin qui a résolu
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  resolvedByUser User? @relation("SlotConflictResolver", fields: [resolvedBy], references: [id], onDelete: SetNull)
+
+  @@index([date])
+  @@index([resolved])
+  @@index([createdAt])
 }

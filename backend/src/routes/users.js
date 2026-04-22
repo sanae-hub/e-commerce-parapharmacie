@@ -176,4 +176,216 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// ==================== GESTION DES CRÉNEAUX EMPLOYÉS ====================
+
+// GET - Récupérer mon horaire (pour un employé)
+router.get('/employee/my-schedule', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true }
+    });
+
+    if (!user || user.role !== 'EMPLOYE') {
+      return res.status(403).json({ message: 'Accès réservé aux employés' });
+    }
+
+    const schedules = await prisma.employeeSchedule.findMany({
+      where: { employeeId: req.userId },
+      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }]
+    });
+
+    res.json(schedules);
+  } catch (error) {
+    console.error('Get employee schedule error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
+// GET - Récupérer mes réservations/congés
+router.get('/employee/my-reservations', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true }
+    });
+
+    if (!user || user.role !== 'EMPLOYE') {
+      return res.status(403).json({ message: 'Accès réservé aux employés' });
+    }
+
+    const { status, startDate, endDate } = req.query;
+    const where = { employeeId: req.userId };
+
+    if (status) where.status = status;
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) where.date.gte = new Date(startDate + 'T00:00:00.000Z');
+      if (endDate) where.date.lte = new Date(endDate + 'T23:59:59.999Z');
+    }
+
+    const reservations = await prisma.employeeSlotReservation.findMany({
+      where,
+      orderBy: { date: 'desc' }
+    });
+
+    res.json(reservations);
+  } catch (error) {
+    console.error('Get employee reservations error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
+// POST - Demander un congé/absence
+router.post('/employee/request-leave', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true }
+    });
+
+    if (!user || user.role !== 'EMPLOYE') {
+      return res.status(403).json({ message: 'Accès réservé aux employés' });
+    }
+
+    const { date, startTime, endTime, reason } = req.body;
+
+    if (!date || !startTime || !endTime) {
+      return res.status(400).json({ message: 'date, startTime et endTime requis' });
+    }
+
+    const reservation = await prisma.employeeSlotReservation.create({
+      data: {
+        employeeId: req.userId,
+        date: new Date(date + 'T00:00:00.000Z'),
+        startTime,
+        endTime,
+        status: 'ACTIVE',
+        reason: reason || 'Demande de congé'
+      }
+    });
+
+    res.status(201).json({ message: 'Demande de congé créée', reservation });
+  } catch (error) {
+    console.error('Request leave error:', error);
+    if (error.code === 'P2002') {
+      return res.status(400).json({ message: 'Une réservation existe déjà pour ce créneau' });
+    }
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
+// PUT - Annuler mon congé/absence
+router.put('/employee/reservations/:id/cancel', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true }
+    });
+
+    if (!user || user.role !== 'EMPLOYE') {
+      return res.status(403).json({ message: 'Accès réservé aux employés' });
+    }
+
+    const { id } = req.params;
+
+    // Vérifier que la réservation appartient à l'employé
+    const reservation = await prisma.employeeSlotReservation.findUnique({
+      where: { id }
+    });
+
+    if (!reservation || reservation.employeeId !== req.userId) {
+      return res.status(403).json({ message: 'Accès refusé' });
+    }
+
+    const updated = await prisma.employeeSlotReservation.update({
+      where: { id },
+      data: { status: 'CANCELLED' }
+    });
+
+    res.json({ message: 'Réservation annulée', reservation: updated });
+  } catch (error) {
+    console.error('Cancel reservation error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
+// GET - Voir les créneaux disponibles avec informations d'employés
+router.get('/employee/available-shifts', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true }
+    });
+
+    if (!user || user.role !== 'EMPLOYE') {
+      return res.status(403).json({ message: 'Accès réservé aux employés' });
+    }
+
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ message: 'Date requise' });
+    }
+
+    const targetDateStart = new Date(date + 'T00:00:00.000Z');
+    const dayOfWeek = targetDateStart.getUTCDay();
+
+    // Récupérer mes créneaux
+    const mySchedules = await prisma.employeeSchedule.findMany({
+      where: { employeeId: req.userId, dayOfWeek, isAvailable: true },
+      orderBy: { startTime: 'asc' }
+    });
+
+    // Récupérer mes réservations pour ce jour
+    const myReservations = await prisma.employeeSlotReservation.findMany({
+      where: {
+        employeeId: req.userId,
+        date: { gte: targetDateStart, lte: new Date(date + 'T23:59:59.999Z') },
+        status: 'ACTIVE'
+      }
+    });
+
+    const toMinutes = (hhmm) => {
+      const [h, m] = hhmm.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const toHHMM = (mins) => `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+
+    const shifts = [];
+
+    for (const schedule of mySchedules) {
+      const startMin = toMinutes(schedule.startTime);
+      const endMin = toMinutes(schedule.endTime);
+
+      // Suppose 60-minute slots
+      for (let cur = startMin; cur < endMin; cur += 60) {
+        const timeStr = toHHMM(cur);
+        const endStr = toHHMM(cur + 60);
+
+        // Check if I have a reservation for this slot
+        const hasReservation = myReservations.some(res => {
+          const resStart = toMinutes(res.startTime);
+          const resEnd = toMinutes(res.endTime);
+          return cur >= resStart && cur < resEnd;
+        });
+
+        shifts.push({
+          scheduleId: schedule.id,
+          time: timeStr,
+          endTime: endStr,
+          maxCapacity: schedule.maxCapacity,
+          reserved: hasReservation,
+          dayOfWeek: schedule.dayOfWeek
+        });
+      }
+    }
+
+    res.json(shifts);
+  } catch (error) {
+    console.error('Get available shifts error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
 export default router;

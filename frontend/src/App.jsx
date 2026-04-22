@@ -7,23 +7,62 @@ import Footer from './components/Footer'
 import { useState, useEffect, useRef } from 'react'
 
 function App() {
-  const { isAdmin, isAuthenticated } = useAuth()
+  const { user, loading, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const hasRedirected = useRef(false)
   const [showClickCollectInfo, setShowClickCollectInfo] = useState(false)
+  const hasCleaned = useRef(false)
 
-  // 🏠 TOUJOURS forcer à l'accueil au démarrage
+  // 🔧 FORCER LA DÉCONNEXION TOTALE UNIQUEMENT SUR L'ACCUEIL
   useEffect(() => {
-    if (!hasRedirected.current && location.pathname !== '/' && !location.pathname.startsWith('/admin') && !['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname)) {
-      hasRedirected.current = true
-      navigate('/', { replace: true })
+    // Ne nettoyer qu'une seule fois et seulement sur la page d'accueil
+    if (!hasCleaned.current && location.pathname === '/') {
+      hasCleaned.current = true
+      
+      // Vérifier s'il y a quelqu'un de connecté
+      const token = localStorage.getItem('token')
+      const userStr = localStorage.getItem('user')
+      
+      if (token || userStr) {
+        console.log('🧹 Nettoyage complet - Déconnexion forcée sur accueil')
+        
+        // Supprimer TOUS les tokens
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminUser')
+        localStorage.removeItem('lastVisitedPath')
+        
+        // Nettoyer les paniers
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('cart_')) {
+            localStorage.removeItem(key)
+          }
+        })
+        
+        // Appeler logout du contexte
+        if (logout) {
+          logout()
+        }
+        
+        // Forcer un rechargement pour être sûr
+        window.location.reload()
+      }
     }
-  }, [])
+  }, [location.pathname, logout])
 
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isAuthRoute = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname)
   const hideFooter = isAdminRoute || isAuthRoute
+
+  // Afficher un loader pendant le chargement
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

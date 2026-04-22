@@ -43,7 +43,8 @@ export function startStockNotifier(io) {
       });
 
       // Email admins (si configuré)
-      const transporter = nodemailer.createTransporter({
+      // 🔧 CORRECTION : createTransporter → createTransport
+      const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
           user: process.env.EMAIL_USER,

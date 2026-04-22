@@ -33,20 +33,18 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/admin/employee" replace />
   }
 
-  // Les EMPLOYE n'ont pas accès aux pages suivantes
+  // ✅ Les EMPLOYE n'ont PAS accès à ces pages (réservées ADMIN)
+  // ⚠️ '/admin/users' a été RETIRÉ - Les employés peuvent accéder à AdminUsers mais uniquement pour gérer les créneaux
   const employeRestrictedPaths = [
-    '/admin/users',
-    '/admin/promotions',
-    '/admin/reports',
-    '/admin/suppliers',
-    '/admin/settings',
-    '/admin/time-slots'
+    '/admin/promotions',   // Gestion des promotions
+    '/admin/reports',      // Rapports
+    '/admin/suppliers',    // Fournisseurs
+    '/admin/settings',     // Paramètres généraux
   ]
 
   if (isEmploye) {
     const isRestricted = employeRestrictedPaths.some(path => location.pathname.startsWith(path))
     if (isRestricted) {
-      // Stocker le message d'accès refusé
       sessionStorage.setItem('accessDeniedMessage', "Vous n'avez pas les permissions nécessaires pour accéder à cette section.")
       return <Navigate to="/admin/employee" replace />
     }

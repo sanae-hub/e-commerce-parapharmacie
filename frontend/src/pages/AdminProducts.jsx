@@ -423,9 +423,7 @@ const AdminProducts = () => {
         brand: formData.brand || null,
         usage: formData.utilisation || null,
         composition: formData.composition || null,
-        benefits: formData.benefits
-          ? formData.benefits.split(',').map(b => b.trim()).filter(Boolean)
-          : [],
+        benefits: formData.benefits ? formData.benefits.split(',').map(b => b.trim()).filter(Boolean) : [],
         active: formData.active,
         expiryDate: formData.expiryDate || null,
         variants: variants.map(v => ({

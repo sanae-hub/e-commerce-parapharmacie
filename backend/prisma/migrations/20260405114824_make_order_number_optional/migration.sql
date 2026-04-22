@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Order" ALTER COLUMN "orderNumber" DROP NOT NULL,
-ALTER COLUMN "total" SET DEFAULT 0;
