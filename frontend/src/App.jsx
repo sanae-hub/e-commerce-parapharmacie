@@ -7,12 +7,15 @@ import Footer from './components/Footer'
 import { useState, useEffect, useRef } from 'react'
 
 function App() {
-  const { user, logout } = useAuth()
+  const { user, loading, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const hasCleaned = useRef(false)
   const [showClickCollectInfo, setShowClickCollectInfo] = useState(false)
+  const hasCleaned = useRef(false)
 
+  // 🔧 FORCER LA DÉCONNEXION TOTALE UNIQUEMENT SUR L'ACCUEIL
+  useEffect(() => {
+    // Ne nettoyer qu'une seule fois et seulement sur la page d'accueil
   // 🔧 FORCER LA DÉCONNEXION TOTALE À L'ACCUEIL
   useEffect(() => {
     // Ne nettoyer qu'une seule fois
@@ -24,6 +27,9 @@ function App() {
       const userStr = localStorage.getItem('user')
       
       if (token || userStr) {
+        console.log('🧹 Nettoyage complet - Déconnexion forcée sur accueil')
+        
+        // Supprimer TOUS les tokens
         console.log('🧹 Nettoyage complet de la session - Déconnexion forcée')
         
         // Supprimer TOUS les tokens et données utilisateur
@@ -54,6 +60,15 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isAuthRoute = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname)
   const hideFooter = isAdminRoute || isAuthRoute
+
+  // Afficher un loader pendant le chargement
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
