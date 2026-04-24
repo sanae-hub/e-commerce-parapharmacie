@@ -1,7 +1,7 @@
 // frontend/src/pages/MyOrders.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar, X } from 'lucide-react'
+import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar, X, ArrowLeft } from 'lucide-react'
 import { useWebSocket } from '../context/WebSocketContext'
 import { useCart } from '../context/CartContext'
 
@@ -26,7 +26,6 @@ const MyOrders = () => {
     { key: 'COMPLETED', label: 'Récupérée', icon: CheckCircle }
   ]
 
-  // Check if order is urgent (within 2 hours of pickup time)
   const isOrderUrgent = (order) => {
     if (!order.timeSlotDate || !order.timeSlotStart) return false;
     const now = new Date();
@@ -42,13 +41,12 @@ const MyOrders = () => {
     fetchOrders()
   }, [])
 
-  // Real-time order status updates
   useEffect(() => {
     notifications.forEach(notification => {
       if (notification.type === 'ORDER_STATUS_CHANGED') {
         setOrders(prevOrders => 
           prevOrders.map(order => 
-            order.id === notification.order.id 
+            order.id === notification.order?.id 
               ? { ...order, status: notification.order.status }
               : order
           )
@@ -56,7 +54,7 @@ const MyOrders = () => {
       } else if (notification.type === 'ORDER_CONFIRMED') {
         setOrders(prevOrders => 
           prevOrders.map(order => 
-            order.id === notification.order.id 
+            order.id === notification.order?.id 
               ? { ...order, status: 'RECEIVED' }
               : order
           )
@@ -64,7 +62,7 @@ const MyOrders = () => {
       } else if (notification.type === 'ORDER_CANCELLED') {
         setOrders(prevOrders => 
           prevOrders.map(order => 
-            order.id === notification.order.id 
+            order.id === notification.order?.id 
               ? { ...order, status: 'CANCELLED' }
               : order
           )
@@ -76,43 +74,32 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token')
-      console.log('🔑 Token:', token ? token.substring(0, 20) + '...' : 'Aucun token')
       
       if (!token) {
-        console.error('❌ Pas de token, redirection vers login')
         navigate('/login')
         return
       }
 
-      // Decode token to get userId
-      let userId = null;
-      try {
-        const tokenParts = token.split('.');
-        const payload = JSON.parse(atob(tokenParts[1]));
-        userId = payload.id;
-      } catch (e) {
-        console.error('Error decoding token:', e);
-      }
-
-      console.log('📡 Requête vers /api/orders/my-orders avec userId:', userId)
-      const response = await fetch(`http://localhost:5000/api/orders/my-orders?userId=${userId}`, {
+      const response = await fetch(`http://localhost:5000/api/orders/my-orders`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       })
-
-      console.log('📥 Réponse statut:', response.status)
+      
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        navigate('/login')
+        return
+      }
       
       if (response.ok) {
         const data = await response.json()
-        console.log('📦 Commandes reçues:', data.orders?.length || 0)
         setOrders(data.orders || [])
-      } else {
-        const errorText = await response.text()
-        console.error('❌ Erreur réponse:', response.status, errorText)
       }
     } catch (error) {
-      console.error('❌ Erreur fetch:', error)
+      console.error('Erreur fetch:', error)
     } finally {
       setLoading(false)
     }
@@ -133,9 +120,13 @@ const MyOrders = () => {
 
       if (response.ok) {
         fetchOrders()
+      } else {
+        const data = await response.json()
+        alert(data.message || 'Erreur lors de l\'annulation')
       }
     } catch (error) {
       console.error('Error canceling order:', error)
+      alert('Erreur lors de l\'annulation')
     }
   }
 
@@ -144,17 +135,14 @@ const MyOrders = () => {
     return index === -1 ? 0 : index
   }
 
-  // Open timeslot change modal
   const openTimeslotModal = (order) => {
     setSelectedOrder(order)
     setShowTimeslotModal(true)
-    // Set minimum date to today
     const today = new Date().toISOString().slice(0, 10)
     setSelectedDate(today)
     fetchAvailableSlots(today)
   }
 
-  // Fetch available slots for a date
   const fetchAvailableSlots = async (date) => {
     try {
       const response = await fetch(`http://localhost:5000/api/time-slots/available?date=${date}`)
@@ -167,7 +155,6 @@ const MyOrders = () => {
     }
   }
 
-  // Handle date change
   const handleDateChange = (e) => {
     const date = e.target.value
     setSelectedDate(date)
@@ -175,7 +162,6 @@ const MyOrders = () => {
     setSelectedSlot(null)
   }
 
-  // Change timeslot
   const changeTimeslot = async () => {
     if (!selectedSlot || !selectedOrder) {
       alert('Veuillez sélectionner un créneau')
@@ -185,16 +171,7 @@ const MyOrders = () => {
     setSavingTimeslot(true)
     try {
       const token = localStorage.getItem('token')
-      
-      // Format date as YYYY-MM-DD
       const formattedDate = new Date(selectedDate).toISOString().slice(0, 10)
-      
-      console.log('Changing timeslot:', {
-        orderId: selectedOrder.id,
-        timeSlotDate: formattedDate,
-        timeSlotStart: selectedSlot.time,
-        timeSlotEnd: selectedSlot.endTime
-      })
       
       const response = await fetch(`http://localhost:5000/api/orders/${selectedOrder.id}/change-timeslot`, {
         method: 'PUT',
@@ -210,10 +187,8 @@ const MyOrders = () => {
       })
 
       const responseData = await response.json()
-      console.log('Response:', response.status, responseData)
 
       if (response.ok) {
-        // Update local order list
         setOrders(prevOrders => 
           prevOrders.map(order => 
             order.id === selectedOrder.id 
@@ -248,12 +223,11 @@ const MyOrders = () => {
         return
       }
 
-      // Transform order items back to cart items
       const cartFormatItems = order.items
-        .filter(item => item.product) // Sécurité : ignorer les items sans produit
+        .filter(item => item.product)
         .map(item => ({
           ...item.product,
-          id: item.productId, // S'assurer que l'ID est bien présent
+          id: item.productId,
           quantity: item.quantity,
           price: item.price
         }))
@@ -267,12 +241,11 @@ const MyOrders = () => {
       setEditingOrder(order)
       navigate('/cart')
     } catch (error) {
-      console.error('Erreur lors de la préparation de la modification:', error)
-      alert('Une erreur est survenue lors de la préparation de la modification.')
+      console.error('Erreur:', error)
+      alert('Une erreur est survenue.')
     }
   }
 
-  // Get minimum date (today)
   const getMinDate = () => {
     return new Date().toISOString().slice(0, 10)
   }
@@ -280,10 +253,19 @@ const MyOrders = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Supprimez le Navbar ici aussi */}
-        {/* <Navbar /> */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="max-w-7xl mx-auto">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-gray-600 hover:text-sky-700 transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span>Retour à l'accueil</span>
+            </button>
+          </div>
+        </div>
         <div className="flex justify-center items-center h-96">
-          <div className="text-sky-700">Chargement...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700"></div>
         </div>
       </div>
     )
@@ -301,13 +283,18 @@ const MyOrders = () => {
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">Aucune commande pour le moment</p>
+            <button
+              onClick={() => navigate('/products')}
+              className="mt-4 px-4 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800"
+            >
+              Découvrir nos produits
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
             {orders.map(order => {
               const currentStepIndex = getStatusIndex(order.status)
               const isExpanded = expandedOrder === order.id
-              // Allow cancellation only for RECEIVED status (before admin starts preparation)
               const canCancel = order.status === 'RECEIVED'
 
               return (
@@ -384,7 +371,7 @@ const MyOrders = () => {
                       </div>
                     )}
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3">
                       <button
                         onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
                         className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
@@ -426,7 +413,7 @@ const MyOrders = () => {
                     <div className="border-t bg-gray-50 p-6">
                       <h4 className="font-semibold text-gray-800 mb-4">Articles commandés</h4>
                       <div className="space-y-3">
-                        {order.items.map(item => (
+                        {order.items && order.items.map(item => (
                           <div key={item.id} className="flex justify-between items-center bg-white p-3 rounded">
                             <div>
                               <p className="font-medium text-gray-800">{item.product?.name || 'Produit'}</p>
@@ -445,92 +432,84 @@ const MyOrders = () => {
         )}
       </div>
 
-      {/* Modal: Modifier le créneau */}
+      {/* Modal Modifier créneau */}
       {showTimeslotModal && selectedOrder && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl max-w-md w-full p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-gray-900">Modifier le créneau de retrait</h3>
-            <button onClick={() => setShowTimeslotModal(false)} className="text-gray-400 hover:text-gray-600">
-              <X size={20} />
-            </button>
-          </div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Modifier le créneau de retrait</h3>
+              <button onClick={() => setShowTimeslotModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
+            </div>
 
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
-              Commande: <span className="font-semibold">{selectedOrder.orderNumber}</span>
-            </p>
-            {selectedOrder.timeSlotDate && (
-              <p className="text-sm text-gray-600 mt-1">
-                Créneau actuel: <span className="font-semibold text-sky-700">
-                  {new Date(selectedOrder.timeSlotDate).toLocaleDateString('fr-FR')} à {selectedOrder.timeSlotStart}
-                </span>
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                Commande: <span className="font-semibold">{selectedOrder.orderNumber}</span>
               </p>
-            )}
-          </div>
+              {selectedOrder.timeSlotDate && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Créneau actuel: <span className="font-semibold text-sky-700">
+                    {new Date(selectedOrder.timeSlotDate).toLocaleDateString('fr-FR')} à {selectedOrder.timeSlotStart}
+                  </span>
+                </p>
+              )}
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Choisir une date
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              min={getMinDate()}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500"
-            />
-          </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Choisir une date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+                min={getMinDate()}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500"
+              />
+            </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Créneaux disponibles
-            </label>
-            {availableSlots.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">
-                Aucun créneau disponible pour cette date
-              </p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                {availableSlots.filter(slot => slot.available).map((slot, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedSlot(slot)}
-                    className={`px-3 py-2 border rounded-lg text-sm transition-all ${
-                      selectedSlot?.time === slot.time
-                        ? 'border-sky-600 bg-sky-50 text-sky-700 font-semibold'
-                        : 'border-gray-300 hover:border-sky-400 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div>{slot.time} - {slot.endTime}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {slot.capacity - slot.reservations} places
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Créneaux disponibles</label>
+              {availableSlots.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">Aucun créneau disponible pour cette date</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  {availableSlots.filter(slot => slot.available).map((slot, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedSlot(slot)}
+                      className={`px-3 py-2 border rounded-lg text-sm transition-all ${
+                        selectedSlot?.time === slot.time
+                          ? 'border-sky-600 bg-sky-50 text-sky-700 font-semibold'
+                          : 'border-gray-300 hover:border-sky-400 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div>{slot.time} - {slot.endTime}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {slot.capacity - slot.reservations} places
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setShowTimeslotModal(false)}
-              className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              Annuler
-            </button>
-            <button
-              type="button"
-              onClick={changeTimeslot}
-              disabled={!selectedSlot || savingTimeslot}
-              className="flex-1 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {savingTimeslot ? 'Enregistrement...' : 'Confirmer'}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowTimeslotModal(false)}
+                className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={changeTimeslot}
+                disabled={!selectedSlot || savingTimeslot}
+                className="flex-1 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50"
+              >
+                {savingTimeslot ? 'Enregistrement...' : 'Confirmer'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   )

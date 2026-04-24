@@ -40,6 +40,7 @@ import AdminReviews from '../pages/AdminReviews'
 import AdminStock from '../pages/AdminStock'
 import AdminSettings from '../pages/AdminSettings'
 import EmployeeWelcome from '../pages/EmployeeWelcome'
+import EmployeeSchedule from '../pages/EmployeeSchedule'
 import { EmployeeDashboardProvider } from '../context/EmployeeDashboardContext';
 
 // Home components
@@ -131,6 +132,8 @@ const AppRoutes = () => {
       <Route path="/admin/purchase-orders" element={<AdminRoute><AdminPurchaseOrders /></AdminRoute>} />
       <Route path="/admin/reviews" element={<AdminRoute><AdminReviews /></AdminRoute>} />
       <Route path="/admin/stock" element={<AdminRoute><AdminStock /></AdminRoute>} />
+      <Route path="/admin/employees/:id/schedule" element={<AdminRoute><EmployeeSchedule /></AdminRoute>} />
+      <Route path="/admin/schedule" element={<AdminRoute><EmployeeSchedule /></AdminRoute>} />
       <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
 
       {/* fallback */}

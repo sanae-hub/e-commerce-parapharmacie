@@ -4,7 +4,7 @@ import {
   Users, Search, Filter, Edit, Eye, UserCheck, UserX, Trash2, Trash,
   ChevronLeft, ChevronRight, MoreVertical, Shield, Clock,
   Activity, BarChart3, Download, X, Crown, ArrowLeft, FileText,
-  UserPlus, Check, AlertCircle, Pencil
+  UserPlus, Check, AlertCircle, Pencil, Plus
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -12,7 +12,7 @@ import adminApi from '../api/adminAxios';
 
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('clients'); // 'clients' ou 'roles'
+  const [activeTab, setActiveTab] = useState('clients');
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -59,6 +59,8 @@ const AdminUsers = () => {
     { value: 'ADMIN', label: 'Administrateur', color: 'bg-red-100 text-red-800', permissions: ['all'] },
     { value: 'EMPLOYE', label: 'Employé', color: 'bg-blue-100 text-blue-800', permissions: ['products_view', 'products_stock', 'orders_view', 'orders_process', 'slots_manage', 'stock_manage', 'categories_associate'] }
   ];
+
+  const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
   useEffect(() => {
     checkAuth();
@@ -137,6 +139,149 @@ const AdminUsers = () => {
       setEmployees(data || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
+    }
+  };
+
+  // ============= GESTION DES CRÉNEAUX HORAIRES =============
+  const fetchSlots = async () => {
+    setLoadingSlots(true);
+    try {
+      const { data } = await adminApi.get('/time-slots/config');
+      setSlots(data || []);
+    } catch (error) {
+      console.error('Error fetching slots:', error);
+      setSlotError('Erreur lors du chargement des créneaux');
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  const fetchBlockedSlots = async () => {
+    try {
+      const { data } = await adminApi.get('/time-slots/blocked');
+      setBlockedSlots(data || []);
+    } catch (error) {
+      console.error('Error fetching blocked slots:', error);
+    }
+  };
+
+  const createSlot = async (e) => {
+    e.preventDefault();
+    setSlotError('');
+    setSlotSuccess('');
+    
+    if (!slotForm.startTime || !slotForm.endTime) {
+      setSlotError('Les heures de début et fin sont requises');
+      return;
+    }
+
+    try {
+      await adminApi.post('/time-slots/config', slotForm);
+      setSlotSuccess('Créneau créé avec succès');
+      setSlotForm({
+        dayOfWeek: 0,
+        startTime: '09:00',
+        endTime: '10:00',
+        capacity: 5,
+        intervalMinutes: 30,
+        active: true
+      });
+      setShowSlotForm(false);
+      fetchSlots();
+    } catch (error) {
+      setSlotError(error.response?.data?.message || 'Erreur création créneau');
+    }
+  };
+
+  const updateSlot = async (e) => {
+    e.preventDefault();
+    setSlotError('');
+    setSlotSuccess('');
+
+    try {
+      await adminApi.put(`/time-slots/config/${editingSlot.id}`, {
+        startTime: slotForm.startTime,
+        endTime: slotForm.endTime,
+        capacity: slotForm.capacity,
+        intervalMinutes: slotForm.intervalMinutes,
+        active: slotForm.active
+      });
+      setSlotSuccess('Créneau modifié avec succès');
+      setEditingSlot(null);
+      setShowSlotForm(false);
+      setSlotForm({
+        dayOfWeek: 0,
+        startTime: '09:00',
+        endTime: '10:00',
+        capacity: 5,
+        intervalMinutes: 30,
+        active: true
+      });
+      fetchSlots();
+    } catch (error) {
+      setSlotError(error.response?.data?.message || 'Erreur modification créneau');
+    }
+  };
+
+  const deleteSlot = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce créneau ?')) return;
+
+    try {
+      await adminApi.delete(`/time-slots/config/${id}`);
+      setSlotSuccess('Créneau supprimé avec succès');
+      fetchSlots();
+    } catch (error) {
+      setSlotError('Erreur suppression créneau');
+    }
+  };
+
+  const openEditSlotModal = (slot) => {
+    setEditingSlot(slot);
+    setSlotForm({
+      dayOfWeek: slot.dayOfWeek,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      capacity: slot.capacity,
+      intervalMinutes: slot.intervalMinutes,
+      active: slot.active
+    });
+    setShowSlotForm(true);
+  };
+
+  const createBlockedSlot = async (e) => {
+    e.preventDefault();
+    setSlotError('');
+
+    if (!blockedSlotForm.date || !blockedSlotForm.reason) {
+      setSlotError('Date et raison sont requises');
+      return;
+    }
+
+    try {
+      await adminApi.post('/time-slots/blocked', blockedSlotForm);
+      setSlotSuccess('Créneau bloqué avec succès');
+      setBlockedSlotForm({
+        date: new Date().toISOString().split('T')[0],
+        startTime: '',
+        endTime: '',
+        reason: ''
+      });
+      setShowBlockedSlotForm(false);
+      fetchBlockedSlots();
+    } catch (error) {
+      setSlotError(error.response?.data?.message || 'Erreur blocage créneau');
+    }
+  };
+
+  const deleteBlockedSlot = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir débloquer ce créneau ?')) return;
+
+    try {
+      await adminApi.delete(`/time-slots/blocked/${id}`);
+      setSlotSuccess('Créneau débloqué avec succès');
+      fetchBlockedSlots();
+    } catch (error) {
+      setSlotError('Erreur déblocage créneau');
     }
   };
 
@@ -432,10 +577,14 @@ const AdminUsers = () => {
         </div>
 
         {/* SECTION CLIENTS */}
-        {activeTab === 'clients' && (
-          <>
-            {/* Filtres et recherche */}
-            <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+        {activeTab === 'clients' && (() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role !== 'ADMIN') return null;
+          
+          return (
+            <>
+              {/* Filtres et recherche */}
+              <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Recherche par nom et email */}
                 <div className="relative">
@@ -693,11 +842,16 @@ const AdminUsers = () => {
               </div>
             )}
           </>
-        )}
+          );
+        })()}
 
         {/* SECTION RÔLES */}
-        {activeTab === 'roles' && (
-          <div className="space-y-6">
+        {activeTab === 'roles' && (() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role !== 'ADMIN') return null;
+          
+          return (
+            <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -749,6 +903,13 @@ const AdminUsers = () => {
                               <Pencil size={16} />
                             </button>
                             <button
+                              onClick={() => navigate(`/admin/employees/${emp.id}/schedule`)}
+                              className="p-2 text-sky-600 hover:bg-sky-50 rounded-lg mr-1"
+                              title="Emploi du temps"
+                            >
+                              <Clock size={16} />
+                            </button>
+                            <button
                               onClick={() => deleteEmployee(emp.id)}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                               title="Désactiver"
@@ -763,6 +924,175 @@ const AdminUsers = () => {
                 </div>
               )}
             </div>
+          </div>
+          );
+        })()}
+
+        {/* SECTION CRÉNEAUX */}
+        {activeTab === 'slots' && (
+          <div className="space-y-6">
+            {/* Messages */}
+            {slotError && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+                <AlertCircle size={18} />
+                {slotError}
+              </div>
+            )}
+            {slotSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
+                <Check size={18} />
+                {slotSuccess}
+              </div>
+            )}
+
+            {/* Créneaux par jour */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Configuration des créneaux horaires</h3>
+                  <p className="text-sm text-gray-500">Gérez les créneaux disponibles pour chaque jour de la semaine</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingSlot(null);
+                    setSlotForm({
+                      dayOfWeek: 0,
+                      startTime: '09:00',
+                      endTime: '10:00',
+                      capacity: 5,
+                      intervalMinutes: 30,
+                      active: true
+                    });
+                    setShowSlotForm(true);
+                    setSlotError('');
+                    setSlotSuccess('');
+                  }}
+                  className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg inline-flex items-center gap-2"
+                >
+                  <Plus size={18} />
+                  Ajouter
+                </button>
+              </div>
+
+              {loadingSlots ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {daysOfWeek.map((day, dayIndex) => {
+                    const daySlots = slots.filter(s => s.dayOfWeek === dayIndex);
+                    return (
+                      <div key={dayIndex} className="border rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-900 mb-3">{day}</h4>
+                        {daySlots.length === 0 ? (
+                          <p className="text-sm text-gray-500 text-center py-4">Aucun créneau</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {daySlots.map(slot => (
+                              <div key={slot.id} className={`p-3 rounded-lg text-sm ${slot.active ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}>
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <div className="font-medium text-gray-900">
+                                      {slot.startTime} - {slot.endTime}
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      Capacité: {slot.capacity} | Intervalle: {slot.intervalMinutes}min
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <button
+                                      onClick={() => openEditSlotModal(slot)}
+                                      className="p-1.5 text-blue-600 hover:bg-blue-100 rounded"
+                                      title="Modifier"
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => deleteSlot(slot.id)}
+                                      className="p-1.5 text-red-600 hover:bg-red-100 rounded"
+                                      title="Supprimer"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </div>
+                                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${slot.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>
+                                  {slot.active ? 'Actif' : 'Inactif'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Créneaux bloqués - Admin uniquement */}
+            {(() => {
+              const user = JSON.parse(localStorage.getItem('user') || '{}');
+              return user.role === 'ADMIN' ? (
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Créneaux bloqués</h3>
+                      <p className="text-sm text-gray-500">Bloquez des créneaux pour les jours de fermeture ou événements spéciaux</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowBlockedSlotForm(true);
+                        setSlotError('');
+                        setSlotSuccess('');
+                      }}
+                      className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg inline-flex items-center gap-2"
+                    >
+                      <Plus size={18} />
+                      Bloquer
+                    </button>
+                  </div>
+
+                  {blockedSlots.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-8">Aucun créneau bloqué</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left font-semibold text-gray-700">Date</th>
+                            <th className="px-4 py-2 text-left font-semibold text-gray-700">Horaires</th>
+                            <th className="px-4 py-2 text-left font-semibold text-gray-700">Raison</th>
+                            <th className="px-4 py-2 text-right font-semibold text-gray-700">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {blockedSlots.map(slot => (
+                            <tr key={slot.id} className="border-t">
+                              <td className="px-4 py-3">{new Date(slot.date).toLocaleDateString('fr-FR')}</td>
+                              <td className="px-4 py-3">
+                                {slot.startTime ? `${slot.startTime} - ${slot.endTime || 'fin'}` : 'Journée entière'}
+                              </td>
+                              <td className="px-4 py-3">{slot.reason}</td>
+                              <td className="px-4 py-3 text-right">
+                                <button
+                                  onClick={() => deleteBlockedSlot(slot.id)}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                  title="Débloquer"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ) : null;
+            })()}
           </div>
         )}
       </div>
