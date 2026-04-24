@@ -1,4 +1,4 @@
-// frontend/src/pages/AdminSubcategories.jsx
+// frontend/src/pages/AdminCategories.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,7 +9,7 @@ import {
   Baby, Milk, Heart, Tablets, Activity, Zap, Moon, Bug, 
   Umbrella, Footprints, Armchair, Hand, Bone, Gauge,
   Package, ShoppingBag, Star, Truck, Shield, Clock, Calendar,
-  Users, Settings, Bell, Search, Home, Menu, XCircle, CheckCircle
+  Users, Settings, Bell, Search, Home, Menu, CircleX, CheckCircle
 } from 'lucide-react';
 import axios from '../api/axios';
 import adminApi from '../api/adminAxios';
@@ -52,7 +52,7 @@ const iconComponents = {
   Search: Search,
   Home: Home,
   Menu: Menu,
-  XCircle: XCircle,
+  CircleX: CircleX,
   CheckCircle: CheckCircle,
   // Icône par défaut
   default: Layers
@@ -322,6 +322,14 @@ const AdminCategories = () => {
     });
   };
 
+  const resetCategoryForm = () => {
+    setCategoryForm({
+      name: '',
+      icon: '',
+      order: 0
+    });
+  };
+
   const openEditCategoryModal = (category) => {
     setEditingCategory(category);
     setCategoryForm({
@@ -446,23 +454,23 @@ const AdminCategories = () => {
           </div>
         )}
 
-      {/* Liste des sous-catégories - Groupées par catégorie parente */}
-      {subcategories.length === 0 ? (
+      {/* Liste des catégories et sous-catégories */}
+      {categories.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <FolderTree size={48} className="mx-auto text-gray-300 mb-4" />
-          <p className="text-gray-500 text-lg mb-2">Aucune sous-catégorie</p>
-          <p className="text-gray-400 text-sm mb-4">Commencez par créer une sous-catégorie</p>
+          <p className="text-gray-500 text-lg mb-2">Aucune catégorie</p>
+          <p className="text-gray-400 text-sm mb-4">Commencez par créer une catégorie</p>
           <button
-            onClick={() => setShowSubcategoryModal(true)}
+            onClick={() => setShowCategoryModal(true)}
             className="inline-flex items-center gap-2 px-6 py-3 bg-sky-700 hover:bg-sky-800 text-white rounded-lg font-medium transition-colors"
           >
             <Plus size={18} />
-            Créer une sous-catégorie
+            Créer une catégorie
           </button>
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Grouper les sous-catégories par catégorie parente et lister les catégories même vides */}
+          {/* Grouper les sous-catégories par catégorie parente */}
           {categories.map((category) => {
             const categorySubcategories = subcategories.filter(sc => sc.categoryId === category.id);
             return (

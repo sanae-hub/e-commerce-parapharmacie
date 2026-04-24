@@ -273,18 +273,8 @@ const MyOrders = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-50">
-      {/* Bouton retour */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-7xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-600 hover:text-sky-700 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span>Retour à l'accueil</span>
-          </button>
-        </div>
-      </div>
+
+      {/* <Navbar /> */}
       
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Mes Commandes</h1>
@@ -407,15 +397,15 @@ const MyOrders = () => {
                           Modifier créneau
                         </button>
                       )}
-                      {['RECEIVED', 'PREPARING', 'READY'].includes(order.status) && (
-                        <button
-                          onClick={() => handleEditOrderProducts(order)}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100"
-                        >
-                          <Package className="w-4 h-4" />
-                          Modifier articles
-                        </button>
-                      )}
+                      {order.status === 'RECEIVED' && (
+                         <button
+                           onClick={() => handleEditOrderProducts(order)}
+                           className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100"
+                         >
+                           <Package className="w-4 h-4" />
+                           Modifier articles
+                         </button>
+                       )}
                     </div>
                   </div>
 

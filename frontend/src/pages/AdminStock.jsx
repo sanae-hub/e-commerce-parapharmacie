@@ -343,19 +343,19 @@ const AdminStock = () => {
                 <Package size={18} className="text-green-500" />
                 <span className="text-xs text-gray-500">Ventes (total)</span>
               </div>
-              <p className="text-2xl font-bold text-green-600">
-                {movements.filter(m => m.type === 'SALE').reduce((s, m) => s + Math.abs(m.quantity), 0)}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-red-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle size={18} className="text-red-500" />
-                <span className="text-xs text-gray-500">Retours (total)</span>
-              </div>
-              <p className="text-2xl font-bold text-red-600">
-                {movements.filter(m => m.type === 'RETURN').reduce((s, m) => s + m.quantity, 0)}
-              </p>
-            </div>
+               <p className="text-2xl font-bold text-green-600">
+                 {totals.salesTotal || 0}
+               </p>
+             </div>
+             <div className="bg-white rounded-xl p-4 border border-red-100 shadow-sm">
+               <div className="flex items-center gap-2 mb-1">
+                 <AlertTriangle size={18} className="text-red-500" />
+                 <span className="text-xs text-gray-500">Retours (total)</span>
+               </div>
+               <p className="text-2xl font-bold text-red-600">
+                 {totals.returnsTotal || 0}
+               </p>
+             </div>
 
           </div>
         )}
@@ -919,8 +919,100 @@ const AdminStock = () => {
                 >
                   Confirmer
                 </button>
-              </div>
-            </form>
+               </div>
+             </form>
+           </div>
+         </div>
+       )}
+       {/* Variants Modal */}
+      {selectedProductForVariants && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-bold text-gray-900">
+                Variantes – {selectedProductForVariants.name}
+              </h3>
+              <button 
+                onClick={() => setSelectedProductForVariants(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4">
+              {variantsLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="w-8 h-8 border-4 border-sky-700 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <>
+                  {/* Product info */}
+                  <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                      {selectedProductForVariants.image ? (
+                        <img src={selectedProductForVariants.image} alt={selectedProductForVariants.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Package size={20} className="text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{selectedProductForVariants.name}</p>
+                      <p className="text-sm text-gray-500">Stock total: {selectedProductForVariants.stock || 0}</p>
+                    </div>
+                  </div>
+
+                  {/* Variants list */}
+                  {selectedProductForVariants.productVariants && selectedProductForVariants.productVariants.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedProductForVariants.productVariants.map(variant => (
+                        <div key={variant.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+                              {variant.image ? (
+                                <img src={variant.image} alt={variant.value} className="w-full h-full object-cover" onError={e => { e.target.src = '/images/placeholder.svg' }} />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                                  {variant.value?.charAt(0)?.toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{variant.value}</p>
+                              {variant.barcode && (
+                                <p className="text-xs text-gray-500 font-mono">{variant.barcode}</p>
+                              )}
+                              {variant.expiryDate && (
+                                <p className="text-xs text-gray-500">
+                                  Exp: {new Date(variant.expiryDate).toLocaleDateString('fr-FR')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className={`inline-flex px-2 py-1 text-sm font-bold rounded-full ${
+                              variant.stock > 10 ? 'bg-green-100 text-green-700'
+                              : variant.stock > 0 ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                            }`}>
+                              {variant.stock || 0}
+                            </span>
+                            {variant.price && (
+                              <p className="text-xs text-gray-500 mt-1">{variant.price} DH</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-400">
+                      <Layers size={40} className="mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">Aucune variante trouvée pour ce produit</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
