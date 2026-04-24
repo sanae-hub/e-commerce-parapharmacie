@@ -8,6 +8,7 @@ import {
   TrendingUp, AlertTriangle, Clock, FileText
 } from 'lucide-react';
 import adminApi from '../api/adminAxios';
+import axios from '../api/axios';
 
 const AdminSuppliers = () => {
   const navigate = useNavigate();

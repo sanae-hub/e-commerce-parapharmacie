@@ -94,25 +94,18 @@ const AdminReports = () => {
         console.error('Sales summary error:', err);
       }
       
-      if (activeReport === 'products' || activeReport === 'all') {
-        const { data } = await adminApi.get('/reports/products', { params });
-        setProductsData(data);
-      }
+       // Toujours charger toutes les données pour garder la synchronisation
+       const { data } = await adminApi.get('/reports/products', { params });
+       setProductsData(data);
 
-      if (activeReport === 'top' || activeReport === 'all') {
-        const { data } = await adminApi.get('/reports/top-products', { params: { ...params, limit: 10 } });
-        setTopProductsData(data);
-      }
+       const { data: topData } = await adminApi.get('/reports/top-products', { params: { ...params, limit: 10 } });
+       setTopProductsData(topData);
 
-      if (activeReport === 'bottom' || activeReport === 'all') {
-        const { data } = await adminApi.get('/reports/bottom-products', { params: { ...params, limit: 10 } });
-        setBottomProductsData(data);
-      }
+       const { data: bottomData } = await adminApi.get('/reports/bottom-products', { params: { ...params, limit: 10 } });
+       setBottomProductsData(bottomData);
 
-      if (activeReport === 'clickcollect' || activeReport === 'all') {
-        const { data } = await adminApi.get('/reports/click-collect', { params });
-        setClickCollectData(data);
-      }
+       const { data: ccData } = await adminApi.get('/reports/click-collect', { params });
+       setClickCollectData(ccData);
 
     } catch (error) {
       console.error('Error fetching reports:', error);

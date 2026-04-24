@@ -86,42 +86,28 @@ router.get('/suppliers', verifyAdmin, async (req, res) => {
     const where = {};
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { contactName: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } }
+        { name: { contains: search } },
+        { contactName: { contains: search } },
+        { email: { contains: search } }
       ];
     }
     if (active !== undefined) {
       where.active = active === 'true';
     }
 
-    // Récupérer les fournisseurs avec le comptage des produits
     const [suppliers, total] = await Promise.all([
       prisma.supplier.findMany({
         where,
-        include: {
-          products: {
-            select: { productId: true }  // Pour compter les produits
-          }
-        },
         orderBy: { createdAt: 'desc' },
         skip,
-        take
+        take,
+        include: { _count: { select: { products: true } } }
       }),
       prisma.supplier.count({ where })
     ]);
 
-    // Ajouter le comptage des produits manuellement
-    const suppliersWithCount = suppliers.map(supplier => ({
-      ...supplier,
-      _count: {
-        products: supplier.products.length
-      },
-      products: undefined // Retirer la liste des produits pour la réponse
-    }));
-
     res.json({
-      suppliers: suppliersWithCount,
+      suppliers,
       pagination: {
         page: parseInt(page),
         limit: take,
@@ -203,7 +189,8 @@ router.get('/suppliers/:id', verifyAdmin, async (req, res) => {
     const { id } = req.params;
 
     const supplier = await prisma.supplier.findUnique({
-      where: { id }
+      where: { id },
+      include: { _count: { select: { products: true } } }
     });
 
     if (!supplier) {
@@ -235,7 +222,7 @@ router.post('/suppliers', verifyAdmin, async (req, res) => {
         address: address || null,
         website: website || null,
         description: description || null,
-        deliveryDays: deliveryDays || 3,
+        deliveryDays: deliveryDays ? parseInt(deliveryDays) : 3,
         paymentTerms: paymentTerms || null,
         autoDiscount: autoDiscount ? parseFloat(autoDiscount) : null,
         active: active !== undefined ? active : true

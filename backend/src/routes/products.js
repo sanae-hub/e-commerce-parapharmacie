@@ -421,12 +421,7 @@ router.get('/', async (req, res) => {
             productImages: { orderBy: { order: 'asc' }, take: 1 },
             subcategory: true,
             subcategoryItem: true,
-            productVariants: {
-              include: {
-                variantType: true,
-                variantValue: true
-              }
-            }
+            productVariants: true
           },
           orderBy: { createdAt: 'desc' },
           skip,
@@ -526,12 +521,7 @@ router.get('/:id', async (req, res) => {
         productImages: {
           orderBy: { order: 'asc' }
         },
-        productVariants: {
-          include: {
-            variantType: true,
-            variantValue: true
-          }
-        }
+            productVariants: true
       }
     })
 
@@ -616,12 +606,7 @@ router.post('/', async (req, res) => {
       include: {
         category: true,
         brandModel: true,
-        productVariants: {
-          include: {
-            variantType: true,
-            variantValue: true
-          }
-        }
+            productVariants: true
       }
     })
 
@@ -732,12 +717,7 @@ router.put('/:id', async (req, res) => {
       include: {
         category: true,
         brandModel: true,
-        productVariants: {
-          include: {
-            variantType: true,
-            variantValue: true
-          }
-        }
+            productVariants: true
       }
     })
     
@@ -780,12 +760,7 @@ router.put('/:id', async (req, res) => {
       include: {
         category: true,
         brandModel: true,
-        productVariants: {
-          include: {
-            variantType: true,
-            variantValue: true
-          }
-        }
+            productVariants: true
       }
     })
     
@@ -1492,61 +1467,76 @@ router.post('/import', upload.single('file'), async (req, res) => {
                   variantsData = [...variantsData, ...jsonVariants]
                 }
               } catch (e) {
-                // Fallback: pipe-separated format "type:value:stock:price:image:barcode:expiryDate|type:value:stock:price:image:barcode:expiryDate"
-                // Note: URL contains ":" so we need special handling
+                // Fallback: pipe-separated format "type:value:stock:price:image:barcode:expiryDate"
+                // Problème: URL contains ":" so we parse from right to left
                 const pipeParts = variantsStr.split('|').filter(p => p.trim())
                 console.log('=== VARIANT DEBUG ===')
                 console.log('variantsStr:', variantsStr)
                 console.log('pipeParts:', pipeParts)
                 pipeParts.forEach((part, idx) => {
-                  // Find the first ":" that separates type from value, then handle remaining
-                  const firstColonIdx = part.indexOf(':')
-                  const secondColonIdx = part.indexOf(':', firstColonIdx + 1)
+                  // First, extract type and value (first two fields separated by ":")
+                  const firstColon = part.indexOf(':')
+                  if (firstColon === -1) return
                   
-                  if (firstColonIdx === -1) return
+                  const type = part.substring(0, firstColon).trim()
+                  let remaining = part.substring(firstColon + 1)
                   
-                  let type = part.substring(0, firstColonIdx).trim()
-                  let remaining = part.substring(firstColonIdx + 1)
-                  
-                  if (secondColonIdx === -1) {
-                    // Only one colon - just type:value
-                    variantsData.push({
-                      type: type || 'variante',
-                      value: remaining.trim() || ''
-                    })
-                  } else {
-                    // Parse value (may contain spaces, so we look for second colon)
-                    let value = remaining.substring(0, remaining.indexOf(':')).trim()
-                    let rest = remaining.substring(remaining.indexOf(':') + 1)
-                    
-                    // Now rest = "stock:price:image:barcode:expiryDate" or similar
-                    // Split rest by ':' 
-                    const restFields = rest.split(':').map(f => f.trim())
-                    
-                    let stock, price, image, barcode, expiryDate
-                    
-                    if (restFields.length >= 1) stock = restFields[0] ? parseInt(restFields[0]) : undefined
-                    if (restFields.length >= 2) price = restFields[1] ? parseFloat(restFields[1]) : undefined
-                    if (restFields.length >= 3) {
-                      // Image may contain ":" (for protocol), so join remaining parts
-                      image = restFields.slice(2).join(':')
-                    }
-                    if (restFields.length >= 4) barcode = restFields[3] ? restFields[3].replace(/\.(jpg|png|jpeg|gif|webp)$/i, '').replace(/^(https?:)?\/\//i, '').split('/')[0] : undefined
-                    if (restFields.length >= 5) expiryDate = restFields[4] || undefined
-                    
-                    console.log(`Part ${idx}: type=${type}, value=${value}, stock=${stock}, price=${price}, image=${image}, barcode=${barcode}, expiryDate=${expiryDate}`)
-                    
-                    variantsData.push({
-                      type: type || 'variante',
-                      value: value || '',
-                      stock: stock,
-                      priceHT: price,
-                      image: image || undefined,
-                      barcode: barcode || undefined,
-                      expiryDate: expiryDate || undefined
-                    })
-                    console.log('Pushed variant:', variantsData[variantsData.length - 1])
+                  // Extract value (may contain ":" but we assume it doesn't, or we find second colon)
+                  const secondColon = remaining.indexOf(':')
+                  if (secondColon === -1) {
+                    // Only type:value
+                    variantsData.push({ type: type || 'variante', value: remaining.trim() || '' })
+                    return
                   }
+                  
+                  const value = remaining.substring(0, secondColon).trim()
+                  remaining = remaining.substring(secondColon + 1)
+                  
+                  // Now remaining = "stock:price:image:barcode:expiryDate"
+                  // We'll split by ":" but then rebuild correctly
+                  const fields = remaining.split(':').map(f => f.trim())
+                  
+                  // We know the last two fields are barcode and expiryDate (if they exist)
+                  // and the first two fields are stock and price
+                  let stock, price, image, barcode, expiryDate
+                  
+                  if (fields.length >= 1) stock = parseInt(fields[0]) || 0
+                  if (fields.length >= 2) price = parseFloat(fields[1]) || undefined
+                  
+                  // Image is everything from index 2 to index (length-2), joined by ":"
+                  // because last two fields are barcode and expiryDate
+                  if (fields.length >= 3) {
+                    // Check if we have barcode and expiryDate (at least 5 fields total: stock, price, image..., barcode, expiryDate)
+                    if (fields.length >= 5) {
+                      // Last two are barcode and expiryDate
+                      barcode = fields[fields.length - 2] || undefined
+                      expiryDate = fields[fields.length - 1] || undefined
+                      // Image is everything from index 2 to index before barcode
+                      image = fields.slice(2, fields.length - 2).join(':') || undefined
+                    } else {
+                      // Only 3 or 4 fields: stock, price, image(, maybe barcode)
+                      // Assume if 4 fields: stock, price, image, barcode
+                      if (fields.length === 4) {
+                        barcode = fields[3] || undefined
+                        image = fields[2] || undefined
+                      } else {
+                        // 3 fields: stock, price, image
+                        image = fields[2] || undefined
+                      }
+                    }
+                  }
+                  
+                  console.log(`Part ${idx}: type=${type}, value=${value}, stock=${stock}, price=${price}, image=${image}, barcode=${barcode}, expiryDate=${expiryDate}`)
+                  
+                  variantsData.push({
+                    type: type || 'variante',
+                    value: value || '',
+                    stock: stock,
+                    priceHT: price,
+                    image: image || undefined,
+                    barcode: barcode || undefined,
+                    expiryDate: expiryDate || undefined
+                  })
                 })
               }
             }

@@ -209,16 +209,7 @@ const AdminSettings = () => {
               <RefreshCw size={16} />
               Actualiser
             </button>
-              <button
-                onClick={() => {
-                  localStorage.removeItem('lastVisitedPath')
-                  navigate('/admin/dashboard')
-                }}
-                className="px-3 py-2 text-sm bg-gray-900 hover:bg-black text-white rounded-lg"
-              >
-                Retour dashboard
-              </button>
-            </div>
+             </div>
 
             <div className="mt-4 flex gap-2 flex-wrap">
               <TabButton active={tab === 'general'} icon={Percent} onClick={() => setTab('general')}>
@@ -424,68 +415,11 @@ const AdminSettings = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-              <h2 className="font-bold text-gray-900 mb-1">Capacité livraison à domicile / jour</h2>
-              <p className="text-sm text-gray-500 mb-4">Nombre max de livraisons par jour + fenêtre affichée côté client.</p>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {DAYS.map((label, dow) => {
-                  const cfg = deliveryConfigMap.get(dow) || { dayOfWeek: dow, capacity: 7, active: false, startTime: '10:00', endTime: '18:00' }
-                  return (
-                    <div key={dow} className="border border-gray-200 rounded-xl p-4">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <p className="font-semibold text-gray-900">{label}</p>
-                        <label className="text-sm flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={!!cfg.active}
-                            onChange={(e) => upsertDeliveryDay(dow, { ...cfg, active: e.target.checked }).catch(() => alert('Erreur'))}
-                          />
-                          Actif
-                        </label>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">Début</label>
-                          <input
-                            value={cfg.startTime || '10:00'}
-                            onChange={(e) => upsertDeliveryDay(dow, { ...cfg, startTime: e.target.value }).catch(() => alert('Erreur'))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">Fin</label>
-                          <input
-                            value={cfg.endTime || '18:00'}
-                            onChange={(e) => upsertDeliveryDay(dow, { ...cfg, endTime: e.target.value }).catch(() => alert('Erreur'))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">Capacité</label>
-                          <input
-                            type="number"
-                            min={0}
-                            value={cfg.capacity ?? 7}
-                            onChange={(e) => upsertDeliveryDay(dow, { ...cfg, capacity: Number(e.target.value) }).catch(() => alert('Erreur'))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-2 text-xs text-gray-400 flex items-center gap-1.5">
-                        <Save size={14} />
-                        Sauvegarde automatique
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="text-sm text-gray-500">
-              Gestion des zones de livraison intégrée directement ici.
-            </div>
+             <div className="text-sm text-gray-500">
+               Gestion des zones de livraison intégrée directement ici.
+               <br />
+               Les créneaux horaires sont gérés dans le module <a href="/admin/time-slots" className="text-sky-700 hover:underline">Click & Collect</a>.
+             </div>
           </div>
         )}
       </div>

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar, X } from 'lucide-react'
 import { useWebSocket } from '../context/WebSocketContext'
-import AdminBackButton from '../components/AdminBackButton'
 import { useCart } from '../context/CartContext'
 
 const MyOrders = () => {
@@ -292,9 +291,7 @@ const MyOrders = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-50">
-      <AdminBackButton />
 
-      {/* Supprimez cette ligne */}
       {/* <Navbar /> */}
       
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -413,15 +410,15 @@ const MyOrders = () => {
                           Modifier créneau
                         </button>
                       )}
-                      {['RECEIVED', 'PREPARING', 'READY'].includes(order.status) && (
-                        <button
-                          onClick={() => handleEditOrderProducts(order)}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100"
-                        >
-                          <Package className="w-4 h-4" />
-                          Modifier articles
-                        </button>
-                      )}
+                      {order.status === 'RECEIVED' && (
+                         <button
+                           onClick={() => handleEditOrderProducts(order)}
+                           className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100"
+                         >
+                           <Package className="w-4 h-4" />
+                           Modifier articles
+                         </button>
+                       )}
                     </div>
                   </div>
 

@@ -125,8 +125,14 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('/products?limit=200&t=' + Date.now())
-      setProducts(response.data.products || response.data || [])
+      const response = await axios.get('/products?limit=500&t=' + Date.now())
+      const products = response.data.products || response.data || []
+      // Ensure productVariants is always an array
+      const normalized = products.map(p => ({
+        ...p,
+        productVariants: p.productVariants || []
+      }))
+      setProducts(normalized)
     } catch (error) {
       console.error('Erreur chargement produits:', error)
     } finally {
@@ -798,8 +804,8 @@ const AdminProducts = () => {
                   ) : (
                     <>
                       {['Image', 'Nom', 'Prix', 'Stock', 'Catégorie', 'Code-barres', 'Expiration', 'Actions'].map(h => (
-                        <th key={h} className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">{h}</th>
-                      ))}
+                         <th key={h} className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">{h}</th>
+                       ))}
                     </>
                   )}
                 </tr>
@@ -880,74 +886,88 @@ const AdminProducts = () => {
                     {product.productVariants && product.productVariants.length > 0 && (
                       product.productVariants.map(variant => (
                         <tr key={variant.id} className="hover:bg-blue-50 bg-gray-50 border-l-4 border-l-blue-300">
-                          {showAllColumns ? (
-                            <>
-                              <td className="px-2 py-2 pl-8">
-                                {variant.image ? (
-                                  <img src={variant.image} alt={variant.value} className="w-6 h-6 object-cover rounded" onError={e => { e.target.src = '/images/placeholder.svg' }} />
-                                ) : (
-                                  <div className="w-6 h-6 flex items-center justify-center text-xs text-gray-400"></div>
-                                )}
-                              </td>
-                              <td className="px-2 py-2 text-xs text-gray-400 font-mono max-w-[80px] truncate">{variant.id.slice(0, 8)}</td>
-                              <td className="px-2 py-2 text-xs font-medium text-blue-900 max-w-[150px] truncate">
-                                {variant.value}
-                              </td>
-                              <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{product.category?.name || '—'}</td>
-                              <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{product.subcategory?.title || '—'}</td>
-                              <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{product.subcategoryItem?.name || '—'}</td>
-                              <td className="px-2 py-2 text-xs text-gray-500 max-w-[80px] truncate">{product.brand || '—'}</td>
-                              <td className="px-2 py-2 text-xs font-medium">
-                                {variant.price ? `${variant.price} DH` : 'Hérité'}
-                              </td>
-                              <td className="px-2 py-2">
-                                <span className={`px-1.5 py-0.5 text-xs font-semibold rounded-full ${
-                                  variant.stock > 5 ? 'bg-green-100 text-green-800'
-                                  : variant.stock > 0 ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                                }`}>{variant.stock}</span>
-                              </td>
-                              <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{variant.barcode || '—'}</td>
-                              <td className="px-2 py-2 text-xs text-gray-500">
-                                {variant.expiryDate ? new Date(variant.expiryDate).toLocaleDateString('fr-FR') : '—'}
-                              </td>
-                              <td className="px-2 py-2">
-                                <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1"><Edit size={14} /></button>
-                                <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 size={14} /></button>
-                              </td>
-                            </>
-                          ) : (
-                            <>
-                              <td className="px-3 py-2 pl-8">
-                                {variant.image ? (
-                                  <img src={variant.image} alt={variant.value} className="w-8 h-8 object-cover rounded" onError={e => { e.target.src = '/images/placeholder.svg' }} />
-                                ) : (
-                                  <div className="text-xl"></div>
-                                )}
-                              </td>
-                              <td className="px-3 py-2 text-sm font-medium text-blue-900">
-                                {variant.value}
-                              </td>
-                              <td className="px-3 py-2 text-sm text-gray-600">
-                                {variant.price ? `${variant.price} DH` : 'Hérité'}
-                              </td>
-                              <td className="px-3 py-2">
-                                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                                  variant.stock > 5 ? 'bg-green-100 text-green-800'
-                                  : variant.stock > 0 ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                                }`}>{variant.stock}</span>
-                              </td>
-                              <td className="px-3 py-2 text-sm text-gray-500">{product.category?.name || '—'}</td>
-                              <td className="px-3 py-2 text-sm text-gray-500">{variant.barcode || '—'}</td>
-                              <td className="px-3 py-2 text-sm text-gray-500">
-                                {variant.expiryDate ? new Date(variant.expiryDate).toLocaleDateString('fr-FR') : '—'}
-                              </td>
-                              <td className="px-3 py-2">
-                                <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1"><Edit size={16} /></button>
-                                <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 size={16} /></button>
-                              </td>
-                            </>
+                        {showAllColumns ? (
+                             <>
+                               <td className="px-2 py-2 pl-8">
+                                 {variant.image && variant.image.startsWith('http') ? (
+                                   <img src={variant.image} alt={variant.value} className="w-6 h-6 object-cover rounded" onError={e => { e.target.src = '/images/placeholder.svg' }} />
+                                 ) : (
+                                   <div className="w-6 h-6 flex items-center justify-center text-xs text-gray-400"><X size={12} /></div>
+                                 )}
+                               </td>
+                               <td className="px-2 py-2 text-xs text-gray-400 font-mono max-w-[80px] truncate">{variant.id.slice(0, 8)}</td>
+                               <td className="px-2 py-2 text-xs font-medium text-blue-900 max-w-[150px] truncate">
+                                 {variant.value}
+                               </td>
+                               <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{product.category?.name || '—'}</td>
+                               <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{product.subcategory?.title || '—'}</td>
+                               <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{product.subcategoryItem?.name || '—'}</td>
+                               <td className="px-2 py-2 text-xs text-gray-500 max-w-[80px] truncate">{product.brand || '—'}</td>
+                               <td className="px-2 py-2 text-xs font-medium">
+                                 {variant.price ? `${variant.price} DH` : 'Hérité'}
+                               </td>
+                               <td className="px-2 py-2">
+                                 <span className={`px-1.5 py-0.5 text-xs font-semibold rounded-full ${
+                                   variant.stock > 5 ? 'bg-green-100 text-green-800'
+                                   : variant.stock > 0 ? 'bg-yellow-100 text-yellow-800'
+                                   : 'bg-red-100 text-red-800'
+                                 }`}>{variant.stock}</span>
+                               </td>
+                               <td className="px-2 py-2 text-xs text-gray-500 max-w-[100px] truncate">{variant.barcode || '—'}</td>
+                               <td className="px-2 py-2 text-xs text-gray-500">
+                                 {variant.expiryDate ? (() => {
+                                   try {
+                                     const d = new Date(variant.expiryDate);
+                                     return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+                                   } catch {
+                                     return '—'
+                                   }
+                                 })() : '—'}
+                               </td>
+                               <td className="px-2 py-2">
+                                 <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1"><Edit size={14} /></button>
+                                 <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 size={14} /></button>
+                               </td>
+                             </>
+                           ) : (
+                              <>
+                                <td className="px-3 py-2 pl-8">
+                                  {variant.image && variant.image.startsWith('http') ? (
+                                    <img src={variant.image} alt={variant.value} className="w-8 h-8 object-cover rounded" onError={e => { e.target.src = '/images/placeholder.svg' }} />
+                                  ) : (
+                                    <div className="w-8 h-8 flex items-center justify-center text-xs text-gray-400"><X size={12} /></div>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 text-sm font-medium text-blue-900">
+                                  {variant.value}
+                                </td>
+                                <td className="px-3 py-2 text-sm text-gray-600">
+                                  {variant.price ? `${variant.price} DH` : 'Hérité'}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                                    variant.stock > 5 ? 'bg-green-100 text-green-800'
+                                    : variant.stock > 0 ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-red-100 text-red-800'
+                                  }`}>{variant.stock}</span>
+                                </td>
+                                 <td className="px-3 py-2 text-sm text-gray-500">{product.category?.name || '—'}</td>
+                                 <td className="px-3 py-2 text-sm text-gray-500">{variant.barcode || '—'}</td>
+                                <td className="px-3 py-2 text-sm text-gray-500">
+                                  {variant.expiryDate ? (() => {
+                                    try {
+                                      const d = new Date(variant.expiryDate);
+                                      return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+                                    } catch {
+                                      return '—';
+                                    }
+                                  })() : '—'}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1"><Edit size={16} /></button>
+                                  <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 size={16} /></button>
+                                </td>
+                              </>
                           )}
                         </tr>
                       ))

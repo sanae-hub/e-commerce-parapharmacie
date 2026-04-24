@@ -229,14 +229,14 @@ const AdminPurchaseOrders = () => {
         <tr>
           <td>${item.product?.name || ''}</td>
           <td>${item.quantity}</td>
-          <td>${item.unitPrice?.toFixed(2)} €</td>
-          <td>${(item.quantity * item.unitPrice)?.toFixed(2)} €</td>
+          <td>${item.unitPrice?.toFixed(2)} DH</td>
+          <td>${(item.quantity * item.unitPrice)?.toFixed(2)} DH</td>
         </tr>
       `).join('')}
     </tbody>
   </table>
   <div class="total">
-    Total: ${order.totalAmount?.toFixed(2)} €
+    Total: ${order.totalAmount?.toFixed(2)} DH
   </div>
   ${order.notes ? `<div class="notes"><strong>Notes:</strong> ${order.notes}</div>` : ''}
   <div class="footer">
@@ -468,7 +468,7 @@ const AdminPurchaseOrders = () => {
                       {new Date(order.orderDate).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {order.totalAmount?.toFixed(2)} €
+                       {order.totalAmount?.toFixed(2)} DH
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(order.status)}
@@ -609,7 +609,7 @@ const AdminPurchaseOrders = () => {
                         <div className="flex-1">
                           <span className="font-medium">{item.productName}</span>
                           <span className="text-sm text-gray-500 ml-2">
-                            ({item.unitPrice?.toFixed(2)} €)
+                             ({item.unitPrice?.toFixed(2)} DH)
                           </span>
                         </div>
                         <input
@@ -630,7 +630,7 @@ const AdminPurchaseOrders = () => {
                   </div>
                   <div className="mt-4 p-3 bg-sky-50 rounded-lg">
                     <span className="font-bold">Total: </span>
-                    <span className="font-bold text-sky-700">{calculateTotal().toFixed(2)} €</span>
+                     <span className="font-bold text-sky-700">{calculateTotal().toFixed(2)} DH</span>
                   </div>
                 </div>
               )}
@@ -694,7 +694,7 @@ const AdminPurchaseOrders = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p><span className="font-medium">Fournisseur:</span> {selectedOrder.supplier?.name}</p>
                 <p><span className="font-medium">Date:</span> {new Date(selectedOrder.orderDate).toLocaleDateString('fr-FR')}</p>
-                <p><span className="font-medium">Total:</span> {selectedOrder.totalAmount?.toFixed(2)} €</p>
+                 <p><span className="font-medium">Total:</span> {selectedOrder.totalAmount?.toFixed(2)} DH</p>
               </div>
 
               <label className="block text-sm font-medium text-gray-700 mb-2">Produits reçus</label>
@@ -704,7 +704,7 @@ const AdminPurchaseOrders = () => {
                     <div className="flex-1">
                       <span className="font-medium">{item.product?.name}</span>
                       <div className="text-sm text-gray-500">
-                        Commandé: {item.quantity} × {item.unitPrice?.toFixed(2)} € = {(item.quantity * item.unitPrice)?.toFixed(2)} €
+                        Commandé: {item.quantity} × {item.unitPrice?.toFixed(2)} DH = {(item.quantity * item.unitPrice)?.toFixed(2)} DH
                       </div>
                     </div>
                     <div className="flex flex-col gap-2">
