@@ -3,19 +3,62 @@ import { useLocation, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ClientNotifications from './components/ClientNotifications'
+import PhoneRequiredModal from './components/PhoneRequiredModal'
+import ProfileCompletionBanner from './components/ProfileCompletionBanner'
 import Footer from './components/Footer'
 import { useState, useEffect, useRef } from 'react'
 
 function App() {
-  const { user, logout } = useAuth()
+  const { user, loading, logout, updateProfile } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const hasCleaned = useRef(false)
   const [showClickCollectInfo, setShowClickCollectInfo] = useState(false)
+  const [showPhoneModal, setShowPhoneModal] = useState(false)
+  const hasCleaned = useRef(false)
+  const hasCheckedPhone = useRef(false)
 
-  // 🔧 FORCER LA DÉCONNEXION TOTALE À L'ACCUEIL
+  // Vérifier si l'utilisateur Google a besoin de compléter son profil
   useEffect(() => {
-    // Ne nettoyer qu'une seule fois
+    if (user && !hasCheckedPhone.current && !loading) {
+      hasCheckedPhone.current = true
+      
+      // Vérifier si c'est un utilisateur sans téléphone
+      const needsPhone = !user.phone || user.phone.trim() === ''
+      
+      // Afficher le modal seulement si nécessaire et pas sur certaines pages
+      const excludedPaths = ['/profile', '/login', '/signup', '/admin']
+      const shouldShowModal = needsPhone && 
+        !excludedPaths.some(path => location.pathname.startsWith(path))
+      
+      if (shouldShowModal) {
+        // Délai pour laisser l'utilisateur voir la page d'abord
+        setTimeout(() => {
+          setShowPhoneModal(true)
+        }, 2000)
+      }
+    }
+  }, [user, loading, location.pathname])
+
+  // Gérer la soumission du modal téléphone
+  const handlePhoneSubmit = async (formData) => {
+    try {
+      await updateProfile({
+        phone: formData.phone,
+        whatsapp: formData.whatsapp,
+        notificationEmail: formData.notificationEmail,
+        notificationSMS: formData.notificationSMS,
+        notificationWhatsApp: formData.notificationWhatsApp,
+        notificationPush: formData.notificationPush
+      })
+      setShowPhoneModal(false)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // 🔧 FORCER LA DÉCONNEXION TOTALE UNIQUEMENT SUR L'ACCUEIL
+  useEffect(() => {
+    // Ne nettoyer qu'une seule fois et seulement sur la page d'accueil
     if (!hasCleaned.current && location.pathname === '/') {
       hasCleaned.current = true
       
@@ -24,6 +67,9 @@ function App() {
       const userStr = localStorage.getItem('user')
       
       if (token || userStr) {
+        console.log('🧹 Nettoyage complet - Déconnexion forcée sur accueil')
+        
+        // Supprimer TOUS les tokens
         console.log('🧹 Nettoyage complet de la session - Déconnexion forcée')
         
         // Supprimer TOUS les tokens et données utilisateur
@@ -54,6 +100,15 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin')
   const isAuthRoute = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname)
   const hideFooter = isAdminRoute || isAuthRoute
+
+  // Afficher un loader pendant le chargement
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -87,12 +142,25 @@ function App() {
       {/* Navbar */}
       {!isAdminRoute && !isAuthRoute && <Navbar />}
 
+      {/* Bannière de profil incomplet */}
+      {!isAdminRoute && !isAuthRoute && (
+        <ProfileCompletionBanner onOpenModal={() => setShowPhoneModal(true)} />
+      )}
+
       {/* Main */}
       <main className="flex-grow">
         <Outlet />
       </main>
 
       <ClientNotifications />
+
+      {/* Modal pour compléter le profil */}
+      <PhoneRequiredModal
+        isOpen={showPhoneModal}
+        onClose={() => setShowPhoneModal(false)}
+        onSubmit={handlePhoneSubmit}
+        user={user}
+      />
 
       {/* Footer */}
       {!hideFooter && <Footer />}

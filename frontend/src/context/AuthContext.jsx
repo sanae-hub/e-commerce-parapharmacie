@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
       if (error.response?.status === 401) {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
+        localStorage.removeItem('lastVisitedPath')
         setUser(null)
       }
     } finally {
@@ -94,7 +95,7 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(userData))
-      localStorage.setItem('adminToken', token) // Pour compatibilité avec adminApi
+      localStorage.setItem('adminToken', token)
       setUser(userData)
       
       return { success: true, user: userData }
@@ -107,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const logout = useCallback(() => {
-    // Clear ALL cart storage to prevent cross-account persistence
+    // Clear ALL cart storage
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('cart_')) {
         localStorage.removeItem(key)
@@ -117,8 +118,29 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     localStorage.removeItem('favorites')
+    localStorage.removeItem('lastVisitedPath')
+    localStorage.removeItem('adminToken')
+    localStorage.removeItem('adminUser')
 
     setUser(null)
+  }, [])
+
+  const updateProfile = useCallback(async (profileData) => {
+    try {
+      const response = await axios.put('/user/profile', profileData)
+      const updatedUser = response.data.user
+      
+      // Mettre à jour l'utilisateur local
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+      const mergedUser = { ...currentUser, ...updatedUser }
+      
+      setUser(mergedUser)
+      localStorage.setItem('user', JSON.stringify(mergedUser))
+      
+      return { success: true, user: mergedUser }
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Erreur mise à jour profil')
+    }
   }, [])
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'EMPLOYE'
@@ -136,7 +158,8 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     adminLogin,
     logout,
-    fetchUserProfile
+    fetchUserProfile,
+    updateProfile
   }
 
   return (

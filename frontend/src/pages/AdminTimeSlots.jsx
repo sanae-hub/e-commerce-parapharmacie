@@ -4,12 +4,10 @@ import { Clock, Calendar, Plus, Trash2, X, ArrowLeft } from 'lucide-react';
 import adminApi from '../api/adminAxios';
 
 const DAYS_ALL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-const DAYS_DOW = [0, 1, 2, 3, 4, 5, 6]; // Corresponding day of week numbers
+const DAYS_DOW = [0, 1, 2, 3, 4, 5, 6];
 const DEFAULT_INTERVAL = 60;
 const DEFAULT_CAPACITY = 5;
 
-// Helper to get ordered days starting from current day (Morocco timezone)
-// If past 18:00, starts from tomorrow instead
 const getOrderedDays = () => {
   const now = new Date();
   const options = { timeZone: 'Africa/Casablanca' };
@@ -19,7 +17,6 @@ const getOrderedDays = () => {
   const currentHour = moroccoDate.getHours();
   const currentMinute = moroccoDate.getMinutes();
   
-  // If past 18:00, start from tomorrow
   if (currentHour >= 18) {
     moroccoDay = (moroccoDay + 1) % 7;
   }
@@ -33,7 +30,6 @@ const getOrderedDays = () => {
     orderedDows.push(DAYS_DOW[dayIndex]);
   }
   
-  // Get current time in Morocco as minutes since midnight
   const currentTimeMinutes = currentHour * 60 + currentMinute;
   
   return { 
@@ -46,15 +42,12 @@ const getOrderedDays = () => {
   };
 };
 
-// Helper to convert time string (HH:MM) to minutes since midnight
 const timeToMinutes = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
   return hours * 60 + minutes;
 };
 
-// Helper to get minimum time for today (current time rounded up to next 30 min)
 const getMinTimeForToday = (currentTimeMinutes) => {
-  // Round up to next 30 minutes
   const rounded = Math.ceil(currentTimeMinutes / 30) * 30;
   const hours = Math.floor(rounded / 60);
   const minutes = rounded % 60;
@@ -67,24 +60,19 @@ const AdminTimeSlots = () => {
   const [activeTab, setActiveTab] = useState('days');
   const [{ orderedDays, orderedDows, currentDow, currentTimeMinutes }, setDayOrder] = useState(getOrderedDays());
 
-  // Per-day configs (multiple entries per dayOfWeek for multiple time periods)
   const [configs, setConfigs] = useState([]);
   const [blockedSlots, setBlockedSlots] = useState([]);
-  // Today reservations
   const [todayReservations, setTodayReservations] = useState([]);
-  
-  // Edit modal for a day's hours - now supports multiple periods
   const [editDay, setEditDay] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) adminApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchAll();
-    // Update day order on mount and every minute to stay synchronized
     setDayOrder(getOrderedDays());
     const interval = setInterval(() => {
       setDayOrder(getOrderedDays());
-    }, 60000); // Update every minute
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -99,8 +87,7 @@ const AdminTimeSlots = () => {
 
   const fetchConfigs = async () => {
     try {
-      // Fetch ALL configs (including inactive) to correctly show disabled days
-      const { data } = await adminApi.get('/time-slots/config?all=true');
+      const { data } = await adminApi.get('/time-slots/config?all=true&type=STORE');
       setConfigs(data);
     } catch { setConfigs([]); }
   };
@@ -120,25 +107,19 @@ const AdminTimeSlots = () => {
   };
 
   useEffect(() => {
-    // Refresh data when tab changes
     if (activeTab === 'export') {
       fetchTodayReservations();
     }
   }, [activeTab]);
 
-  // Get configs for a given dayOfWeek (returns array of configs)
   const getConfigsForDay = (dow) => configs.filter(c => c.dayOfWeek === dow);
 
-  // Check if a day has any active config
   const isDayActive = (dow) => {
     const dayConfigs = getConfigsForDay(dow);
     return dayConfigs.length > 0 && dayConfigs.some(c => c.active);
   };
 
-  // Toggle a day: if has active config → deactivate all; if inactive → activate all
-  // Sunday (dow=0) is always disabled
   const toggleDay = async (dow) => {
-    // Sunday is always disabled
     if (dow === 0) {
       alert('Le dimanche est toujours fermé.');
       return;
@@ -146,24 +127,21 @@ const AdminTimeSlots = () => {
     const dayConfigs = getConfigsForDay(dow);
     const hasActive = dayConfigs.some(c => c.active);
     
-    try {
-      if (dayConfigs.length === 0) {
-        // Create default config for this day (08:00 - 20:00)
-        await adminApi.post('/time-slots/config', {
-          dayOfWeek: dow, startTime: '08:00', endTime: '20:00',
-          capacity: DEFAULT_CAPACITY, intervalMinutes: DEFAULT_INTERVAL, active: true
-        });
-      } else {
-        // Toggle all configs for this day
-        for (const cfg of dayConfigs) {
-          await adminApi.put(`/time-slots/config/${cfg.id}`, { active: !hasActive });
+      try {
+        if (dayConfigs.length === 0) {
+          await adminApi.post('/time-slots/config', {
+            dayOfWeek: dow, startTime: '08:00', endTime: '20:00',
+            capacity: DEFAULT_CAPACITY, active: true
+          });
+        } else {
+          for (const cfg of dayConfigs) {
+            await adminApi.put(`/time-slots/config/${cfg.id}`, { active: !hasActive });
+          }
         }
-      }
-      fetchConfigs();
-    } catch { alert('Erreur lors de la mise à jour'); }
+        fetchConfigs();
+      } catch { alert('Erreur lors de la mise à jour'); }
   };
 
-  // Open edit modal for a day's hours
   const openEditDay = (dow) => {
     const dayConfigs = getConfigsForDay(dow);
     let periods;
@@ -174,10 +152,9 @@ const AdminTimeSlots = () => {
         startTime: c.startTime, 
         endTime: c.endTime, 
         intervalMinutes: c.intervalMinutes || DEFAULT_INTERVAL, 
-        capacity: c.capacity || DEFAULT_CAPACITY 
+        capacity: c.capacity || DEFAULT_CAPACITY
       }));
     } else {
-      // For today, set minimum start time to current time (rounded up)
       const isToday = dow === currentDow;
       const minStartTime = isToday ? getMinTimeForToday(currentTimeMinutes) : '08:00';
       periods = [{ 
@@ -185,7 +162,7 @@ const AdminTimeSlots = () => {
         startTime: minStartTime, 
         endTime: '20:00', 
         intervalMinutes: DEFAULT_INTERVAL, 
-        capacity: DEFAULT_CAPACITY 
+        capacity: DEFAULT_CAPACITY
       }];
     }
     
@@ -196,9 +173,7 @@ const AdminTimeSlots = () => {
     });
   };
 
-  // Add a new period to edit modal
   const addPeriod = () => {
-    // Set default start time based on last period's end time if available
     const lastPeriod = editDay.periods[editDay.periods.length - 1];
     const defaultStart = lastPeriod ? lastPeriod.endTime : '08:00';
     setEditDay({
@@ -207,7 +182,6 @@ const AdminTimeSlots = () => {
     });
   };
 
-  // Remove a period from edit modal
   const removePeriod = (index) => {
     if (editDay.periods.length > 1) {
       const newPeriods = editDay.periods.filter((_, i) => i !== index);
@@ -215,17 +189,42 @@ const AdminTimeSlots = () => {
     }
   };
 
-  // Update a period in edit modal
   const updatePeriod = (index, field, value) => {
     const newPeriods = [...editDay.periods];
     newPeriods[index] = { ...newPeriods[index], [field]: value };
     setEditDay({ ...editDay, periods: newPeriods });
   };
 
+  const validatePeriodsOverlap = (periods) => {
+    for (let i = 0; i < periods.length; i++) {
+      for (let j = i + 1; j < periods.length; j++) {
+        const p1 = periods[i];
+        const p2 = periods[j];
+        
+        if (p1.startTime < p2.endTime && p1.endTime > p2.startTime) {
+          return { valid: false, message: `Les plages ${i + 1} et ${j + 1} se chevauchent: (${p1.startTime}-${p1.endTime} vs ${p2.startTime}-${p2.endTime})` };
+        }
+      }
+    }
+    
+    for (let i = 0; i < periods.length; i++) {
+      if (periods[i].startTime >= periods[i].endTime) {
+        return { valid: false, message: `Plage ${i + 1}: L'heure de début doit être avant l'heure de fin` };
+      }
+    }
+    
+    return { valid: true };
+  };
+
   const saveEditDay = async (e) => {
     e.preventDefault();
     try {
-      // Delete configs that are no longer in the form
+      const validation = validatePeriodsOverlap(editDay.periods);
+      if (!validation.valid) {
+        alert(`❌ Erreur de validation:\n${validation.message}`);
+        return;
+      }
+      
       const currentIds = editDay.periods.filter(p => p.id).map(p => p.id);
       const dayConfigs = getConfigsForDay(editDay.dayOfWeek);
       for (const cfg of dayConfigs) {
@@ -234,31 +233,39 @@ const AdminTimeSlots = () => {
         }
       }
       
-      // Create or update periods
+      const errors = [];
       for (const period of editDay.periods) {
-        if (period.id) {
-          await adminApi.put(`/time-slots/config/${period.id}`, {
-            startTime: period.startTime,
-            endTime: period.endTime,
-            intervalMinutes: parseInt(period.intervalMinutes) || 30,
-            capacity: parseInt(period.capacity) || 5
-          });
-        } else {
-          await adminApi.post('/time-slots/config', {
-            dayOfWeek: editDay.dayOfWeek,
-            startTime: period.startTime,
-            endTime: period.endTime,
-            intervalMinutes: parseInt(period.intervalMinutes) || 30,
-            capacity: parseInt(period.capacity) || 5,
-            active: true
-          });
+        try {
+          if (period.id) {
+            await adminApi.put(`/time-slots/config/${period.id}`, {
+              startTime: period.startTime,
+              endTime: period.endTime,
+              capacity: parseInt(period.capacity) || 5
+            });
+          } else {
+            await adminApi.post('/time-slots/config', {
+              dayOfWeek: editDay.dayOfWeek,
+              startTime: period.startTime,
+              endTime: period.endTime,
+              capacity: parseInt(period.capacity) || 5,
+              active: true
+            });
+          }
+        } catch (err) {
+          errors.push(`Plage ${period.startTime}-${period.endTime}: ${err.response?.data?.message || err.message}`);
         }
       }
-      setEditDay(null);
-      fetchConfigs();
+      
+      if (errors.length > 0) {
+        alert(`⚠️ Erreurs lors de la sauvegarde:\n${errors.join('\n')}`);
+        fetchConfigs();
+      } else {
+        setEditDay(null);
+        fetchConfigs();
+      }
     } catch (err) {
       const msg = err.response?.data?.message || 'Erreur lors de la sauvegarde';
-      alert(msg);
+      alert(`❌ ${msg}`);
     }
   };
 
@@ -268,7 +275,7 @@ const AdminTimeSlots = () => {
     </div>
   );
 
-return (
+  return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
@@ -286,9 +293,9 @@ return (
             <div>
               <h1 className="text-xl font-bold text-gray-900">Gestion des créneaux</h1>
               <p className="text-xs text-gray-500">Configurez les horaires d'ouverture par jour</p>
-</div>
+            </div>
+          </div>
         </div>
-      </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6">
@@ -309,16 +316,19 @@ return (
         {/* TAB: Jours & Horaires */}
         {activeTab === 'days' && (
           <div>
-            <p className="text-sm text-gray-500 mb-4">
-              Configurez les horaires d\'ouverture pour chaque jour. Vous pouvez ajouter plusieurs plages horaires par jour (ex: matin et après-midi).
-            </p>
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl">
+              <h3 className="font-semibold text-gray-900 mb-2">💡 Gérer plusieurs plages horaires par jour</h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Configurez les horaires d'ouverture pour chaque jour. Vous pouvez ajouter <strong>plusieurs plages horaires indépendantes</strong> par jour 
+                (ex: matin 8h-12h et après-midi 15h-20h). Cliquez sur "Modifier les horaires" pour gérer les plages d'un jour.
+              </p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {orderedDays.map((dayName, idx) => {
                 const dow = orderedDows[idx];
                 const dayConfigs = getConfigsForDay(dow);
                 const isActive = dow !== 0 && isDayActive(dow);
                 
-                // Format periods for display
                 const periods = dayConfigs.filter(c => c.active).map(c => `${c.startTime} – ${c.endTime}`);
 
                 return (
@@ -369,8 +379,6 @@ return (
             </div>
           </div>
         )}
-
-        
       </div>
 
       {/* Modal: Edit day hours with multiple periods */}
@@ -378,15 +386,25 @@ return (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-gray-900">Horaires — {DAYS_ALL[editDay.dayOfWeek]}</h3>
+              <h3 className="font-bold text-gray-900 text-lg">Configuration des créneaux — <span className="text-sky-600">{DAYS_ALL[editDay.dayOfWeek]}</span></h3>
               <button onClick={() => setEditDay(null)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
-            <form onSubmit={saveEditDay} className="space-y-4">
+            
+            {editDay.periods.length > 1 && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700 text-sm">
+                <span>✅ Vous avez {editDay.periods.length} plages horaires. Les créneaux non-chevauchants sont autorisés.</span>
+              </div>
+            )}
+            
+            <form onSubmit={saveEditDay}>
               <div className="space-y-4">
                 {editDay.periods.map((period, index) => (
-                  <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-sky-300 transition-colors">
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-xs font-semibold text-gray-600 uppercase">Plage {index + 1}</span>
+                      <div>
+                        <span className="text-xs font-bold text-sky-700 bg-sky-100 px-2 py-1 rounded">PLAGE {index + 1}</span>
+                        {index > 0 && <span className="text-xs text-gray-500 ml-2">Déjà défini: {period.startTime}-{period.endTime}</span>}
+                      </div>
                       {editDay.periods.length > 1 && (
                         <button type="button" onClick={() => removePeriod(index)}
                           className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors">
@@ -396,28 +414,28 @@ return (
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Début</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Heure de début</label>
                         {editDay.isToday && index === 0 && (
                           <p className="text-xs text-orange-600 mb-1">
-                            ⚠️ Heure min: {getMinTimeForToday(currentTimeMinutes)} (heure actuelle arrondie)
+                            ⚠️ Min: {getMinTimeForToday(currentTimeMinutes)} (arrondie)
                           </p>
                         )}
                         <input type="time" value={period.startTime}
                           onChange={e => updatePeriod(index, 'startTime', e.target.value)}
                           min={editDay.isToday && index === 0 ? getMinTimeForToday(currentTimeMinutes) : undefined}
-                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" required />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Fin</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Heure de fin</label>
                         <input type="time" value={period.endTime}
                           onChange={e => updatePeriod(index, 'endTime', e.target.value)}
-                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" required />
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Intervalle (min)</label>
                         <select value={period.intervalMinutes}
                           onChange={e => updatePeriod(index, 'intervalMinutes', parseInt(e.target.value))}
-                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500">
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
                           {[15, 30, 45, 60, 90, 120].map(v => <option key={v} value={v}>{v} min</option>)}
                         </select>
                       </div>
@@ -425,7 +443,7 @@ return (
                         <label className="block text-xs font-medium text-gray-700 mb-1">Capacité</label>
                         <input type="number" min="1" max="50" value={period.capacity}
                           onChange={e => updatePeriod(index, 'capacity', parseInt(e.target.value) || 1)}
-                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500" required />
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" required />
                       </div>
                     </div>
                   </div>
@@ -433,26 +451,24 @@ return (
               </div>
               
               <button type="button" onClick={addPeriod}
-                className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg text-sm hover:border-sky-500 hover:text-sky-600 transition-colors flex items-center justify-center gap-1">
-                <Plus size={15} /> Ajouter une plage horaire
+                className="w-full mt-4 py-2.5 border-2 border-dashed border-sky-300 text-sky-700 rounded-lg text-sm font-medium hover:bg-sky-50 transition-colors flex items-center justify-center gap-2">
+                <Plus size={16} /> Ajouter une autre plage horaire
               </button>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-4">
                 <button type="button" onClick={() => setEditDay(null)}
-                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50 font-medium">
                   Annuler
                 </button>
                 <button type="submit"
-                  className="flex-1 py-2 bg-sky-700 text-white rounded-lg text-sm hover:bg-sky-800">
-                  Enregistrer
+                  className="flex-1 py-2 bg-sky-700 text-white rounded-lg text-sm hover:bg-sky-800 font-medium transition-colors">
+                  ✅ Enregistrer {editDay.periods.length} {editDay.periods.length === 1 ? 'plage' : 'plages'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      
     </div>
   );
 };

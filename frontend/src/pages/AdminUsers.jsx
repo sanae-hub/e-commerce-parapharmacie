@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, Search, Filter, Edit, Eye, UserCheck, UserX, Trash2, Trash,
-  ChevronLeft, ChevronRight, MoreVertical, Shield, Clock,
+  ChevronLeft, ChevronRight, MoreVertical, Shield,
   Activity, BarChart3, Download, X, Crown, ArrowLeft, FileText,
-  UserPlus, Check, AlertCircle, Pencil
+  UserPlus, Check, AlertCircle, Pencil, Plus,Clock
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -12,7 +12,7 @@ import adminApi from '../api/adminAxios';
 
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('clients'); // 'clients' ou 'roles'
+  const [activeTab, setActiveTab] = useState('clients');
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -54,11 +54,18 @@ const AdminUsers = () => {
   const [showEditEmployeeModal, setShowEditEmployeeModal] = useState(false);
   const [editEmployeeForm, setEditEmployeeForm] = useState({ firstName: '', lastName: '', phone: '', email: '', isActive: true });
   const [updatingEmployee, setUpdatingEmployee] = useState(false);
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const [editingPermissions, setEditingPermissions] = useState(null);
+  const [permissions, setPermissions] = useState({});
+  const [modules, setModules] = useState([]);
+  const [loadingPermissions, setLoadingPermissions] = useState(false);
 
   const systemRoles = [
     { value: 'ADMIN', label: 'Administrateur', color: 'bg-red-100 text-red-800', permissions: ['all'] },
     { value: 'EMPLOYE', label: 'Employé', color: 'bg-blue-100 text-blue-800', permissions: ['products_view', 'products_stock', 'orders_view', 'orders_process', 'slots_manage', 'stock_manage', 'categories_associate'] }
   ];
+
+  const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
   useEffect(() => {
     checkAuth();
@@ -104,7 +111,8 @@ const AdminUsers = () => {
           role: 'CLIENT',
           status: statusFilter !== 'ALL' ? statusFilter : undefined,
           sortBy,
-          sortOrder
+          sortOrder,
+          includeCart: true
         }
       });
       setUsers(data.users.filter(u => u.role === 'CLIENT'));
@@ -137,6 +145,149 @@ const AdminUsers = () => {
       setEmployees(data || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
+    }
+  };
+
+  // ============= GESTION DES CRÉNEAUX HORAIRES =============
+  const fetchSlots = async () => {
+    setLoadingSlots(true);
+    try {
+      const { data } = await adminApi.get('/time-slots/config');
+      setSlots(data || []);
+    } catch (error) {
+      console.error('Error fetching slots:', error);
+      setSlotError('Erreur lors du chargement des créneaux');
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  const fetchBlockedSlots = async () => {
+    try {
+      const { data } = await adminApi.get('/time-slots/blocked');
+      setBlockedSlots(data || []);
+    } catch (error) {
+      console.error('Error fetching blocked slots:', error);
+    }
+  };
+
+  const createSlot = async (e) => {
+    e.preventDefault();
+    setSlotError('');
+    setSlotSuccess('');
+    
+    if (!slotForm.startTime || !slotForm.endTime) {
+      setSlotError('Les heures de début et fin sont requises');
+      return;
+    }
+
+    try {
+      await adminApi.post('/time-slots/config', slotForm);
+      setSlotSuccess('Créneau créé avec succès');
+      setSlotForm({
+        dayOfWeek: 0,
+        startTime: '09:00',
+        endTime: '10:00',
+        capacity: 5,
+        intervalMinutes: 30,
+        active: true
+      });
+      setShowSlotForm(false);
+      fetchSlots();
+    } catch (error) {
+      setSlotError(error.response?.data?.message || 'Erreur création créneau');
+    }
+  };
+
+  const updateSlot = async (e) => {
+    e.preventDefault();
+    setSlotError('');
+    setSlotSuccess('');
+
+    try {
+      await adminApi.put(`/time-slots/config/${editingSlot.id}`, {
+        startTime: slotForm.startTime,
+        endTime: slotForm.endTime,
+        capacity: slotForm.capacity,
+        intervalMinutes: slotForm.intervalMinutes,
+        active: slotForm.active
+      });
+      setSlotSuccess('Créneau modifié avec succès');
+      setEditingSlot(null);
+      setShowSlotForm(false);
+      setSlotForm({
+        dayOfWeek: 0,
+        startTime: '09:00',
+        endTime: '10:00',
+        capacity: 5,
+        intervalMinutes: 30,
+        active: true
+      });
+      fetchSlots();
+    } catch (error) {
+      setSlotError(error.response?.data?.message || 'Erreur modification créneau');
+    }
+  };
+
+  const deleteSlot = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce créneau ?')) return;
+
+    try {
+      await adminApi.delete(`/time-slots/config/${id}`);
+      setSlotSuccess('Créneau supprimé avec succès');
+      fetchSlots();
+    } catch (error) {
+      setSlotError('Erreur suppression créneau');
+    }
+  };
+
+  const openEditSlotModal = (slot) => {
+    setEditingSlot(slot);
+    setSlotForm({
+      dayOfWeek: slot.dayOfWeek,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      capacity: slot.capacity,
+      intervalMinutes: slot.intervalMinutes,
+      active: slot.active
+    });
+    setShowSlotForm(true);
+  };
+
+  const createBlockedSlot = async (e) => {
+    e.preventDefault();
+    setSlotError('');
+
+    if (!blockedSlotForm.date || !blockedSlotForm.reason) {
+      setSlotError('Date et raison sont requises');
+      return;
+    }
+
+    try {
+      await adminApi.post('/time-slots/blocked', blockedSlotForm);
+      setSlotSuccess('Créneau bloqué avec succès');
+      setBlockedSlotForm({
+        date: new Date().toISOString().split('T')[0],
+        startTime: '',
+        endTime: '',
+        reason: ''
+      });
+      setShowBlockedSlotForm(false);
+      fetchBlockedSlots();
+    } catch (error) {
+      setSlotError(error.response?.data?.message || 'Erreur blocage créneau');
+    }
+  };
+
+  const deleteBlockedSlot = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir débloquer ce créneau ?')) return;
+
+    try {
+      await adminApi.delete(`/time-slots/blocked/${id}`);
+      setSlotSuccess('Créneau débloqué avec succès');
+      fetchBlockedSlots();
+    } catch (error) {
+      setSlotError('Erreur déblocage créneau');
     }
   };
 
@@ -197,13 +348,89 @@ const AdminUsers = () => {
     }
   };
 
+  // Gestion des permissions
+  const fetchEmployeePermissions = async (employeeId) => {
+    setLoadingPermissions(true);
+    try {
+      const [modulesResponse, permissionsResponse] = await Promise.all([
+        adminApi.get('/employees/permissions/modules'),
+        adminApi.get(`/employees/${employeeId}/permissions`)
+      ]);
+      
+      console.log('Modules response:', modulesResponse.data);
+      console.log('Permissions response:', permissionsResponse.data);
+      
+      setModules(modulesResponse.data);
+      
+      // Utiliser l'employeeId directement et créer un objet employé simple
+      const employee = employees.find(emp => emp.id === employeeId) || { id: employeeId };
+      setEditingPermissions(employee);
+      
+      // Initialiser les permissions avec les valeurs actuelles
+      const initialPermissions = {};
+      modulesResponse.data.forEach(module => {
+        initialPermissions[module.key] = permissionsResponse.data.permissions?.[module.key] || {
+          canView: false,
+          canCreate: false,
+          canEdit: false,
+          canDelete: false
+        };
+      });
+      setPermissions(initialPermissions);
+      setShowPermissionsModal(true);
+    } catch (error) {
+      console.error('Erreur lors du chargement des permissions:', error);
+      alert('Erreur lors du chargement des permissions');
+    } finally {
+      setLoadingPermissions(false);
+    }
+  };
+
+  const handlePermissionChange = (moduleKey, permissionType, checked) => {
+    setPermissions(prev => ({
+      ...prev,
+      [moduleKey]: {
+        ...prev[moduleKey],
+        [permissionType]: checked
+      }
+    }));
+  };
+
+  const handleSelectAllForModule = (moduleKey, checked) => {
+    setPermissions(prev => ({
+      ...prev,
+      [moduleKey]: {
+        canView: checked,
+        canCreate: checked,
+        canEdit: checked,
+        canDelete: checked
+      }
+    }));
+  };
+
+  const saveEmployeePermissions = async () => {
+    if (!editingPermissions?.id) {
+      alert('Erreur: ID employé manquant');
+      return;
+    }
+    
+    try {
+      await adminApi.put(`/employees/${editingPermissions.id}/permissions`, { permissions });
+      setShowPermissionsModal(false);
+      setEditingPermissions(null);
+      alert('Permissions mises à jour avec succès !');
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de la sauvegarde des permissions');
+    }
+  };
+
   const fetchAuditLogs = async () => {
     try {
       const { data } = await adminApi.get('/audit-logs', {
         params: { limit: 100 }
       });
       setAuditLogs(data.logs);
-      setShowAuditModal(true);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       alert('Erreur lors du chargement du journal d\'activité');
@@ -428,14 +655,34 @@ const AdminUsers = () => {
                 Rôles du Système
               </div>
             </button>
+            <button
+              onClick={() => {
+                setActiveTab('audit');
+                fetchAuditLogs();
+              }}
+              className={`pb-4 px-2 font-medium border-b-2 transition-colors ${
+                activeTab === 'audit'
+                  ? 'border-sky-600 text-sky-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Activity size={18} />
+                Journal d'Activité
+              </div>
+            </button>
           </div>
         </div>
 
         {/* SECTION CLIENTS */}
-        {activeTab === 'clients' && (
-          <>
-            {/* Filtres et recherche */}
-            <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+        {activeTab === 'clients' && (() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role !== 'ADMIN') return null;
+          
+          return (
+            <>
+              {/* Filtres et recherche */}
+              <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Recherche par nom et email */}
                 <div className="relative">
@@ -496,13 +743,6 @@ const AdminUsers = () => {
               >
                 <FileText size={18} />
                 Exporter en PDF
-              </button>
-              <button
-                onClick={exportClientsToCSV}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-              >
-                <Download size={18} />
-                Exporter en CSV
               </button>
             </div>
 
@@ -576,6 +816,9 @@ const AdminUsers = () => {
                         Commandes
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Panier Actuel
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                         Inscription
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -586,7 +829,7 @@ const AdminUsers = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {users.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                           Aucun client trouvé
                         </td>
                       </tr>
@@ -619,6 +862,29 @@ const AdminUsers = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {user._count.orders}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {user.cart && Array.isArray(user.cart) && user.cart.length > 0 ? (
+                                <div>
+                                  <span className="font-medium text-blue-600">
+                                    {user.cart.length} article{user.cart.length > 1 ? 's' : ''}
+                                  </span>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {user.cart.slice(0, 2).map((item, index) => (
+                                      <div key={index}>
+                                        {item.quantity}x {item.product?.name || 'Produit'}
+                                      </div>
+                                    ))}
+                                    {user.cart.length > 2 && (
+                                      <div className="text-gray-400">+{user.cart.length - 2} autre{user.cart.length - 2 > 1 ? 's' : ''}...</div>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400 text-sm">Panier vide</span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {formatDate(user.createdAt)}
@@ -693,11 +959,16 @@ const AdminUsers = () => {
               </div>
             )}
           </>
-        )}
+          );
+        })()}
 
         {/* SECTION RÔLES */}
-        {activeTab === 'roles' && (
-          <div className="space-y-6">
+        {activeTab === 'roles' && (() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role !== 'ADMIN') return null;
+          
+          return (
+            <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -742,12 +1013,21 @@ const AdminUsers = () => {
                           <td className="px-4 py-3">{new Date(emp.createdAt).toLocaleDateString('fr-FR')}</td>
                           <td className="px-4 py-3 text-right">
                             <button
+                              onClick={() => fetchEmployeePermissions(emp.id)}
+                              className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg mr-1"
+                              title="Gérer les permissions"
+                            >
+                              <Shield size={16} />
+                            </button>
+                            
+                            <button
                               onClick={() => openEditEmployeeModal(emp)}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg mr-1"
                               title="Modifier"
                             >
                               <Pencil size={16} />
                             </button>
+
                             <button
                               onClick={() => deleteEmployee(emp.id)}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
@@ -763,6 +1043,262 @@ const AdminUsers = () => {
                 </div>
               )}
             </div>
+          </div>
+          );
+        })()}
+
+        {/* SECTION JOURNAL D'ACTIVITÉ */}
+        {activeTab === 'audit' && (() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role !== 'ADMIN') return null;
+          
+          return (
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Journal d'Activité Administratif</h3>
+                    <p className="text-sm text-gray-500">Historique des actions administratives effectuées sur les comptes utilisateurs</p>
+                  </div>
+                </div>
+
+                {/* Tableau des logs d'audit */}
+                <div className="overflow-x-auto">
+                  <table className="w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                          Date/Heure
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                          Utilisateur
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                          Action
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                          Description
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                          IP
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {auditLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                            Aucune activité trouvée
+                          </td>
+                        </tr>
+                      ) : (
+                        auditLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {formatDate(log.createdAt)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {log.user ? `${log.user.firstName} ${log.user.lastName}` : 'Système'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {log.user?.email || 'N/A'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                log.action === 'CREATE' ? 'bg-green-100 text-green-800' :
+                                log.action === 'UPDATE' ? 'bg-blue-100 text-blue-800' :
+                                log.action === 'DELETE' ? 'bg-red-100 text-red-800' :
+                                log.action === 'ACTIVATE' ? 'bg-green-100 text-green-800' :
+                                log.action === 'DEACTIVATE' ? 'bg-orange-100 text-orange-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {log.action}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-900">
+                              <div className="max-w-xs truncate" title={log.description}>
+                                {log.description}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {log.ipAddress || 'N/A'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+        {activeTab === 'slots' && (
+          <div className="space-y-6">
+            {/* Messages */}
+            {slotError && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+                <AlertCircle size={18} />
+                {slotError}
+              </div>
+            )}
+            {slotSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
+                <Check size={18} />
+                {slotSuccess}
+              </div>
+            )}
+
+            {/* Créneaux par jour */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Configuration des créneaux horaires</h3>
+                  <p className="text-sm text-gray-500">Gérez les créneaux disponibles pour chaque jour de la semaine</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingSlot(null);
+                    setSlotForm({
+                      dayOfWeek: 0,
+                      startTime: '09:00',
+                      endTime: '10:00',
+                      capacity: 5,
+                      intervalMinutes: 30,
+                      active: true
+                    });
+                    setShowSlotForm(true);
+                    setSlotError('');
+                    setSlotSuccess('');
+                  }}
+                  className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg inline-flex items-center gap-2"
+                >
+                  <Plus size={18} />
+                  Ajouter
+                </button>
+              </div>
+
+              {loadingSlots ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {daysOfWeek.map((day, dayIndex) => {
+                    const daySlots = slots.filter(s => s.dayOfWeek === dayIndex);
+                    return (
+                      <div key={dayIndex} className="border rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-900 mb-3">{day}</h4>
+                        {daySlots.length === 0 ? (
+                          <p className="text-sm text-gray-500 text-center py-4">Aucun créneau</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {daySlots.map(slot => (
+                              <div key={slot.id} className={`p-3 rounded-lg text-sm ${slot.active ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}>
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <div className="font-medium text-gray-900">
+                                      {slot.startTime} - {slot.endTime}
+                                    </div>
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      Capacité: {slot.capacity} | Intervalle: {slot.intervalMinutes}min
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <button
+                                      onClick={() => openEditSlotModal(slot)}
+                                      className="p-1.5 text-blue-600 hover:bg-blue-100 rounded"
+                                      title="Modifier"
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => deleteSlot(slot.id)}
+                                      className="p-1.5 text-red-600 hover:bg-red-100 rounded"
+                                      title="Supprimer"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </div>
+                                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${slot.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>
+                                  {slot.active ? 'Actif' : 'Inactif'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Créneaux bloqués - Admin uniquement */}
+            {(() => {
+              const user = JSON.parse(localStorage.getItem('user') || '{}');
+              return user.role === 'ADMIN' ? (
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Créneaux bloqués</h3>
+                      <p className="text-sm text-gray-500">Bloquez des créneaux pour les jours de fermeture ou événements spéciaux</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowBlockedSlotForm(true);
+                        setSlotError('');
+                        setSlotSuccess('');
+                      }}
+                      className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg inline-flex items-center gap-2"
+                    >
+                      <Plus size={18} />
+                      Bloquer
+                    </button>
+                  </div>
+
+                  {blockedSlots.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-8">Aucun créneau bloqué</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left font-semibold text-gray-700">Date</th>
+                            <th className="px-4 py-2 text-left font-semibold text-gray-700">Horaires</th>
+                            <th className="px-4 py-2 text-left font-semibold text-gray-700">Raison</th>
+                            <th className="px-4 py-2 text-right font-semibold text-gray-700">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {blockedSlots.map(slot => (
+                            <tr key={slot.id} className="border-t">
+                              <td className="px-4 py-3">{new Date(slot.date).toLocaleDateString('fr-FR')}</td>
+                              <td className="px-4 py-3">
+                                {slot.startTime ? `${slot.startTime} - ${slot.endTime || 'fin'}` : 'Journée entière'}
+                              </td>
+                              <td className="px-4 py-3">{slot.reason}</td>
+                              <td className="px-4 py-3 text-right">
+                                <button
+                                  onClick={() => deleteBlockedSlot(slot.id)}
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                  title="Débloquer"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ) : null;
+            })()}
           </div>
         )}
       </div>
@@ -1120,6 +1656,136 @@ const AdminUsers = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPermissionsModal && editingPermissions && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-5 mx-auto p-4 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[95vh] overflow-y-auto">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-xl font-medium text-gray-900">
+                    Gérer les permissions
+                  </h3>
+                  <p className="text-gray-600 mt-1">
+                    Employé: {editingPermissions.firstName} {editingPermissions.lastName} ({editingPermissions.email})
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowPermissionsModal(false);
+                    setEditingPermissions(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {loadingPermissions ? (
+                <div className="flex justify-center items-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2">Chargement...</span>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Sélectionnez les pages auxquelles cet employé aura accès et les actions qu'il pourra effectuer.
+                  </p>
+                  
+                  {modules.map((module) => (
+                    <div key={module.key} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{module.label}</h4>
+                          <p className="text-sm text-gray-500">{module.description}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const allSelected = permissions[module.key]?.canView && 
+                                              permissions[module.key]?.canCreate && 
+                                              permissions[module.key]?.canEdit && 
+                                              permissions[module.key]?.canDelete;
+                            handleSelectAllForModule(module.key, !allSelected);
+                          }}
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          {permissions[module.key]?.canView && 
+                           permissions[module.key]?.canCreate && 
+                           permissions[module.key]?.canEdit && 
+                           permissions[module.key]?.canDelete ? 'Tout désélectionner' : 'Tout sélectionner'}
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={permissions[module.key]?.canView || false}
+                            onChange={(e) => handlePermissionChange(module.key, 'canView', e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">Consulter</span>
+                        </label>
+                        
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={permissions[module.key]?.canCreate || false}
+                            onChange={(e) => handlePermissionChange(module.key, 'canCreate', e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">Créer</span>
+                        </label>
+                        
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={permissions[module.key]?.canEdit || false}
+                            onChange={(e) => handlePermissionChange(module.key, 'canEdit', e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">Modifier</span>
+                        </label>
+                        
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={permissions[module.key]?.canDelete || false}
+                            onChange={(e) => handlePermissionChange(module.key, 'canDelete', e.target.checked)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">Supprimer</span>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3 pt-6 mt-8 border-t">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPermissionsModal(false);
+                    setEditingPermissions(null);
+                  }}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={saveEmployeePermissions}
+                  disabled={loadingPermissions}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  Sauvegarder
+                </button>
+              </div>
             </div>
           </div>
         </div>

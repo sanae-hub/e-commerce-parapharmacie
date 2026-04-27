@@ -1,4 +1,3 @@
-// frontend/src/pages/Products.jsx
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
@@ -32,7 +31,7 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedSubcategory, setSelectedSubcategory] = useState('')
   const [selectedItem, setSelectedItem] = useState('')
-  const [sortBy, setSortBy] = useState('trending') // trending, price-asc, price-desc, newest, name
+  const [sortBy, setSortBy] = useState('trending')
   const [showFilters, setShowFilters] = useState(false)
   
   const observerTarget = useRef(null)
@@ -271,7 +270,6 @@ const Products = () => {
 
         {/* Filtres et Tris */}
         <div className="mb-6 space-y-4">
-          {/* Toggle Filtres + Tri */}
           <div className="flex items-center justify-between bg-white rounded-lg shadow-sm p-4">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -313,7 +311,6 @@ const Products = () => {
           {/* Filtres Dropdown */}
           {showFilters && (
             <div className="bg-white rounded-lg shadow-sm p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* Catégorie */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Catégorie</label>
                 <select
@@ -328,7 +325,6 @@ const Products = () => {
                 </select>
               </div>
 
-              {/* Sous-catégorie */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Sous-catégorie</label>
                 <select
@@ -344,7 +340,6 @@ const Products = () => {
                 </select>
               </div>
 
-              {/* Item */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Item</label>
                 <select
@@ -360,7 +355,6 @@ const Products = () => {
                 </select>
               </div>
 
-              {/* Actions */}
               <div className="flex items-end">
                 <button
                   onClick={() => setShowFilters(false)}
@@ -372,7 +366,9 @@ const Products = () => {
             </div>
           )}
         </div>
-        {products.length === 0 ? (
+
+        {/* Products List */}
+        {products.length === 0 && !loading ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <Filter size={64} className="mx-auto text-gray-300 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Aucun produit trouvé</h2>
@@ -395,7 +391,7 @@ const Products = () => {
                     product={product}
                     onAddToCart={addToCart}
                     onToggleFavorite={handleToggleFavorite}
-                    isFavorite={isFavorite(product)}
+                    isFavorite={isFavorite(product.id)}
                   />
                 ))}
               </div>
@@ -410,7 +406,7 @@ const Products = () => {
                     product={product}
                     onAddToCart={addToCart}
                     onToggleFavorite={handleToggleFavorite}
-                    isFavorite={isFavorite(product)}
+                    isFavorite={isFavorite(product.id)}
                   />
                 ))}
               </div>
