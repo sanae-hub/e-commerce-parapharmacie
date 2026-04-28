@@ -22,6 +22,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
         notificationSMS: true,
         notificationWhatsApp: true,
         notificationPush: true,
+        authProvider: true,
       },
     });
 

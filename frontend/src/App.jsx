@@ -15,29 +15,28 @@ function App() {
   const [showClickCollectInfo, setShowClickCollectInfo] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
   const hasCleaned = useRef(false)
-  const hasCheckedPhone = useRef(false)
 
-  // Vérifier si l'utilisateur Google a besoin de compléter son profil
+  // Afficher le modal téléphone UNIQUEMENT pour les utilisateurs Google sans téléphone
   useEffect(() => {
-    if (user && !hasCheckedPhone.current && !loading) {
-      hasCheckedPhone.current = true
-      
-      // Vérifier si c'est un utilisateur sans téléphone
+    if (user && !loading) {
+      // Seulement pour les comptes Google
+      if (user.authProvider !== 'google') return
+
+      // Seulement si pas de téléphone
       const needsPhone = !user.phone || user.phone.trim() === ''
-      
-      // Afficher le modal seulement si nécessaire et pas sur certaines pages
+      if (!needsPhone) return
+
+      // Clé unique par utilisateur : ne montrer qu'une seule fois
+      const dismissedKey = `phone_modal_dismissed_${user.id}`
+      if (localStorage.getItem(dismissedKey)) return
+
+      // Ne pas afficher sur certaines pages
       const excludedPaths = ['/profile', '/login', '/signup', '/admin']
-      const shouldShowModal = needsPhone && 
-        !excludedPaths.some(path => location.pathname.startsWith(path))
-      
-      if (shouldShowModal) {
-        // Délai pour laisser l'utilisateur voir la page d'abord
-        setTimeout(() => {
-          setShowPhoneModal(true)
-        }, 2000)
-      }
+      if (excludedPaths.some(path => location.pathname.startsWith(path))) return
+
+      setTimeout(() => setShowPhoneModal(true), 2000)
     }
-  }, [user, loading, location.pathname])
+  }, [user?.id, loading])
 
   // Gérer la soumission du modal téléphone
   const handlePhoneSubmit = async (formData) => {
@@ -50,6 +49,8 @@ function App() {
         notificationWhatsApp: formData.notificationWhatsApp,
         notificationPush: formData.notificationPush
       })
+      // Marquer comme traité pour ne plus jamais afficher
+      if (user?.id) localStorage.setItem(`phone_modal_dismissed_${user.id}`, '1')
       setShowPhoneModal(false)
     } catch (error) {
       throw error
@@ -157,7 +158,10 @@ function App() {
       {/* Modal pour compléter le profil */}
       <PhoneRequiredModal
         isOpen={showPhoneModal}
-        onClose={() => setShowPhoneModal(false)}
+        onClose={() => {
+          if (user?.id) localStorage.setItem(`phone_modal_dismissed_${user.id}`, '1')
+          setShowPhoneModal(false)
+        }}
         onSubmit={handlePhoneSubmit}
         user={user}
       />

@@ -10,6 +10,7 @@ import AppRoutes from './routes/index'
 import './index.css'
 import { WebSocketProvider } from './context/WebSocketContext'
 import { AdminWebSocketProvider } from './context/AdminWebSocketContext'
+import { PermissionsProvider } from './context/PermissionsContext'
 
 // Google Client ID
 const GOOGLE_CLIENT_ID = '1024523760942-q8q2qqeujam35kcdcvv09vk79d6lm0ho.apps.googleusercontent.com'
@@ -40,6 +41,7 @@ const AppWrapper = () => {
     }}>
       <BrowserRouter>
         <AuthProvider>
+          <PermissionsProvider>
           <CartProvider>
             <FavoritesProvider>
               <AdminWebSocketProvider>
@@ -50,6 +52,7 @@ const AppWrapper = () => {
               </AdminWebSocketProvider>
             </FavoritesProvider>
           </CartProvider>
+          </PermissionsProvider>
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>

@@ -8,6 +8,7 @@ import {
   Gift, Sparkles, Flame, Crown, BadgePercent , Upload, ArrowLeft
 } from 'lucide-react';
 import adminApi from '../api/adminAxios';
+import { usePermissions } from '../context/PermissionsContext';
 
 // Liste des icônes disponibles pour les promotions
 const AVAILABLE_ICONS = [
@@ -23,6 +24,8 @@ const AVAILABLE_ICONS = [
 ];
 
 const AdminPromotions = () => {
+  const { canCreate, canEdit, canDelete } = usePermissions();
+  const btn = (allowed, cls) => allowed ? cls : cls + ' opacity-40 cursor-not-allowed pointer-events-none';
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('promo-codes');
   const [loading, setLoading] = useState(false);
@@ -471,11 +474,13 @@ const handleCreatePromotion = async (data) => {
 
           <button
             onClick={() => {
+              if (!canCreate('promotions')) return;
               setFormData(null);
               setPreviewImage('');
               setShowForm(true);
             }}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors w-full lg:w-auto"
+            disabled={!canCreate('promotions')}
+            className={btn(canCreate('promotions'), 'flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors w-full lg:w-auto')}
           >
             <Plus size={18} />
             {activeTab === 'promo-codes' ? 'Nouveau Code' : 'Nouvelle Bannière'}
@@ -494,8 +499,9 @@ const handleCreatePromotion = async (data) => {
                 <Tag size={48} className="mx-auto text-gray-400 mb-4" />
                 <p className={isDarkTheme ? 'text-gray-400 mb-2' : 'text-gray-600 mb-2'}>Aucun code promo</p>
                 <button
-                  onClick={() => setShowForm(true)}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
+                  onClick={() => canCreate('promotions') && setShowForm(true)}
+                  disabled={!canCreate('promotions')}
+                  className={btn(canCreate('promotions'), 'text-purple-600 hover:text-purple-700 font-medium')}
                 >
                   Créer un code promo
                 </button>
@@ -530,18 +536,17 @@ const handleCreatePromotion = async (data) => {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
-                            setFormData(promo);
-                            setShowForm(true);
-                          }}
-                          className={isDarkTheme ? 'p-2 text-gray-500 hover:text-gray-300' : 'p-2 text-gray-400 hover:text-gray-600'}
+                          onClick={() => { if (!canEdit('promotions')) return; setFormData(promo); setShowForm(true); }}
+                          disabled={!canEdit('promotions')}
+                          className={btn(canEdit('promotions'), isDarkTheme ? 'p-2 text-gray-500 hover:text-gray-300' : 'p-2 text-gray-400 hover:text-gray-600')}
                           title="Modifier"
                         >
                           <Edit2 size={18} />
                         </button>
                         <button
-                          onClick={() => handleDeletePromoCode(promo.id)}
-                          className="p-2 text-red-400 hover:text-red-600"
+                          onClick={() => canDelete('promotions') && handleDeletePromoCode(promo.id)}
+                          disabled={!canDelete('promotions')}
+                          className={btn(canDelete('promotions'), 'p-2 text-red-400 hover:text-red-600')}
                           title="Supprimer"
                         >
                           <Trash2 size={18} />
@@ -583,12 +588,13 @@ const handleCreatePromotion = async (data) => {
                         </span>
                       )}
                       <button
-                        onClick={() => togglePromoCodeStatus(promo.id, promo.active)}
-                        className={`ml-auto px-3 py-1 rounded text-sm font-medium transition-colors ${
+                        onClick={() => canEdit('promotions') && togglePromoCodeStatus(promo.id, promo.active)}
+                        disabled={!canEdit('promotions')}
+                        className={btn(canEdit('promotions'), `ml-auto px-3 py-1 rounded text-sm font-medium transition-colors ${
                           promo.active
                             ? isDarkTheme ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
                             : isDarkTheme ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                        }`)}
                       >
                         {promo.active ? 'Actif' : 'Inactif'}
                       </button>
@@ -672,8 +678,9 @@ const handleCreatePromotion = async (data) => {
                 <Percent size={48} className="mx-auto text-gray-400 mb-4" />
                 <p className={isDarkTheme ? 'text-gray-400 mb-2' : 'text-gray-600 mb-2'}>Aucune promotion</p>
                 <button
-                  onClick={() => setShowForm(true)}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
+                  onClick={() => canCreate('promotions') && setShowForm(true)}
+                  disabled={!canCreate('promotions')}
+                  className={btn(canCreate('promotions'), 'text-purple-600 hover:text-purple-700 font-medium')}
                 >
                   Créer une promotion
                 </button>
@@ -707,18 +714,17 @@ const handleCreatePromotion = async (data) => {
                           </div>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => {
-                                setFormData(promotion);
-                                setShowForm(true);
-                              }}
-                              className={isDarkTheme ? 'p-2 text-gray-500 hover:text-gray-300' : 'p-2 text-gray-400 hover:text-gray-600'}
+                              onClick={() => { if (!canEdit('promotions')) return; setFormData(promotion); setShowForm(true); }}
+                              disabled={!canEdit('promotions')}
+                              className={btn(canEdit('promotions'), isDarkTheme ? 'p-2 text-gray-500 hover:text-gray-300' : 'p-2 text-gray-400 hover:text-gray-600')}
                               title="Modifier"
                             >
                               <Edit2 size={18} />
                             </button>
                             <button
-                              onClick={() => handleDeletePromotion(promotion.id)}
-                              className="p-2 text-red-400 hover:text-red-600"
+                              onClick={() => canDelete('promotions') && handleDeletePromotion(promotion.id)}
+                              disabled={!canDelete('promotions')}
+                              className={btn(canDelete('promotions'), 'p-2 text-red-400 hover:text-red-600')}
                               title="Supprimer"
                             >
                               <Trash2 size={18} />
@@ -765,12 +771,13 @@ const handleCreatePromotion = async (data) => {
                             <span className={isDarkTheme ? 'text-xs text-orange-400' : 'text-xs text-orange-600'}>Plus que {promotion.stock} exemplaires</span>
                           )}
                           <button
-                            onClick={() => togglePromotionStatus(promotion.id, promotion.active)}
-                            className={`ml-auto px-3 py-1 rounded text-sm font-medium transition-colors ${
+                            onClick={() => canEdit('promotions') && togglePromotionStatus(promotion.id, promotion.active)}
+                            disabled={!canEdit('promotions')}
+                            className={btn(canEdit('promotions'), `ml-auto px-3 py-1 rounded text-sm font-medium transition-colors ${
                               promotion.active
                                 ? isDarkTheme ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
                                 : isDarkTheme ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                            }`)}
                           >
                             {promotion.active ? 'Activée' : 'Désactivée'}
                           </button>
@@ -1029,7 +1036,7 @@ const handleCreatePromotion = async (data) => {
       </div>
 
       {/* Modal Formulaire Promotion */}
-      {showForm && activeTab === 'promotions' && (
+      {showForm && activeTab === 'promotions' && (canCreate('promotions') || (formData && canEdit('promotions'))) && (
         <PromotionFormModal
           data={formData}
           onSubmit={formData ? handleUpdatePromotion : handleCreatePromotion}
@@ -1043,7 +1050,7 @@ const handleCreatePromotion = async (data) => {
       )}
 
       {/* Modal Formulaire Code Promo */}
-      {showForm && activeTab === 'promo-codes' && (
+      {showForm && activeTab === 'promo-codes' && (canCreate('promotions') || (formData && canEdit('promotions'))) && (
         <PromoCodeFormModal
           data={formData}
           onSubmit={formData ? handleUpdatePromoCode : handleCreatePromoCode}

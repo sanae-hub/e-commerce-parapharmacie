@@ -25,6 +25,7 @@ model User {
   isActive          Boolean   @default(true)
   resetToken        String?
   resetTokenExpiry  DateTime?
+  authProvider      String    @default("local") // local, google
   cart              Json?     @default("[]")
   salary           Float?
   createdAt         DateTime  @default(now())

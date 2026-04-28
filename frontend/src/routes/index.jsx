@@ -111,13 +111,7 @@ const AppRoutes = () => {
 
       {/* Admin */}
       <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/employee" element={
-        <AdminRoute>
-          <EmployeeDashboardProvider>
-            <EmployeeWelcome />
-          </EmployeeDashboardProvider>
-        </AdminRoute>
-      } />
+      <Route path="/admin/employee" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/admin/admindashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />

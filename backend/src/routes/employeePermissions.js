@@ -1,274 +1,124 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import { verifyAdmin } from '../middleware/auth.js';
+import { verifyAdmin, authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// GET /admin/employees/permissions/modules - Lister tous les modules disponibles
-router.get('/modules', (req, res) => {
-   const modules = [
-     {
-       key: 'products',
-       label: 'Produits',
-       description: 'Gestion du catalogue produits (ajout, modification, suppression, visualisation)'
-     },
-     {
-       key: 'orders',
-       label: 'Commandes',
-       description: 'Gestion des commandes clients (consultation, modification de statut)'
-     },
-     {
-       key: 'reports',
-       label: 'Rapports',
-       description: 'Accès aux rapports statistiques et analyses'
-     },
-     {
-       key: 'promotions',
-       label: 'Promotions',
-       description: 'Gestion des promotions et codes promo'
-     },
-     {
-       key: 'timeslots',
-       label: 'Créneaux horaires',
-       description: 'Gestion des créneaux de retrait et calendrier'
-     },
-     {
-       key: 'suppliers',
-       label: 'Fournisseurs',
-       description: 'Gestion des fournisseurs et commandes fournisseurs'
-     },
-     {
-       key: 'categories',
-       label: 'Catégories',
-       description: 'Gestion des catégories et sous-catégories'
-     },
-     {
-       key: 'customers',
-       label: 'Clients',
-       description: 'Gestion des comptes clients'
-     },
-     {
-       key: 'inventory',
-       label: 'Inventaire',
-       description: 'Gestion des stocks et mouvements'
-     },
-     {
-       key: 'settings',
-       label: 'Paramètres',
-       description: 'Configuration générale du système'
-     },
-     {
-       key: 'employees',
-       label: 'Employés',
-       description: 'Gestion des comptes employés et permissions'
-     }
-   ];
+// Liste centralisée des modules — correspond exactement aux pages admin
+export const ADMIN_MODULES = [
+  { key: 'products',           label: 'Produits',              path: '/admin/products' },
+  { key: 'categories',         label: 'Catégories',            path: '/admin/categories' },
+  { key: 'orders',             label: 'Commandes',             path: '/admin/orders' },
+  { key: 'promotions',         label: 'Promotions',            path: '/admin/promotions' },
+  { key: 'timeslots',          label: 'Créneaux horaires',     path: '/admin/time-slots' },
+  { key: 'customers',          label: 'Clients/Utilisateurs',  path: '/admin/users' },
+  { key: 'reports',            label: 'Rapports',              path: '/admin/reports' },
+  { key: 'suppliers',          label: 'Fournisseurs',          path: '/admin/suppliers' },
+  { key: 'purchase_orders',    label: 'Bons de commande',      path: '/admin/purchase-orders' },
+  { key: 'supplier_discounts', label: 'Remises fournisseurs',  path: '/admin/supplier-discounts' },
+  { key: 'inventory',          label: 'Gestion du stock',      path: '/admin/stock' },
+  { key: 'reviews',            label: 'Avis clients',          path: '/admin/reviews' },
+  { key: 'settings',           label: 'Paramètres',            path: '/admin/settings' },
+];
 
-   res.json(modules);
+// GET /api/admin/employees/permissions/modules — liste des modules (admin)
+router.get('/modules', verifyAdmin, (req, res) => {
+  res.json(ADMIN_MODULES);
 });
 
-// GET /admin/employees/:id/permissions - Récupérer toutes les permissions d'un employé
+// GET /api/admin/employees/permissions/my — permissions de l'employé connecté
+router.get('/my', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { role: true }
+    });
+
+    // Admin = tous les droits
+    if (user?.role === 'ADMIN') {
+      const allPerms = {};
+      ADMIN_MODULES.forEach(m => {
+        allPerms[m.key] = { canView: true, canCreate: true, canEdit: true, canDelete: true };
+      });
+      return res.json({ permissions: allPerms });
+    }
+
+    // Employé = permissions depuis la base
+    const rows = await prisma.employeePermission.findMany({
+      where: { userId: req.userId }
+    });
+
+    const permissions = {};
+    ADMIN_MODULES.forEach(m => {
+      const row = rows.find(r => r.module === m.key);
+      permissions[m.key] = row
+        ? { canView: row.canView, canCreate: row.canCreate, canEdit: row.canEdit, canDelete: row.canDelete }
+        : { canView: false, canCreate: false, canEdit: false, canDelete: false };
+    });
+
+    res.json({ permissions });
+  } catch (error) {
+    console.error('Get my permissions error:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// GET /api/admin/employees/permissions/:userId — permissions d'un employé (admin)
 router.get('/:userId', verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Vérifier que l'utilisateur est bien un employé
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true }
+      select: { id: true, firstName: true, lastName: true, email: true, role: true }
     });
 
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    }
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    if (user.role !== 'EMPLOYE') return res.status(400).json({ message: 'Cet utilisateur n\'est pas un employé' });
 
-    if (user.role !== 'EMPLOYE' && user.role !== 'PREPARATEUR' && user.role !== 'CAISSIER') {
-      return res.status(400).json({ message: 'Cet utilisateur n\'est pas un employé' });
-    }
+    const rows = await prisma.employeePermission.findMany({ where: { userId } });
 
-    // Récupérer les permissions existantes
-    const permissions = await prisma.employeePermission.findMany({
-      where: { userId },
-      orderBy: { module: 'asc' }
+    const permissions = {};
+    ADMIN_MODULES.forEach(m => {
+      const row = rows.find(r => r.module === m.key);
+      permissions[m.key] = row
+        ? { canView: row.canView, canCreate: row.canCreate, canEdit: row.canEdit, canDelete: row.canDelete }
+        : { canView: false, canCreate: false, canEdit: false, canDelete: false };
     });
 
-    // Retourner un objet clé par module pour faciliter l'usage frontend
-    const permissionsMap = {};
-    permissions.forEach(p => {
-      permissionsMap[p.module] = {
-        canView: p.canView,
-        canCreate: p.canCreate,
-        canEdit: p.canEdit,
-        canDelete: p.canDelete
-      };
-    });
-
-    res.json({ userId, permissions: permissionsMap });
+    res.json({ user, permissions });
   } catch (error) {
     console.error('Get employee permissions error:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
-// PUT /admin/employees/:id/permissions - Mettre à jour les permissions d'un employé
+// PUT /api/admin/employees/permissions/:userId — mettre à jour les permissions (admin)
 router.put('/:userId', verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { permissions } = req.body; // { products: { canView: true, canCreate: false, ... }, ... }
+    const { permissions } = req.body;
 
-    // Vérifier que l'utilisateur est bien un employé
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true }
-    });
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    if (user.role !== 'EMPLOYE') return res.status(400).json({ message: 'Cet utilisateur n\'est pas un employé' });
 
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    }
-
-    if (user.role !== 'EMPLOYE' && user.role !== 'PREPARATEUR' && user.role !== 'CAISSIER') {
-      return res.status(400).json({ message: 'Cet utilisateur n\'est pas un employé' });
-    }
-
-    // Récupérer les modules disponibles pour comparaison
-    const availableModules = [
-      'products', 'orders', 'reports', 'promotions',
-      'timeslots', 'suppliers', 'categories', 'customers',
-      'inventory', 'settings', 'employees'
-    ];
-
-    // Upsert chaque permission
-    for (const module of availableModules) {
-      const permData = permissions[module] || {
-        canView: false,
-        canCreate: false,
-        canEdit: false,
-        canDelete: false
-      };
-
+    // Upsert chaque module
+    for (const m of ADMIN_MODULES) {
+      const p = permissions[m.key] || { canView: false, canCreate: false, canEdit: false, canDelete: false };
       await prisma.employeePermission.upsert({
-        where: { userId_module: { userId, module } },
-        update: {
-          canView: permData.canView,
-          canCreate: permData.canCreate,
-          canEdit: permData.canEdit,
-          canDelete: permData.canDelete
-        },
-        create: {
-          userId,
-          module,
-          canView: permData.canView,
-          canCreate: permData.canCreate,
-          canEdit: permData.canEdit,
-          canDelete: permData.canDelete
-        }
+        where: { userId_module: { userId, module: m.key } },
+        update:  { canView: !!p.canView, canCreate: !!p.canCreate, canEdit: !!p.canEdit, canDelete: !!p.canDelete },
+        create:  { userId, module: m.key, canView: !!p.canView, canCreate: !!p.canCreate, canEdit: !!p.canEdit, canDelete: !!p.canDelete }
       });
     }
 
-    // Récupérer les permissions mises à jour
-    const updatedPermissions = await prisma.employeePermission.findMany({
-      where: { userId },
-      orderBy: { module: 'asc' }
-    });
-
-    const permissionsMap = {};
-    updatedPermissions.forEach(p => {
-      permissionsMap[p.module] = {
-        canView: p.canView,
-        canCreate: p.canCreate,
-        canEdit: p.canEdit,
-        canDelete: p.canDelete
-      };
-    });
-
-    res.json({
-      message: 'Permissions mises à jour',
-      permissions: permissionsMap
-    });
+    res.json({ message: 'Permissions mises à jour avec succès' });
   } catch (error) {
     console.error('Update employee permissions error:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
-});
-
-// DELETE /admin/employees/:userId/permissions - Supprimer toutes les permissions d'un employé (réinitialiser)
-router.delete('/:userId', verifyAdmin, async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    await prisma.employeePermission.deleteMany({
-      where: { userId }
-    });
-
-    res.json({ message: 'Permissions réinitialisées' });
-  } catch (error) {
-    console.error('Delete employee permissions error:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-});
-
-// GET /admin/employees/permissions/modules - Lister tous les modules disponibles
-router.get('/modules', (req, res) => {
-  const modules = [
-    {
-      key: 'products',
-      label: 'Produits',
-      description: 'Gestion du catalogue produits (ajout, modification, suppression, visualisation)'
-    },
-    {
-      key: 'orders',
-      label: 'Commandes',
-      description: 'Gestion des commandes clients (consultation, modification de statut)'
-    },
-    {
-      key: 'reports',
-      label: 'Rapports',
-      description: 'Accès aux rapports statistiques et analyses'
-    },
-    {
-      key: 'promotions',
-      label: 'Promotions',
-      description: 'Gestion des promotions et codes promo'
-    },
-    {
-      key: 'timeslots',
-      label: 'Créneaux horaires',
-      description: 'Gestion des créneaux de retrait et calendrier'
-    },
-    {
-      key: 'suppliers',
-      label: 'Fournisseurs',
-      description: 'Gestion des fournisseurs et commandes fournisseurs'
-    },
-    {
-      key: 'categories',
-      label: 'Catégories',
-      description: 'Gestion des catégories et sous-catégories'
-    },
-    {
-      key: 'customers',
-      label: 'Clients',
-      description: 'Gestion des comptes clients'
-    },
-    {
-      key: 'inventory',
-      label: 'Inventaire',
-      description: 'Gestion des stocks et mouvements'
-    },
-    {
-      key: 'settings',
-      label: 'Paramètres',
-      description: 'Configuration générale du système'
-    },
-    {
-      key: 'employees',
-      label: 'Employés',
-      description: 'Gestion des comptes employés et permissions'
-    }
-  ];
-
-  res.json(modules);
 });
 
 export default router;

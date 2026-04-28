@@ -254,12 +254,13 @@ app.post('/api/auth/google', async (req, res) => {
           email, 
           firstName: given_name || 'Utilisateur', 
           lastName: family_name || 'Google', 
-          phone: '', // Vide pour forcer la saisie
+          phone: '',
           address: '', 
           password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10), 
           profileImage: picture || null, 
           role: 'CLIENT',
-          whatsapp: '', // Vide pour forcer la saisie
+          authProvider: 'google',
+          whatsapp: '',
           notificationEmail: true,
           notificationSMS: false,
           notificationWhatsApp: false,
@@ -269,7 +270,7 @@ app.post('/api/auth/google', async (req, res) => {
     }
     if (!user.isActive) return res.status(403).json({ message: 'Compte désactivé' });
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ message: 'Connexion Google réussie', token, user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role } });
+    res.json({ message: 'Connexion Google réussie', token, user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role, authProvider: user.authProvider } });
   } catch (error) {
     console.error('Google auth error:', error);
     res.status(500).json({ message: 'Erreur serveur' });

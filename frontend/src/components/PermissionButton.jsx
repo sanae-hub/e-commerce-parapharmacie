@@ -1,38 +1,15 @@
-import React from 'react';
-import { useEmployeePermissions } from '../hooks/useEmployeePermissions';
+import { usePermissions } from '../context/PermissionsContext';
 
-const PermissionButton = ({ 
-  children, 
-  module, 
-  action = 'canView', 
-  className = '',
-  disabled = false,
-  ...props 
-}) => {
-  const { hasPermission, loading } = useEmployeePermissions();
+// Rend le bouton invisible si l'employé n'a pas la permission
+// Usage: <PermissionButton module="products" action="canDelete" onClick={...}>Supprimer</PermissionButton>
+const PermissionButton = ({ children, module, action = 'canView', className = '', disabled = false, ...props }) => {
+  const { can, loading } = usePermissions();
 
-  if (loading) {
-    return (
-      <button 
-        className={`${className} opacity-50 cursor-not-allowed`} 
-        disabled={true}
-        {...props}
-      >
-        {children}
-      </button>
-    );
-  }
-
-  if (!hasPermission(module, action)) {
-    return null; // Ne pas afficher le bouton si pas de permission
-  }
+  if (loading) return null;
+  if (!can(module, action)) return null;
 
   return (
-    <button 
-      className={className} 
-      disabled={disabled}
-      {...props}
-    >
+    <button className={className} disabled={disabled} {...props}>
       {children}
     </button>
   );
