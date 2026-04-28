@@ -8,6 +8,11 @@ import ImageUpload from '../components/ImageUpload'
 import { useBrands } from '../hooks/useBrands'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { usePermissions } from '../context/PermissionsContext'
+
+// Helper : classe CSS selon permission
+const btn = (allowed, activeClass) =>
+  allowed ? activeClass : `${activeClass} opacity-40 cursor-not-allowed pointer-events-none`;
 
 const AdminProducts = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -31,11 +36,16 @@ const AdminProducts = () => {
   const [isCategorySuggested, setIsCategorySuggested] = useState(false)
   const [selectedBrand, setSelectedBrand] = useState('')
   const { brands, refreshBrands } = useBrands()
+  const { canCreate, canEdit, canDelete } = usePermissions()
 
   // Cascading data
   const [categories, setCategories] = useState([])
-  const [subcategories, setSubcategories] = useState([])   // filtered by selected category
-  const [items, setItems] = useState([])                   // filtered by selected subcategory
+  // Formulaire modal : sous-catégories et items
+  const [formSubcategories, setFormSubcategories] = useState([])
+  const [formItems, setFormItems] = useState([])
+  // Filtres de la liste : sous-catégories et items
+  const [subcategories, setSubcategories] = useState([])
+  const [items, setItems] = useState([])
   
   // Variants management
   const [variants, setVariants] = useState([])
@@ -75,29 +85,26 @@ const AdminProducts = () => {
     fetchVariantTypes()
   }, [])
 
-   // When categoryId changes → filter subcategories
+   // Formulaire : quand categoryId change → mettre à jour formSubcategories
+   // NE PAS reset subcategoryId/subcategoryItemId ici (géré manuellement dans handleEdit et handleInputChange)
    useEffect(() => {
     if (formData.categoryId && categories.length > 0) {
       const cat = categories.find(c => c.id === formData.categoryId)
-      setSubcategories(cat?.subcategories || [])
+      setFormSubcategories(cat?.subcategories || [])
     } else {
-      setSubcategories([])
+      setFormSubcategories([])
     }
-    // Reset downstream
-    setFormData(prev => ({ ...prev, subcategoryId: '', subcategoryItemId: '' }))
-    setItems([])
   }, [formData.categoryId, categories])
 
-  // When subcategoryId changes → filter items
+  // Formulaire : quand subcategoryId change → mettre à jour formItems
   useEffect(() => {
-    if (formData.subcategoryId && subcategories.length > 0) {
-      const sub = subcategories.find(s => s.id === formData.subcategoryId)
-      setItems(sub?.items || [])
+    if (formData.subcategoryId && formSubcategories.length > 0) {
+      const sub = formSubcategories.find(s => s.id === formData.subcategoryId)
+      setFormItems(sub?.items || [])
     } else {
-      setItems([])
+      setFormItems([])
     }
-    setFormData(prev => ({ ...prev, subcategoryItemId: '' }))
-  }, [formData.subcategoryId, subcategories])
+  }, [formData.subcategoryId, formSubcategories])
 
   // Sync filter: when selectedCategory changes → filter subcategories
   useEffect(() => {
@@ -130,8 +137,10 @@ const AdminProducts = () => {
       setLoading(true)
       const response = await axios.get('/products?limit=500&active=all&t=' + Date.now())
       const products = response.data.products || response.data || []
-      // Ensure productVariants is always an array
-      const normalized = products.map(p => ({
+      // Exclure les produits de la catégorie Promotions
+      const normalized = products
+        .filter(p => p.category?.name !== 'Promotions')
+        .map(p => ({
         ...p,
         productVariants: p.productVariants || []
       }))
@@ -682,25 +691,13 @@ const AdminProducts = () => {
             </div>
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
               <div className="relative group">
-                <button className="flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg transition-colors font-medium text-sm">
+                <button
+                  onClick={() => exportProducts('pdf')}
+                  className="flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg transition-colors font-medium text-sm"
+                >
                   <Download size={16} />
-                  <span className="hidden sm:inline">Exporter</span>
-                  <ChevronDown size={14} />
+                  <span className="hidden sm:inline">Exporter PDF</span>
                 </button>
-                <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-                  <button
-                    onClick={() => exportProducts('csv')}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm flex items-center gap-2"
-                  >
-                    <FileText size={14} /> CSV
-                  </button>
-                  <button
-                    onClick={() => exportProducts('pdf')}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm flex items-center gap-2"
-                  >
-                    <FileText size={14} /> PDF
-                  </button>
-                </div>
               </div>
               <input
                 type="file"
@@ -709,21 +706,25 @@ const AdminProducts = () => {
                 onChange={handleImport}
                 className="hidden"
               />
+              {canCreate('products') && (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                disabled={importing}
-                className="flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 px-3 py-2 rounded-lg transition-colors font-medium text-sm disabled:opacity-50"
+                disabled={importing || !canCreate('products')}
+                className={btn(canCreate('products'), 'flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 px-3 py-2 rounded-lg transition-colors font-medium text-sm disabled:opacity-50')}
               >
                 {importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                 <span className="hidden sm:inline">Importer</span>
               </button>
+              )}
+              {canCreate('products') && (
               <button
                 onClick={() => { setEditingProduct(null); resetForm(); setIsModalOpen(true) }}
-                className="flex items-center gap-2 bg-sky-700 hover:bg-sky-800 text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                className={btn(canCreate('products'), 'flex items-center gap-2 bg-sky-700 hover:bg-sky-800 text-white px-3 py-2 rounded-lg transition-colors text-sm')}
               >
                 <Plus size={18} />
                 <span className="hidden sm:inline">Ajouter</span>
               </button>
+              )}
             </div>
           </div>
         </div>
@@ -888,7 +889,7 @@ const AdminProducts = () => {
                             {product.expiryDate ? new Date(product.expiryDate).toLocaleDateString('fr-FR') : '—'}
                           </td>
                           <td className="px-2 py-2">
-                            <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1 mr-1" title="Modifier"><Edit size={14} /></button>
+                            <button onClick={() => canEdit('products') && handleEdit(product)} disabled={!canEdit('products')} className={btn(canEdit('products'), 'text-sky-600 hover:text-sky-900 p-1 mr-1')} title="Modifier"><Edit size={14} /></button>
                             <button 
                               onClick={() => handleToggleActive(product.id, product.active)}
                               className={`p-1 mr-1 ${product.active ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}`}
@@ -896,7 +897,7 @@ const AdminProducts = () => {
                             >
                               {product.active ? <EyeOff size={14} /> : <Eye size={14} />}
                             </button>
-                            <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1" title="Supprimer"><Trash2 size={14} /></button>
+                            <button onClick={() => canDelete('products') && handleDelete(product.id)} disabled={!canDelete('products')} className={btn(canDelete('products'), 'text-red-600 hover:text-red-900 p-1')} title="Supprimer"><Trash2 size={14} /></button>
                           </td>
                         </>
                       ) : (
@@ -931,7 +932,7 @@ const AdminProducts = () => {
                             </span>
                           </td>
                           <td className="px-3 py-3 text-sm">
-                            <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1 mr-1" title="Modifier"><Edit size={16} /></button>
+                            <button onClick={() => canEdit('products') && handleEdit(product)} disabled={!canEdit('products')} className={btn(canEdit('products'), 'text-sky-600 hover:text-sky-900 p-1 mr-1')} title="Modifier"><Edit size={16} /></button>
                             <button 
                               onClick={() => handleToggleActive(product.id, product.active)}
                               className={`p-1 mr-1 ${product.active ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}`}
@@ -939,7 +940,7 @@ const AdminProducts = () => {
                             >
                               {product.active ? <EyeOff size={14} /> : <Eye size={14} />}
                             </button>
-                            <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900 p-1" title="Supprimer"><Trash2 size={16} /></button>
+                            <button onClick={() => canDelete('products') && handleDelete(product.id)} disabled={!canDelete('products')} className={btn(canDelete('products'), 'text-red-600 hover:text-red-900 p-1')} title="Supprimer"><Trash2 size={16} /></button>
                           </td>
                         </>
                       )}
@@ -991,8 +992,8 @@ const AdminProducts = () => {
                                  })() : '—'}
                                </td>
                                <td className="px-2 py-2">
-                                 <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1"><Edit size={14} /></button>
-                                 <button onClick={() => handleDeleteVariant(product.id, variant.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 size={14} /></button>
+                                 <button onClick={() => canEdit('products') && handleEdit(product)} disabled={!canEdit('products')} className={btn(canEdit('products'), 'text-sky-600 hover:text-sky-900 p-1')}><Edit size={14} /></button>
+                                 <button onClick={() => canDelete('products') && handleDeleteVariant(product.id, variant.id)} disabled={!canDelete('products')} className={btn(canDelete('products'), 'text-red-600 hover:text-red-900 p-1')}><Trash2 size={14} /></button>
                                </td>
                              </>
                            ) : (
@@ -1027,8 +1028,8 @@ const AdminProducts = () => {
                                   </span>
                                 </td>
                                 <td className="px-3 py-2">
-                                  <button onClick={() => handleEdit(product)} className="text-sky-600 hover:text-sky-900 p-1"><Edit size={16} /></button>
-                                  <button onClick={() => handleDeleteVariant(product.id, variant.id)} className="text-red-600 hover:text-red-900 p-1"><Trash2 size={16} /></button>
+                                  <button onClick={() => canEdit('products') && handleEdit(product)} disabled={!canEdit('products')} className={btn(canEdit('products'), 'text-sky-600 hover:text-sky-900 p-1')}><Edit size={16} /></button>
+                                  <button onClick={() => canDelete('products') && handleDeleteVariant(product.id, variant.id)} disabled={!canDelete('products')} className={btn(canDelete('products'), 'text-red-600 hover:text-red-900 p-1')}><Trash2 size={16} /></button>
                                 </td>
                               </>
                           )}

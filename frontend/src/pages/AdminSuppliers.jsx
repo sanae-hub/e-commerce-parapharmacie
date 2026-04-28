@@ -9,9 +9,12 @@ import {
 } from 'lucide-react';
 import adminApi from '../api/adminAxios';
 import axios from '../api/axios';
+import { usePermissions } from '../context/PermissionsContext';
 
 const AdminSuppliers = () => {
   const navigate = useNavigate();
+  const { canCreate, canEdit, canDelete } = usePermissions();
+  const btn = (allowed, cls) => allowed ? cls : cls + ' opacity-40 cursor-not-allowed pointer-events-none';
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState([]);
   const [pagination, setPagination] = useState(null);

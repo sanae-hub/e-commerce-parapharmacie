@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, DollarSign, Package, Clock, AlertTriangle,
   TrendingUp, Calendar, Users, LogOut, Bell, RefreshCw, Tag, Radio,
-  Grid3x3, Layers, Truck, ExternalLink, Star, BarChart2, MapPin, Settings
+  Grid3x3, Layers, Truck, ExternalLink, Star, BarChart2, Settings
 } from 'lucide-react';
 
 import {
@@ -14,13 +14,32 @@ import api from '../api/axios';
 import adminApi from '../api/adminAxios';
 import AdminNotifications from '../components/AdminNotifications';
 import { useAdminWebSocket } from '../context/AdminWebSocketContext';
-import { useEmployeePermissions } from '../hooks/useEmployeePermissions';
+import { usePermissions } from '../context/PermissionsContext';
+import { useAuth } from '../context/AuthContext';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isConnected, stats, notificationCount, clearNotifications } = useAdminWebSocket();
-  const { canAccessModule, hasPermission, loading: permissionsLoading } = useEmployeePermissions();
+  const { canView, loading: permissionsLoading } = usePermissions();
+
+  // Menu dynamique — filtré selon les permissions
+  const ALL_MENU_ITEMS = [
+    { path: '/admin/products',        label: 'Produits',          icon: Grid3x3,    module: 'products' },
+    { path: '/admin/categories',      label: 'Catégories',        icon: Layers,     module: 'categories' },
+    { path: '/admin/orders',          label: 'Commandes',         icon: ShoppingCart, module: 'orders' },
+    { path: '/admin/promotions',      label: 'Promotions',        icon: Tag,        module: 'promotions' },
+    { path: '/admin/time-slots',      label: 'Créneaux',          icon: Clock,      module: 'timeslots' },
+    { path: '/admin/users',           label: 'Utilisateurs',      icon: Users,      module: 'customers' },
+    { path: '/admin/reports',         label: 'Rapports',          icon: TrendingUp, module: 'reports' },
+    { path: '/admin/suppliers',       label: 'Fournisseurs',      icon: Truck,      module: 'suppliers' },
+    { path: '/admin/purchase-orders', label: 'Bons de commande',  icon: Package,    module: 'purchase_orders' },
+    { path: '/admin/stock',           label: 'Stock',             icon: BarChart2,  module: 'inventory' },
+    { path: '/admin/reviews',         label: 'Avis clients',      icon: Star,       module: 'reviews' },
+    { path: '/admin/settings',        label: 'Paramètres',        icon: Settings,   module: 'settings' },
+  ];
+  const menuItems = ALL_MENU_ITEMS.filter(item => canView(item.module));
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showListMenu, setShowListMenu] = useState(false);
@@ -234,7 +253,7 @@ const AdminDashboard = () => {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Dashboard Admin</h1>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-600">Parapharmacie ParaClick</p>
+                  <p className="text-sm text-gray-600">Parapharmacie ParaClick{user?.role === 'EMPLOYE' ? ` • Employé : ${user.firstName} ${user.lastName}` : ''}</p>
                 </div>
               </div>
             </div>
@@ -281,161 +300,18 @@ const AdminDashboard = () => {
             className="w-64 bg-white border-r border-gray-200 shadow-sm flex-shrink-0"
           >
             <nav className="flex flex-col gap-1 p-4">
-              {/* SECTION PRODUITS */}
-              {canAccessModule('products') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/products');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Grid3x3 size={16} /> Produits
-                </button>
-              )}
-              
-              {/* SECTION CATÉGORIES */}
-              {canAccessModule('categories') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/categories');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Layers size={16} /> Catégories
-                </button>
-              )}
-              
-              {/* SECTION COMMANDES */}
-              {canAccessModule('orders') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/orders');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <ShoppingCart size={16} /> Commandes
-                </button>
-              )}
-              
-              {/* SECTION PROMOTIONS */}
-              {canAccessModule('promotions') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/promotions');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Tag size={16} /> Promotions
-                </button>
-              )}
-              
-              {/* SECTION CRÉNEAUX */}
-              {canAccessModule('timeslots') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/time-slots');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Clock size={16} /> Créneaux
-                </button>
-              )}
-              
-              {/* SECTION UTILISATEURS */}
-              {canAccessModule('customers') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/users');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Users size={16} /> Utilisateurs
-                </button>
-              )}
-              
-              {/* SECTION RAPPORTS */}
-              {canAccessModule('reports') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/reports');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <TrendingUp size={16} /> Rapports
-                </button>
-              )}
-              
-              {/* SECTION FOURNISSEURS */}
-              {canAccessModule('suppliers') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/suppliers');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Truck size={16} /> Fournisseurs
-                </button>
-              )}
-              
-              {/* SECTION BONS DE COMMANDE */}
-              {canAccessModule('suppliers') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/purchase-orders');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Package size={16} /> Bons de commande
-                </button>
-              )}
-              
-              {/* SECTION AVIS CLIENTS */}
-              {canAccessModule('reviews') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/reviews');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Star size={16} /> Avis clients
-                </button>
-              )}
-              
-              {/* SECTION GESTION DU STOCK */}
-              {canAccessModule('inventory') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/stock');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <BarChart2 size={16} /> Gestion du stock
-                </button>
-              )}
-              
-              {/* SECTION RÉGLAGES */}
-              {canAccessModule('settings') && (
-                <button
-                  onClick={() => {
-                    navigate('/admin/settings');
-                    setShowListMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg"
-                >
-                  <Settings size={16} /> Réglages
-                </button>
-              )}
+              {menuItems.map(item => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => { navigate(item.path); setShowListMenu(false); }}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2 rounded-lg text-sm"
+                  >
+                    <Icon size={16} /> {item.label}
+                  </button>
+                );
+              })}
             </nav>
           </aside>
         )}
@@ -446,7 +322,7 @@ const AdminDashboard = () => {
         {/* KPIs Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Commandes du jour */}
-          {canAccessModule('orders') && (
+          {canView('orders') && (
             <div 
               onClick={() => navigate('/admin/orders')}
               className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500 relative cursor-pointer hover:bg-blue-50 transition-colors"
@@ -466,7 +342,7 @@ const AdminDashboard = () => {
           )}
 
           {/* CA Journalier */}
-          {canAccessModule('reports') && (
+          {canView('reports') && (
             <div 
               onClick={() => navigate('/admin/reports')}
               className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500 cursor-pointer hover:bg-green-50 transition-colors"
@@ -481,7 +357,7 @@ const AdminDashboard = () => {
           )}
 
           {/* CA Mensuel */}
-          {canAccessModule('reports') && (
+          {canView('reports') && (
             <div 
               onClick={() => navigate('/admin/reports')}
               className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500 cursor-pointer hover:bg-purple-50 transition-colors"
@@ -496,7 +372,7 @@ const AdminDashboard = () => {
           )}
 
           {/* Créneaux réservés */}
-          {canAccessModule('timeslots') && (
+          {canView('timeslots') && (
             <div 
               onClick={() => navigate('/admin/time-slots')}
               className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 relative cursor-pointer hover:bg-orange-50 transition-colors"

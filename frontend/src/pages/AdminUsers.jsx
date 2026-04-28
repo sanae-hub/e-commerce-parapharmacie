@@ -9,10 +9,13 @@ import {
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import adminApi from '../api/adminAxios';
+import { usePermissions } from '../context/PermissionsContext';
 
 const AdminUsers = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('clients');
+  const { canCreate, canEdit, canDelete } = usePermissions();
+  const btn = (allowed, cls) => allowed ? cls : cls + ' opacity-40 cursor-not-allowed pointer-events-none';
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState(null);

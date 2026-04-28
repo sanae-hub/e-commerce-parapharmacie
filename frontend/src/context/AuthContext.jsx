@@ -61,12 +61,16 @@ export const AuthProvider = ({ children }) => {
       const { token, user: userData } = response.data
 
       localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(userData))
       localStorage.removeItem('adminToken')
       localStorage.removeItem('adminUser')
-      setUser(userData)
 
-      return { success: true, user: userData }
+      // Charger le profil complet (avec authProvider) après login
+      const profileRes = await axios.get('/user/profile', { headers: { Authorization: `Bearer ${token}` } })
+      const fullUser = { ...profileRes.data, role: userData.role || profileRes.data.role }
+      localStorage.setItem('user', JSON.stringify(fullUser))
+      setUser(fullUser)
+
+      return { success: true, user: fullUser }
     } catch (error) {
       return {
         success: false,
@@ -80,9 +84,14 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post('/auth/google', { credential })
       const { token, user: userData } = response.data
       localStorage.setItem('token', token)
-      localStorage.setItem('user', JSON.stringify(userData))
-      setUser(userData)
-      return { success: true, user: userData }
+
+      // Charger le profil complet (avec authProvider) après login Google
+      const profileRes = await axios.get('/user/profile', { headers: { Authorization: `Bearer ${token}` } })
+      const fullUser = { ...profileRes.data, role: userData.role || profileRes.data.role }
+      localStorage.setItem('user', JSON.stringify(fullUser))
+      setUser(fullUser)
+
+      return { success: true, user: fullUser }
     } catch (error) {
       return { success: false, error: error.response?.data?.message || 'Erreur Google' }
     }

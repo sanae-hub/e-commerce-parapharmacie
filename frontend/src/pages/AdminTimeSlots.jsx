@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Calendar, Plus, Trash2, X, ArrowLeft } from 'lucide-react';
 import adminApi from '../api/adminAxios';
+import { usePermissions } from '../context/PermissionsContext';
 
 const DAYS_ALL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const DAYS_DOW = [0, 1, 2, 3, 4, 5, 6];
@@ -55,6 +56,9 @@ const getMinTimeForToday = (currentTimeMinutes) => {
 };
 
 const AdminTimeSlots = () => {
+  const { canCreate, canEdit, canDelete } = usePermissions();
+  const btn = (allowed, activeClass) =>
+    allowed ? activeClass : `${activeClass} opacity-40 cursor-not-allowed pointer-events-none`;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('days');
@@ -338,11 +342,11 @@ const AdminTimeSlots = () => {
                     <div className="flex items-center justify-between mb-3">
                       <span className={`font-semibold ${dow === 0 ? 'text-gray-400' : 'text-gray-900'}`}>{dayName}</span>
                       <button
-                        onClick={() => toggleDay(dow)}
-                        disabled={dow === 0}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        onClick={() => canEdit('timeslots') && toggleDay(dow)}
+                        disabled={dow === 0 || !canEdit('timeslots')}
+                        className={btn(canEdit('timeslots'), `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           isActive ? 'bg-green-500' : 'bg-gray-300'
-                        } ${dow === 0 ? 'cursor-not-allowed opacity-50' : ''}`}
+                        } ${dow === 0 ? 'cursor-not-allowed opacity-50' : ''}`)}
                       >
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
                           isActive ? 'translate-x-6' : 'translate-x-1'
@@ -363,8 +367,9 @@ const AdminTimeSlots = () => {
                           )}
                         </div>
                         <button
-                          onClick={() => openEditDay(dow)}
-                          className="w-full text-xs text-sky-700 border border-sky-200 rounded-lg py-1.5 hover:bg-sky-50 transition-colors flex items-center justify-center gap-1"
+                          onClick={() => canEdit('timeslots') && openEditDay(dow)}
+                          disabled={!canEdit('timeslots')}
+                          className={btn(canEdit('timeslots'), 'w-full text-xs text-sky-700 border border-sky-200 rounded-lg py-1.5 hover:bg-sky-50 transition-colors flex items-center justify-center gap-1')}
                         >
                           Modifier les horaires
                         </button>
@@ -406,8 +411,9 @@ const AdminTimeSlots = () => {
                         {index > 0 && <span className="text-xs text-gray-500 ml-2">Déjà défini: {period.startTime}-{period.endTime}</span>}
                       </div>
                       {editDay.periods.length > 1 && (
-                        <button type="button" onClick={() => removePeriod(index)}
-                          className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors">
+                        <button type="button" onClick={() => canDelete('timeslots') && removePeriod(index)}
+                          disabled={!canDelete('timeslots')}
+                          className={btn(canDelete('timeslots'), 'p-1 text-red-500 hover:bg-red-50 rounded transition-colors')}>
                           <Trash2 size={14} />
                         </button>
                       )}
@@ -450,8 +456,9 @@ const AdminTimeSlots = () => {
                 ))}
               </div>
               
-              <button type="button" onClick={addPeriod}
-                className="w-full mt-4 py-2.5 border-2 border-dashed border-sky-300 text-sky-700 rounded-lg text-sm font-medium hover:bg-sky-50 transition-colors flex items-center justify-center gap-2">
+              <button type="button" onClick={() => canCreate('timeslots') && addPeriod()}
+                disabled={!canCreate('timeslots')}
+                className={btn(canCreate('timeslots'), 'w-full mt-4 py-2.5 border-2 border-dashed border-sky-300 text-sky-700 rounded-lg text-sm font-medium hover:bg-sky-50 transition-colors flex items-center justify-center gap-2')}>
                 <Plus size={16} /> Ajouter une autre plage horaire
               </button>
 
@@ -461,7 +468,8 @@ const AdminTimeSlots = () => {
                   Annuler
                 </button>
                 <button type="submit"
-                  className="flex-1 py-2 bg-sky-700 text-white rounded-lg text-sm hover:bg-sky-800 font-medium transition-colors">
+                  disabled={!canEdit('timeslots')}
+                  className={btn(canEdit('timeslots'), 'flex-1 py-2 bg-sky-700 text-white rounded-lg text-sm hover:bg-sky-800 font-medium transition-colors')}>
                   ✅ Enregistrer {editDay.periods.length} {editDay.periods.length === 1 ? 'plage' : 'plages'}
                 </button>
               </div>

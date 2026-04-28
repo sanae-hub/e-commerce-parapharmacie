@@ -7,12 +7,15 @@ import {
 } from 'lucide-react';
 import adminApi from '../api/adminAxios';
 import { useAdminWebSocket } from '../context/AdminWebSocketContext';
+import { usePermissions } from '../context/PermissionsContext';
 
 
 const AdminOrders = () => {
    const navigate = useNavigate();
    const [searchParams] = useSearchParams();
    const statusParam = searchParams.get('status');
+   const { canEdit, canDelete } = usePermissions();
+   const btn = (allowed, cls) => allowed ? cls : cls + ' opacity-40 cursor-not-allowed pointer-events-none';
    const searchParam = searchParams.get('search');
    const [orders, setOrders] = useState([]);
    const [loading, setLoading] = useState(true);
