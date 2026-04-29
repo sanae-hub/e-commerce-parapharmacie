@@ -155,11 +155,6 @@ const AdminOrders = () => {
     }
   };
 
-  const handleSort = (field) => {
-    const newOrder = filters.sortBy === field && filters.sortOrder === 'desc' ? 'asc' : 'desc';
-    setFilters({ ...filters, sortBy: field, sortOrder: newOrder });
-  };
-
   const handleExportOrders = async () => {
     try {
       const params = new URLSearchParams();

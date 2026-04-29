@@ -112,13 +112,6 @@ const AdminStock = () => {
     return () => clearInterval(interval);
   }, [typeFilter, activeTab]);
 
-  const fetchTotals = async () => {
-    setTotalsLoading(true);
-    try { const { data } = await adminApi.get('/admin/stock/stats-totals'); setTotals(data); }
-    catch { setTotals({ salesTotal: 0, returnsTotal: 0 }); }
-    finally { setTotalsLoading(false); }
-  };
-
   const fetchStats = async () => {
     setStatsLoading(true);
     try { const { data } = await adminApi.get('/stock/stats'); setStats(data); }

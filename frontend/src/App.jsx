@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from 'react'
 
 function App() {
   const { user, loading, logout, updateProfile } = useAuth()
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const [showClickCollectInfo, setShowClickCollectInfo] = useState(false)

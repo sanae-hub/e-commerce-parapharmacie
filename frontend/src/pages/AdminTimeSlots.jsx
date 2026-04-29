@@ -66,27 +66,6 @@ const AdminTimeSlots = () => {
     };
   };
 
-const timeToMinutes = (timeStr) => {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  return hours * 60 + minutes;
-};
-
-const getMinTimeForToday = (currentTimeMinutes) => {
-  const rounded = Math.ceil(currentTimeMinutes / 30) * 30;
-  const hours = Math.floor(rounded / 60);
-  const minutes = rounded % 60;
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-};
-
-const AdminTimeSlots = () => {
-  const { canCreate, canEdit, canDelete } = usePermissions();
-  const btn = (allowed, activeClass) =>
-    allowed ? activeClass : `${activeClass} opacity-40 cursor-not-allowed pointer-events-none`;
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('days');
-  const [{ orderedDays, orderedDows, currentDow, currentTimeMinutes }, setDayOrder] = useState(getOrderedDays());
-
   const [configs, setConfigs] = useState([]);
   const [blockedSlots, setBlockedSlots] = useState([]);
   const [todayReservations, setTodayReservations] = useState([]);
