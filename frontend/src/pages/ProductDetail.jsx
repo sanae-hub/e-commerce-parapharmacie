@@ -1,6 +1,7 @@
-// frontend/src/pages/ProductDetail.jsx
+﻿// frontend/src/pages/ProductDetail.jsx
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useCart } from '../context/CartContext'
 import { useFavorites } from '../context/FavoritesContext'
 import { useAuth } from '../context/AuthContext'
@@ -8,14 +9,26 @@ import { ArrowLeft, Heart, ShoppingCart, Star, Package, CheckCircle, Truck, Shie
 import { calculateDiscountPercentage, formatDiscountPercentage } from '../lib/utils'
 import SimilarProductCard from '../components/SimilarProductCard'
 import axios from '../api/axios'
+import { useAutoTranslate, useAutoTranslateArray, useAutoTranslateObject } from '../hooks/useAutoTranslate'
+
+const TranslatedText = ({ text }) => {
+  const translated = useAutoTranslate(text)
+  return <>{translated}</>
+}
 
 const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
+  const isAr = i18n.language?.startsWith('ar')
   const { cartItems, addToCart, updateQuantity } = useCart()
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isAuthenticated } = useAuth()
   const [product, setProduct] = useState(null)
+  const translatedProduct = useAutoTranslateObject(product, ['brand', 'name', 'description', 'usage', 'composition'])
+  const translatedSimilarProducts = useAutoTranslateArray(similarProducts, ['name'])
+  // safe accessor — falls back to original product field
+  const tp = (field) => translatedProduct?.[field] || product?.[field]
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [quantity, setQuantity] = useState(1)
@@ -90,7 +103,7 @@ const ProductDetail = () => {
       
     } catch (error) {
       console.error('Erreur chargement produit:', error)
-      setError('Produit non trouvé')
+      setError(t('product.not_found'))
     } finally {
       setLoading(false)
     }
@@ -130,9 +143,9 @@ const ProductDetail = () => {
     const stock = selectedVariant?.stock ?? product.stock ?? 0
     if (quantity > stock) {
       const itemName = selectedVariant 
-        ? `${product.name} (${selectedVariant.value})`
-        : product.name
-      alert(`❌ Stock insuffisant pour "${itemName}". Disponible: ${stock} unité(s)`)
+        ? `${tp('name')} (${selectedVariant.value})`
+        : tp('name')
+      alert(`❌ ${t('product.stock_insufficient')} "${itemName}". ${t('product.available')}: ${stock} ${t('product.units')}`)
       return
     }
 
@@ -164,7 +177,7 @@ const ProductDetail = () => {
     if (!newReview.name || !newReview.comment) return
     const token = localStorage.getItem('token')
     if (!token) {
-      alert('Vous devez être connecté pour laisser un avis')
+      alert(t('stock_alert.login_required'))
       return
     }
     try {
@@ -174,13 +187,13 @@ const ProductDetail = () => {
       setReviewSubmitted(true)
       setNewReview({ rating: 5, comment: '', name: '' })
     } catch (error) {
-      alert('Erreur lors de la soumission de l\'avis')
+      alert(t('product.review_submit_error'))
     }
   }
 
   const handleShare = (platform) => {
     const url = window.location.href
-    const text = `Découvrez ${product.name} sur ParaClick`
+    const text = t('product.share_discover', { name: tp('name') })
     
     const shareUrls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -196,7 +209,7 @@ const ProductDetail = () => {
   const handleStockAlertSubmit = async (e) => {
     e.preventDefault()
     if (!stockAlertEmail || !stockAlertEmail.includes('@')) {
-      alert('Veuillez entrer une adresse email valide')
+      alert(t('stock_alert.invalid_email'))
       return
     }
 
@@ -222,7 +235,7 @@ const ProductDetail = () => {
         setStockAlertEmail('')
       }, 3000)
     } catch (error) {
-      alert(error.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.')
+      alert(error.response?.data?.message || t('common.generic_retry_error'))
     } finally {
       setStockAlertLoading(false)
     }
@@ -241,13 +254,13 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Package size={64} className="mx-auto text-gray-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Produit non trouvé</h2>
-          <p className="text-gray-600 mb-6">Le produit que vous recherchez n'existe pas ou a été supprimé.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('product.not_found')}</h2>
+          <p className="text-gray-600 mb-6">{t('product.not_found_desc')}</p>
           <button
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-sky-700 hover:bg-sky-800 text-white rounded-lg"
           >
-            Retour à l'accueil
+            {t('product.back_home')}
           </button>
         </div>
       </div>
@@ -268,7 +281,7 @@ const ProductDetail = () => {
           className="flex items-center gap-2 text-sky-700 font-semibold mb-6 hover:text-sky-800"
         >
           <ArrowLeft size={20} />
-          Retour
+          {t('common.back')}
         </button>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -278,7 +291,7 @@ const ProductDetail = () => {
               <div className="relative bg-gray-100 rounded-xl overflow-hidden aspect-square mb-4">
                 <img
                   src={images[selectedImage]}
-                  alt={product.name}
+                  alt={tp('name') || product.name}
                   className="w-full h-full object-cover cursor-zoom-in"
                   onClick={() => setShowLightbox(true)}
                   onError={(e) => { e.target.src = '/images/placeholder.svg' }}
@@ -308,7 +321,7 @@ const ProductDetail = () => {
                         selectedImage === index ? 'border-sky-700' : 'border-gray-200'
                       }`}
                     >
-                      <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={img} alt={`${tp('name') || product.name} ${index + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -317,12 +330,12 @@ const ProductDetail = () => {
 
             {/* Informations */}
             <div>
-              <p className="text-sm text-gray-500 mb-2">{product.brand || 'Marque'}</p>
+              <p className="text-sm text-gray-500 mb-2">{tp('brand') || t('product.brand')}</p>
               <div className="flex items-center gap-3 mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{tp('name')}</h1>
                 {isNew && (
                   <span className="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full uppercase tracking-wide">
-                    Nouveau
+                    {t('product.new_badge')}
                   </span>
                 )}
               </div>
@@ -337,12 +350,12 @@ const ProductDetail = () => {
                     />
                   ))}
                 </div>
-                <span className="text-gray-600">({reviews.length + (product.reviews || 0)} avis)</span>
+                <span className="text-gray-600">({reviews.length + (product.reviews || 0)} {t('product.reviews_count')})</span>
               </div>
 
               <div className="bg-sky-50 p-6 rounded-2xl border border-sky-100 mb-8 shadow-sm">
                 <div className="flex items-baseline gap-4 mb-1">
-                  <span className="text-5xl font-black text-sky-800 tracking-tighter">
+                  <span className="text-5xl font-black text-sky-800 tracking-tighter ltr">
                     {(() => {
                       const variantPrice = selectedVariant?.price != null ? selectedVariant.price : null
                       const basePrice = product.priceHT || product.price || 0
@@ -356,17 +369,17 @@ const ProductDetail = () => {
                     const basePrice = product.priceHT || product.price || 0
                     return variantPrice !== null ? variantPrice : basePrice
                   })() && (
-                    <span className="text-xl text-gray-400 line-through font-medium">
+                    <span className="text-xl text-gray-400 line-through font-medium ltr">
                       {product.oldPrice.toFixed(2)} DH
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs font-bold text-sky-600 uppercase tracking-widest">Taxes Incluses (TTC)</p>
+                  <p className="text-xs font-bold text-sky-600 uppercase tracking-widest">{t('product.taxes_included')}</p>
                   <div className="h-1 w-1 bg-sky-300 rounded-full" />
                   <div className="flex items-center gap-1.5 text-green-600">
                     <CheckCircle size={14} className="fill-green-100" />
-                    <span className="text-xs font-bold uppercase tracking-wider">En Stock</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">{t('product.in_stock')}</span>
                   </div>
                 </div>
               </div>
@@ -374,7 +387,7 @@ const ProductDetail = () => {
 
               {product.description && (
                 <div className="mb-6">
-                  <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                  <p className="text-gray-700 leading-relaxed">{tp('description')}</p>
                 </div>
               )}
 
@@ -382,7 +395,7 @@ const ProductDetail = () => {
               {product.productVariants && product.productVariants.length > 0 && (
                 <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <label className="block text-sm font-bold text-gray-900 mb-4">
-                    ✨ Sélectionner une variante
+                    {t('product.select_variant')}
                   </label>
                   <div className="space-y-5">
                     {/* Group variants by type */}
@@ -390,7 +403,7 @@ const ProductDetail = () => {
                       const groupedVariants = {}
                       product.productVariants.forEach(v => {
                         // Use variantType.label if available, otherwise use type
-                        const groupKey = v.variantType?.label || v.type || 'Variante'
+                        const groupKey = v.variantType?.label || v.type || t('product.variant_default_label')
                         if (!groupedVariants[groupKey]) groupedVariants[groupKey] = []
                         groupedVariants[groupKey].push(v)
                       })
@@ -420,14 +433,14 @@ const ProductDetail = () => {
                                   <div className="flex flex-col items-start gap-1">
                                     <span className="font-semibold">{variant.value}</span>
                                     {(variant.price != null || variant.priceAdjustment !== 0) && (
-                                      <span className="text-xs opacity-75">
+                                      <span className="text-xs opacity-75 ltr">
                                         {displayPrice.toFixed(2)} DH
                                       </span>
                                     )}
                                   </div>
                                   {!inStock && (
                                     <span className="absolute bottom-2 left-4 text-xs font-bold text-red-600">
-                                      ⚠️ Rupture
+                                      {t('product.variant_rupture')}
                                     </span>
                                   )}
                                 </button>
@@ -452,10 +465,10 @@ const ProductDetail = () => {
                           )}
                           <div className="flex-1">
                             <h3 className="text-sm font-bold text-gray-900 mb-1">
-                              ✓ {selectedVariant.value} sélectionné
+                              {selectedVariant.value} {t('product.selected_variant')}
                             </h3>
                             <p className="text-xs text-gray-600 mb-2">
-                              Prix: <span className="font-bold text-lg text-sky-700">
+                              {t('product.variant_price')}: <span className="font-bold text-lg text-sky-700 ltr">
                                 {(selectedVariant.price != null ? selectedVariant.price : product.price + (selectedVariant.priceAdjustment || 0)).toFixed(2)} DH
                               </span>
                             </p>
@@ -544,7 +557,7 @@ const ProductDetail = () => {
               )}
 
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Quantité</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">{t('product.quantity')}</label>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => {
@@ -620,7 +633,7 @@ const ProductDetail = () => {
                     className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-gray-200 transition-all hover:shadow-md"
                   >
                     <Lock size={18} />
-                    Connectez-vous pour commander
+                    {t('product.login_to_order')}
                   </button>
                 )}
                 <button
@@ -635,7 +648,7 @@ const ProductDetail = () => {
               </div>
 
               <div className="mb-6">
-                <p className="text-sm font-semibold text-gray-900 mb-3">Partager :</p>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{t('product.share')}</p>
                 <div className="flex gap-2">
                   <button onClick={() => handleShare('facebook')} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
                     <Facebook size={20} />
@@ -652,15 +665,15 @@ const ProductDetail = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Truck size={20} className="text-sky-700" />
-                  <span className="text-sm text-gray-700">Livraison gratuite</span>
+                  <span className="text-sm text-gray-700">{t('product.free_delivery')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Shield size={20} className="text-sky-700" />
-                  <span className="text-sm text-gray-700">Paiement sécurisé</span>
+                  <span className="text-sm text-gray-700">{t('product.secure_payment')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Package size={20} className="text-sky-700" />
-                  <span className="text-sm text-gray-700">Click & Collect</span>
+                  <span className="text-sm text-gray-700">{t('product.click_collect')}</span>
                 </div>
               </div>
             </div>
@@ -671,14 +684,14 @@ const ProductDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {product.usage && (
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Mode d'utilisation</h2>
-                    <p className="text-gray-700 leading-relaxed">{product.usage}</p>
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">{t('product.usage')}</h2>
+                    <p className="text-gray-700 leading-relaxed">{tp('usage')}</p>
                   </div>
                 )}
 
                 {product.benefits && Array.isArray(product.benefits) && product.benefits.length > 0 && (
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Bénéfices</h2>
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">{t('product.benefits')}</h2>
                     <ul className="space-y-2">
                       {product.benefits.map((benefit, index) => (
                         <li key={index} className="flex items-start gap-2">
@@ -693,8 +706,8 @@ const ProductDetail = () => {
 
               {product.composition && (
                 <div className="mt-8">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Composition</h2>
-                  <p className="text-gray-700 leading-relaxed text-sm">{product.composition}</p>
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">{t('product.composition')}</h2>
+                  <p className="text-gray-700 leading-relaxed text-sm">{tp('composition')}</p>
                 </div>
               )}
             </div>
@@ -702,13 +715,13 @@ const ProductDetail = () => {
 
           {/* Avis clients et produits similaires - reste identique */}
           <div className="border-t border-gray-200 p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Avis clients</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('product.reviews_title')}</h2>
             
             <div className="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Laisser un avis</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('product.leave_review')}</h3>
               <form onSubmit={handleSubmitReview}>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Votre nom</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('product.your_name')}</label>
                   <input
                     type="text"
                     value={newReview.name}
@@ -718,7 +731,7 @@ const ProductDetail = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('product.rating')}</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((rating) => (
                       <button
@@ -733,7 +746,7 @@ const ProductDetail = () => {
                   </div>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Votre commentaire</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('product.your_comment')}</label>
                   <textarea
                     value={newReview.comment}
                     onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
@@ -743,11 +756,11 @@ const ProductDetail = () => {
                   />
                 </div>
                 <button type="submit" className="px-6 py-2 bg-sky-700 hover:bg-sky-800 text-white font-semibold rounded-lg">
-                  Publier l'avis
+                  {t('product.submit_review')}
                 </button>
               </form>
               {reviewSubmitted && (
-                <p className="mt-3 text-sm text-green-600 font-medium">✓ Avis soumis, en attente de modération.</p>
+                <p className="mt-3 text-sm text-green-600 font-medium">{t('product.review_pending')}</p>
               )}
             </div>
 
@@ -763,7 +776,7 @@ const ProductDetail = () => {
                         ))}
                       </div>
                     </div>
-                    <span className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString('fr-FR')}</span>
+                    <span className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString(isAr ? 'ar-MA' : 'fr-FR')}</span>
                   </div>
                   <p className="text-gray-700">{review.comment}</p>
                 </div>
@@ -817,7 +830,7 @@ const ProductDetail = () => {
           <button onClick={() => setSelectedImage((prev) => (prev + 1) % images.length)} className="absolute right-4 p-2 bg-white rounded-full hover:bg-gray-100">
             <ChevronRight size={24} />
           </button>
-          <img src={images[selectedImage]} alt={product.name} className="max-w-full max-h-full object-contain" />
+          <img src={images[selectedImage]} alt={tp('name') || product.name} className="max-w-full max-h-full object-contain" />
         </div>
       )}
     </div>
@@ -825,3 +838,4 @@ const ProductDetail = () => {
 }
 
 export default ProductDetail
+

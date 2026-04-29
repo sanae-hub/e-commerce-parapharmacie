@@ -1,4 +1,4 @@
-// frontend/src/pages/AdminProducts.jsx
+﻿// frontend/src/pages/AdminProducts.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, ArrowLeft, Edit, Trash2, Search, Save, X, Loader2, Package, ChevronDown, ChevronUp, FileText, Tag, Filter, Download, Upload, Percent, Eye, EyeOff } from 'lucide-react'
@@ -17,6 +17,8 @@ const btn = (allowed, activeClass) =>
 const AdminProducts = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
+  const isAr = i18n.language?.startsWith('ar')
   const filterParam = searchParams.get('filter')
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -188,7 +190,7 @@ const AdminProducts = () => {
       const allProducts = response.data.products || response.data || []
       
       if (!allProducts || allProducts.length === 0) {
-        alert('Aucun produit à exporter')
+        alert(t('admin_products.no_products_export'))
         return
       }
 
@@ -335,7 +337,7 @@ const AdminProducts = () => {
       }, 100)
     } catch (error) {
       console.error('Erreur export:', error)
-      alert('Erreur lors de l\'export')
+      alert(t('admin_products.export_error'))
     }
   }
 
@@ -411,11 +413,10 @@ const AdminProducts = () => {
 
 
   const validateForm = () => {
-    if (!formData.name.trim()) { setFormError('Le nom du produit est requis'); return false }
-    if (!formData.priceHT)     { setFormError('Le prix HT est requis'); return false }
-    if (!formData.categoryId)  { setFormError('La catégorie est requise'); return false }
-
-    if (formData.stock === '')  { setFormError('Le stock est requis'); return false }
+    if (!formData.name.trim()) { setFormError(t('admin_products.validate_name_required')); return false }
+    if (!formData.priceHT)     { setFormError(t('admin_products.validate_price_required')); return false }
+    if (!formData.categoryId)  { setFormError(t('admin_products.validate_category_required')); return false }
+    if (formData.stock === '')  { setFormError(t('admin_products.validate_stock_required')); return false }
     return true
   }
 
@@ -485,7 +486,7 @@ const AdminProducts = () => {
       resetForm()
       fetchProducts()
     } catch (error) {
-      setFormError(error.response?.data?.message || 'Erreur lors de la sauvegarde')
+      setFormError(error.response?.data?.message || t('admin_products.save_error'))
     } finally {
       setSaving(false)
     }
@@ -583,7 +584,7 @@ const AdminProducts = () => {
   }
 
   const handleDelete = async (productId) => {
-    if (!window.confirm('Supprimer ce produit ?')) return
+    if (!window.confirm(t('admin_products.delete_confirm'))) return
     try {
       await axios.delete(`/products/${productId}`)
       fetchProducts()
@@ -629,7 +630,7 @@ const AdminProducts = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700 mx-auto" />
-          <p className="mt-4 text-gray-600">Chargement des produits...</p>
+          <p className="mt-4 text-gray-600">{t('admin_products.loading')}</p>
         </div>
       </div>
     )
@@ -647,12 +648,12 @@ const AdminProducts = () => {
                 <Filter size={18} className="text-sky-700" />
               </div>
               <div>
-                <p className="font-bold text-sm">Vue filtrée</p>
+                <p className="font-bold text-sm">{t('admin_products.filter_view')}</p>
                 <p className="text-xs opacity-90">
                   {
-                    filterParam === 'low-stock' ? 'Stock faible' :
-                    filterParam === 'out-of-stock' ? 'Rupture' :
-                    filterParam === 'expiring' ? 'Expirant bientôt' : filterParam
+                filterParam === 'low-stock' ? t('admin_products.filter_low_stock') :
+                    filterParam === 'out-of-stock' ? t('admin_products.filter_out_of_stock') :
+                    filterParam === 'expiring' ? t('admin_products.filter_expiring') : filterParam
                   }
                 </p>
               </div>
@@ -666,7 +667,7 @@ const AdminProducts = () => {
               }}
               className="px-3 py-1.5 bg-white border border-sky-200 text-sky-700 font-bold rounded-lg hover:bg-sky-50 transition-all shadow-sm flex items-center gap-1 text-sm"
             >
-              <X size={14} /> <span className="hidden sm:inline">Effacer</span>
+              <X size={14} /> <span className="hidden sm:inline">{t('admin_products.filter_banner_clear')}</span>
             </button>
           </div>
         )}
@@ -678,15 +679,15 @@ const AdminProducts = () => {
               <button
                 onClick={() => navigate('/admin/dashboard')}
                 className="p-2 bg-gray-50 text-gray-700 hover:text-sky-700 hover:bg-sky-50 rounded-xl transition-all border border-gray-100 flex items-center gap-2 group"
-                title="Retour au Tableau de Bord"
+                title={i18n.language?.startsWith('ar') ? 'العودة إلى لوحة التحكم' : 'Retour au Tableau de Bord'}
               >
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                <span className="text-sm font-semibold hidden lg:inline">Dashboard</span>
+                <span className="text-sm font-semibold hidden lg:inline">{i18n.language?.startsWith('ar') ? 'لوحة التحكم' : 'Dashboard'}</span>
               </button>
               <div className="h-8 w-px bg-gray-200 hidden md:block"></div>
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">Gestion des Produits</h1>
-                <p className="text-xs text-gray-500 mt-0.5">{products.length} produit(s) au total</p>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">{t('admin_products.title')}</h1>
+                <p className="text-xs text-gray-500 mt-0.5">{t('admin_products.count', { n: products.length })}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
@@ -713,7 +714,7 @@ const AdminProducts = () => {
                 className={btn(canCreate('products'), 'flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 px-3 py-2 rounded-lg transition-colors font-medium text-sm disabled:opacity-50')}
               >
                 {importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                <span className="hidden sm:inline">Importer</span>
+                <span className="hidden sm:inline">{t('admin_products.import')}</span>
               </button>
               )}
               {canCreate('products') && (
@@ -722,7 +723,7 @@ const AdminProducts = () => {
                 className={btn(canCreate('products'), 'flex items-center gap-2 bg-sky-700 hover:bg-sky-800 text-white px-3 py-2 rounded-lg transition-colors text-sm')}
               >
                 <Plus size={18} />
-                <span className="hidden sm:inline">Ajouter</span>
+                <span className="hidden sm:inline">{t('admin_products.add')}</span>
               </button>
               )}
             </div>
@@ -737,7 +738,7 @@ const AdminProducts = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
-                placeholder="Rechercher par nom ou marque..."
+                placeholder={t('admin_products.search_placeholder')}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
@@ -745,9 +746,9 @@ const AdminProducts = () => {
             </div>
             <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-600 whitespace-nowrap">
               <input type="checkbox" checked={showAllColumns} onChange={e => setShowAllColumns(e.target.checked)} className="w-4 h-4 text-sky-600 rounded" />
-              Détails complets
+              {t('admin_products.filter_view_label')}
             </label>
-            <span className="text-sm text-gray-500 text-center sm:text-left font-semibold">{filteredProducts.length} résultat(s)</span>
+              <span className="text-sm text-gray-500 text-center sm:text-left font-semibold">{t('admin_products.results', { n: filteredProducts.length })}</span>
           </div>
 
           {/* Advanced Filters */}
@@ -758,7 +759,7 @@ const AdminProducts = () => {
               onChange={e => setSelectedCategory(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 text-sm"
             >
-              <option value="">Toutes les catégories</option>
+              <option value="">{t('admin_products.all_categories')}</option>
               {categories.map(cat => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
@@ -771,7 +772,7 @@ const AdminProducts = () => {
               disabled={!selectedCategory}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 text-sm disabled:bg-gray-100 disabled:text-gray-400"
             >
-              <option value="">Toutes les sous-catégories</option>
+              <option value="">{t('admin_products.all_subcategories')}</option>
               {subcategories.map(sub => (
                 <option key={sub.id} value={sub.id}>{sub.title}</option>
               ))}
@@ -784,7 +785,7 @@ const AdminProducts = () => {
               disabled={!selectedSubcategory}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 text-sm disabled:bg-gray-100 disabled:text-gray-400"
             >
-              <option value="">Tous les articles</option>
+              <option value="">{t('admin_products.all_items')}</option>
               {items.map(item => (
                 <option key={item.id} value={item.id}>{item.name}</option>
               ))}
@@ -814,7 +815,7 @@ const AdminProducts = () => {
                 }}
                 className="px-3 py-2 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors"
               >
-                Réinitialiser les filtres
+                {t('admin_products.reset_filters')}
               </button>
             )}
           </div>
@@ -828,7 +829,7 @@ const AdminProducts = () => {
                 <tr>
                   {showAllColumns ? (
                     <>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Img</th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">{t('admin_products.image_label')}</th>
                       <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">ID</th>
                       <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Nom</th>
                       <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Catégorie</th>
@@ -886,7 +887,7 @@ const AdminProducts = () => {
                           </td>
                           <td className="px-2 py-2 text-xs text-gray-500 font-mono max-w-[100px] truncate">{product.barcode || '—'}</td>
                           <td className="px-2 py-2 text-xs text-gray-500">
-                            {product.expiryDate ? new Date(product.expiryDate).toLocaleDateString('fr-FR') : '—'}
+                            {product.expiryDate ? new Date(product.expiryDate).toLocaleDateString(isAr ? 'ar-MA' : 'fr-FR') : '—'}
                           </td>
                           <td className="px-2 py-2">
                             <button onClick={() => canEdit('products') && handleEdit(product)} disabled={!canEdit('products')} className={btn(canEdit('products'), 'text-sky-600 hover:text-sky-900 p-1 mr-1')} title="Modifier"><Edit size={14} /></button>
@@ -985,7 +986,7 @@ const AdminProducts = () => {
                                  {variant.expiryDate ? (() => {
                                    try {
                                      const d = new Date(variant.expiryDate);
-                                     return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+                                     return isNaN(d.getTime()) ? '—' : d.toLocaleDateString(isAr ? 'ar-MA' : 'fr-FR');
                                    } catch {
                                      return '—'
                                    }
@@ -1050,7 +1051,7 @@ const AdminProducts = () => {
           <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4 my-6">
             <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
               <h2 className="text-lg md:text-xl font-semibold text-gray-900">
-                {editingProduct ? 'Modifier' : 'Ajouter un produit'}
+                {editingProduct ? t('admin_products.modal_edit') : t('admin_products.modal_add')}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">
                 <X size={22} />
@@ -1070,28 +1071,28 @@ const AdminProducts = () => {
                 <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Tag size={16} className="text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">Code-barres : {formData.barcode}</span>
+                    <span className="text-sm font-medium text-blue-800">{t('admin_products.barcode_display_label')} {formData.barcode}</span>
                   </div>
                   <button 
                     type="button" 
                     onClick={() => setFormData(prev => ({ ...prev, barcode: '' }))}
                     className="text-xs text-blue-600 hover:underline"
                   >
-                    Effacer
+                    {t('admin_products.barcode_clear')}
                   </button>
                 </div>
               )}
 
               {/* Nom */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom du produit *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.name_label')}</label>
                 <input type="text" name="name" value={formData.name} onChange={handleInputChange} required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
               </div>
 
               {/* Marque */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Marque</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.brand_label')}</label>
                 <input type="text" name="brand" value={formData.brand} onChange={handleInputChange}
                   placeholder="ex: Doliprane, Nivea, SVR..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
@@ -1101,11 +1102,11 @@ const AdminProducts = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
-                    Catégorie *
+                    {t('admin_products.category_label')}
                     {isCategorySuggested && (
                       <span className="flex items-center gap-1 text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full border border-yellow-200 animate-pulse">
                         <span className="w-1 h-1 bg-yellow-400 rounded-full"></span>
-                        Suggéré
+                        {t('admin_products.suggested')}
                       </span>
                     )}
                   </label>
@@ -1121,41 +1122,41 @@ const AdminProducts = () => {
                       isCategorySuggested ? 'bg-yellow-50 border-yellow-300 ring-2 ring-yellow-100' : 'border-gray-300'
                     }`}
                   >
-                    <option value="">-- Catégorie --</option>
+                    <option value="">-- {t('admin_products.category_label')} --</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sous-catégorie</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.subcategory_label')}</label>
                   <select name="subcategoryId" value={formData.subcategoryId} onChange={handleInputChange}
                     disabled={!formData.categoryId || subcategories.length === 0}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 disabled:bg-gray-100 disabled:text-gray-400">
-                    <option value="">-- Sous-catégorie --</option>
+                    <option value="">{t('admin_products.subcategory_placeholder')}</option>
                     {subcategories.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
                   </select>
                   {formData.categoryId && subcategories.length === 0 && (
-                    <p className="text-xs text-gray-400 mt-1">Aucune sous-catégorie</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('admin_products.no_subcategory')}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Item</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.item_label')}</label>
                   <select name="subcategoryItemId" value={formData.subcategoryItemId} onChange={handleInputChange}
                     disabled={!formData.subcategoryId || items.length === 0}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 disabled:bg-gray-100 disabled:text-gray-400">
-                    <option value="">-- Item --</option>
+                    <option value="">{t('admin_products.item_placeholder')}</option>
                     {items.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
                   </select>
                   {formData.subcategoryId && items.length === 0 && (
-                    <p className="text-xs text-gray-400 mt-1">Aucun item</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('admin_products.no_item')}</p>
                   )}
                 </div>
               </div>
 
                {/* Barcode Field */}
                <div>
-                 <label className="block text-sm font-semibold text-green-800 mb-2">Code-barres (EAN)</label>
+                 <label className="block text-sm font-semibold text-green-800 mb-2">{t('admin_products.barcode_label')}</label>
                  <input 
                    type="text" 
                    name="barcode" 
@@ -1169,12 +1170,12 @@ const AdminProducts = () => {
               {/* Stock */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stock *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.stock_label')}</label>
                   <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Seuil alerte</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.stock_alert_label')}</label>
                   <input type="number" name="stockAlert" value={formData.stockAlert} onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
                 </div>
@@ -1183,16 +1184,16 @@ const AdminProducts = () => {
               {/* Pricing Section */}
               <div className="bg-sky-50/50 p-4 rounded-xl border border-sky-100 space-y-4">
                 <div className="flex items-center gap-2 mb-1 text-sky-800 font-semibold text-sm">
-                  <Tag size={16} /> Configuration des prix
+                  <Tag size={16} /> {t('admin_products.price_config')}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Prix HT (DH) *</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">{t('admin_products.price_ht')}</label>
                     <input type="number" name="priceHT" value={formData.priceHT} onChange={handleInputChange} step="0.01" required
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 bg-white" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Taux TVA</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">{t('admin_products.tax_rate')}</label>
                     <select name="taxRate" value={formData.taxRate} onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700 bg-white">
                       <option value="20">20% (Standard)</option>
@@ -1203,7 +1204,7 @@ const AdminProducts = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-sky-600 uppercase mb-1">Prix TTC (Client)</label>
+                    <label className="block text-xs font-bold text-sky-600 uppercase mb-1">{t('admin_products.price_ttc')}</label>
                     <div className="px-3 py-2 bg-sky-100 border border-sky-200 rounded-lg font-bold text-sky-900">
                       {formData.priceTTC || '0.00'} DH
                     </div>
@@ -1212,15 +1213,14 @@ const AdminProducts = () => {
 
                 
 
-                {/* Promotion - Réduction百分比 */}
                 {formData.priceTTC && parseFloat(formData.priceTTC) > 0 && (
                   <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 space-y-4">
                     <div className="flex items-center gap-2 mb-1 text-orange-800 font-semibold text-sm">
-                      <Percent size={16} /> Promotion (Optionnel)
+                      <Percent size={16} /> {t('admin_products.promotion_optional')}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-orange-600 uppercase mb-1">% Reduction</label>
+                        <label className="block text-xs font-bold text-orange-600 uppercase mb-1">{t('admin_products.discount_pct_label')}</label>
                         <input 
                           type="number" 
                           name="discountPercentage" 
@@ -1234,13 +1234,13 @@ const AdminProducts = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-orange-600 uppercase mb-1">Prix TTC Normal</label>
+                        <label className="block text-xs font-bold text-orange-600 uppercase mb-1">{t('admin_products.normal_price_label')}</label>
                         <div className="px-3 py-2 bg-orange-100 border border-orange-200 rounded-lg text-orange-900">
                           {formData.priceTTC} DH
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-green-600 uppercase mb-1">Nouveau Prix TTC</label>
+                        <label className="block text-xs font-bold text-green-600 uppercase mb-1">{t('admin_products.new_price_label')}</label>
                         <div className="px-3 py-2 bg-green-100 border border-green-200 rounded-lg font-bold text-green-900">
                           {formData.discountedPriceTTC ? `${formData.discountedPriceTTC} DH` : '—'}
                         </div>
@@ -1249,7 +1249,7 @@ const AdminProducts = () => {
                     {formData.discountPercentage && parseFloat(formData.discountPercentage) > 0 && (
                       <div className="text-center">
                         <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                          -{formData.discountPercentage}% de réduction !
+                          {t('admin_products.discount_badge', { n: formData.discountPercentage })}
                         </span>
                       </div>
                     )}
@@ -1260,7 +1260,7 @@ const AdminProducts = () => {
               {/* Expiry Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date d'expiration</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.expiry_label')}</label>
                   <input type="date" name="expiryDate" value={formData.expiryDate} onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
                 </div>
@@ -1269,7 +1269,7 @@ const AdminProducts = () => {
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image du produit</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin_products.image_label')}</label>
                 <ImageUpload
                   type="product"
                   currentImage={formData.image}
@@ -1279,17 +1279,14 @@ const AdminProducts = () => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.description_label')}</label>
                 <textarea name="description" value={formData.description} onChange={handleInputChange} rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
               </div>
 
               {/* Composition - Composants séparés par virgule */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Composition 
-                  <span className="text-xs text-gray-400 font-normal ml-1">(composants séparés par virgule)</span>
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin_products.composition_label')}</label>
                 <input 
                   type="text" 
                   name="composition" 
@@ -1304,7 +1301,7 @@ const AdminProducts = () => {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="active" checked={formData.active} onChange={handleInputChange}
                   className="w-4 h-4 text-sky-600 rounded" />
-                <span className="text-sm text-gray-700">Produit actif (visible sur le site)</span>
+                <span className="text-sm text-gray-700">{t('admin_products.active_label')}</span>
               </label>
 
               {/* Variantes */}
@@ -1312,7 +1309,7 @@ const AdminProducts = () => {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Tag size={18} className="text-sky-700" />
-                    <span className="text-sm font-semibold text-gray-900">Variantes du produit</span>
+                    <span className="text-sm font-semibold text-gray-900">{t('admin_products.variants_section_title')}</span>
                     {variants.length > 0 && (
                       <span className="bg-sky-100 text-sky-700 text-xs px-2 py-0.5 rounded-full">{variants.length}</span>
                     )}
@@ -1327,7 +1324,7 @@ const AdminProducts = () => {
                     }`}
                   >
                     {showVariants ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    {showVariants ? 'Masquer' : `Gérer (${variants.length})`}
+                    {showVariants ? t('admin_products.hide_variants') : t('admin_products.manage_variants', { n: variants.length })}
                   </button>
                 </div>
 
@@ -1339,7 +1336,7 @@ const AdminProducts = () => {
                       onClick={() => setVariants([...variants, { id: Date.now().toString(), variantTypeId: '', variantTypeName: '', value: '', priceHT: null, priceTTC: null, composition: '', stock: 0, image: '', description: '', inCatalog: true, barcode: '', expiryDate: '' }])}
                       className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-sky-500 hover:text-sky-600 transition-colors flex items-center justify-center gap-2"
                     >
-                      <Plus size={16} /> Ajouter une variante
+                      <Plus size={16} /> {t('admin_products.add_variant')}
                     </button>
 
                     {/* Variants list */}
@@ -1348,7 +1345,7 @@ const AdminProducts = () => {
                         {variants.map((variant, index) => (
                           <div key={variant.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-gray-700">Variante #{index + 1}</span>
+                              <span className="text-sm font-semibold text-gray-700">{t('admin_products.variant_num', { n: index + 1 })}</span>
                               <button
                                 type="button"
                                 onClick={() => setVariants(variants.filter((_, i) => i !== index))}
@@ -1359,7 +1356,7 @@ const AdminProducts = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-xs text-gray-500 mb-1">Type de variante</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('admin_products.variant_type')}</label>
                                 <select
                                   value={variant.variantTypeId || ''}
                                   onChange={(e) => {
@@ -1374,14 +1371,14 @@ const AdminProducts = () => {
                                   }}
                                   className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
                                 >
-                                  <option value="">Sélectionner un type</option>
+                                  <option value="">{t('admin_products.select_variant_type')}</option>
                                   {variantTypes.map(vt => (
                                     <option key={vt.id} value={vt.id}>{vt.label}</option>
                                   ))}
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-xs text-gray-500 mb-1">Valeur</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('admin_products.variant_value')}</label>
                                 {variant.variantTypeId && variantValues[variant.variantTypeId]?.length > 0 ? (
                                   // Si le type a des valeurs, afficher un dropdown
                                   <select
@@ -1393,7 +1390,7 @@ const AdminProducts = () => {
                                     }}
                                     className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
                                   >
-                                    <option value="">Sélectionner une valeur</option>
+                                    <option value="">{t('admin_products.select_variant_value')}</option>
                                     {variantValues[variant.variantTypeId].map(val => (
                                       <option key={val.id} value={val.value}>{val.value}</option>
                                     ))}
@@ -1408,7 +1405,7 @@ const AdminProducts = () => {
                                       newVariants[index].value = e.target.value
                                       setVariants(newVariants)
                                     }}
-                                    placeholder="Ex: S, M, L, XL"
+                                    placeholder={t('admin_products.variant_value_placeholder')}
                                     className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
                                   />
                                 )}
@@ -1434,7 +1431,7 @@ const AdminProducts = () => {
                                     setVariants(newVariants)
                                   }}
                                   step="0.01"
-                                  placeholder="Laisser vide pour utiliser le prix du produit"
+                                  placeholder={t('admin_products.variant_price_placeholder')}
                                   className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
                                 />
                               </div>
@@ -1525,7 +1522,7 @@ const AdminProducts = () => {
                                 )}
                               </div>
                               <div className="md:col-span-2">
-                                <label className="block text-xs text-gray-500 mb-1">Description</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('admin_products.variant_desc_label')}</label>
                                 <textarea
                                   value={variant.description}
                                   onChange={(e) => {
@@ -1538,7 +1535,7 @@ const AdminProducts = () => {
                                 />
                               </div>
                               <div>
-                                <label className="block text-xs text-gray-500 mb-1">Code-barres</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('admin_products.variant_barcode_label')}</label>
                                 <input
                                   type="text"
                                   value={variant.barcode || ''}
@@ -1547,12 +1544,12 @@ const AdminProducts = () => {
                                     newVariants[index].barcode = e.target.value
                                     setVariants(newVariants)
                                   }}
-                                  placeholder="Code-barres"
+                                  placeholder={t('admin_products.variant_barcode_label')}
                                   className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
                                 />
                               </div>
                               <div>
-                                <label className="block text-xs text-gray-500 mb-1">Date d'expiration</label>
+                                <label className="block text-xs text-gray-500 mb-1">{t('admin_products.variant_expiry_label')}</label>
                                 <input
                                   type="date"
                                   value={variant.expiryDate || ''}
@@ -1576,7 +1573,7 @@ const AdminProducts = () => {
                                     }}
                                     className="w-4 h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
                                   />
-                                  <span className="text-sm text-gray-700">Visible dans le catalogue public</span>
+                                  <span className="text-sm text-gray-700">{t('admin_products.variant_visible')}</span>
                                 </label>
                                 <p className="text-xs text-gray-500 ml-6">Si décoché, la variante ne sera pas affichée sur le site mais sera visible dans l'espace admin et pourra être commandée via la fiche produit</p>
                               </div>
@@ -1591,15 +1588,13 @@ const AdminProducts = () => {
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t">
-                <button type="button" onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                  Annuler
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                  {t('admin_products.cancel')}
                 </button>
-                <button type="submit" disabled={saving}
-                  className="px-5 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg flex items-center gap-2 disabled:opacity-50">
+                <button type="submit" disabled={saving} className="px-5 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg flex items-center gap-2 disabled:opacity-50">
                   {saving
-                    ? <><Loader2 size={16} className="animate-spin" />{editingProduct ? 'Modification...' : 'Enregistrement...'}</>
-                    : <><Save size={16} />{editingProduct ? 'Modifier' : 'Enregistrer'}</>
+                    ? <><Loader2 size={16} className="animate-spin" />{editingProduct ? t('admin_products.editing') : t('admin_products.saving')}</>
+                    : <><Save size={16} />{editingProduct ? t('admin_products.modal_edit') : t('admin_products.save')}</>
                   }
                 </button>
               </div>
@@ -1612,7 +1607,7 @@ const AdminProducts = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl w-full max-w-lg mx-4 my-6">
             <div className="flex items-center justify-between p-4 md:p-6 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Résultat de l'import</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('admin_products.import_title')}</h2>
               <button onClick={() => { setShowImportModal(false); setImportResult(null) }} className="text-gray-400 hover:text-gray-600">
                 <X size={22} />
               </button>
@@ -1621,17 +1616,17 @@ const AdminProducts = () => {
               {importing ? (
                 <div className="text-center py-8">
                   <Loader2 size={40} className="animate-spin text-sky-700 mx-auto mb-4" />
-                  <p className="text-gray-600">Import en cours...</p>
+                  <p className="text-gray-600">{t('admin_products.importing')}</p>
                 </div>
               ) : importResult ? (
                 <div>
                   {importResult.success ? (
                     <>
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                        <p className="text-green-800 font-semibold">✓ Import réussi</p>
-                        <p className="text-green-700 text-sm">{importResult.imported} produit(s) importé(s)</p>
+                        <p className="text-green-800 font-semibold">✓ {t('admin_products.import_success')}</p>
+                        <p className="text-green-700 text-sm">{t('admin_products.import_count', { n: importResult.imported })}</p>
                         {importResult.errors > 0 && (
-                          <p className="text-orange-600 text-sm mt-1">{importResult.errors} erreur(s)</p>
+                          <p className="text-orange-600 text-sm mt-1">{t('admin_products.import_errors', { n: importResult.errors })}</p>
                         )}
                       </div>
                       {importResult.errorDetails?.length > 0 && (
@@ -1650,7 +1645,7 @@ const AdminProducts = () => {
                     </>
                   ) : (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <p className="text-red-800 font-semibold">✗ Erreur d'import</p>
+                      <p className="text-red-800 font-semibold">✗ {t('admin_products.import_fail')}</p>
                       <p className="text-red-700 text-sm">{importResult.message || importResult.error || 'Une erreur est survenue'}</p>
                     </div>
                   )}
@@ -1658,9 +1653,8 @@ const AdminProducts = () => {
               ) : null}
             </div>
             <div className="p-4 border-t flex justify-end">
-              <button onClick={() => { setShowImportModal(false); setImportResult(null) }}
-                className="px-4 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800">
-                Fermer
+              <button onClick={() => { setShowImportModal(false); setImportResult(null) }} className="px-4 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800">
+                {t('admin_products.close')}
               </button>
             </div>
           </div>
@@ -1671,3 +1665,4 @@ const AdminProducts = () => {
 }
 
 export default AdminProducts
+

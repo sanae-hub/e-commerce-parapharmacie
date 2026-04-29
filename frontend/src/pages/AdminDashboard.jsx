@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, ShoppingCart, DollarSign, Package, Clock, AlertTriangle,
   TrendingUp, Calendar, Users, LogOut, Bell, RefreshCw, Tag, Radio,
   Grid3x3, Layers, Truck, ExternalLink, Star, BarChart2, Settings
 } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -198,7 +200,7 @@ const AdminDashboard = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('fr-MA', {
+    return new Intl.NumberFormat(isAr ? 'ar-MA' : 'fr-MA', {
       style: 'currency',
       currency: 'MAD'
     }).format(amount);
@@ -217,7 +219,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-sky-700 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement du dashboard...</p>
+          <p className="text-gray-600">{t('admin.loading')}</p>
         </div>
       </div>
     );
@@ -232,8 +234,7 @@ const AdminDashboard = () => {
       {dataErrors.length > 0 && (
         <div className="mx-6 mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-700">
-            ⚠️ Certaines données n'ont pas pu être chargées : {dataErrors.join(', ')}.
-            Vous pouvez continuer à utiliser le dashboard avec les données disponibles.
+            ⚠️ {t('admin.data_error')}
           </p>
         </div>
       )}
@@ -246,12 +247,12 @@ const AdminDashboard = () => {
               <button
                 onClick={() => setShowListMenu((prev) => !prev)}
                 className="text-sky-700 hover:text-sky-900"
-                title="Ouvrir le menu"
+                title={isAr ? 'فتح القائمة' : 'Ouvrir le menu'}
               >
                 <LayoutDashboard size={28} />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard Admin</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('admin.dashboard_title')}</h1>
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-600">Parapharmacie ParaClick{user?.role === 'EMPLOYE' ? ` • Employé : ${user.firstName} ${user.lastName}` : ''}</p>
                 </div>
@@ -263,10 +264,12 @@ const AdminDashboard = () => {
                 onClick={handleRefresh}
                 disabled={refreshing}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Actualiser"
+                title={isAr ? 'تحديث' : 'Actualiser'}
               >
                 <RefreshCw size={20} className={`text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
               </button>
+
+              <LanguageSwitcher />
 
               <button
                 onClick={() => {
@@ -277,7 +280,7 @@ const AdminDashboard = () => {
                 className="flex items-center gap-1.5 px-3 py-2 text-sm bg-sky-700 hover:bg-sky-800 text-white rounded-lg transition-colors"
               >
                 <ExternalLink size={16} />
-                <span className="hidden sm:inline">Voir le site</span>
+                <span className="hidden sm:inline">{t('admin.view_site')}</span>
               </button>
 
               <button
@@ -285,7 +288,7 @@ const AdminDashboard = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
               >
                 <LogOut size={18} />
-                <span className="hidden sm:inline">Déconnexion</span>
+                <span className="hidden sm:inline">{t('admin.logout')}</span>
               </button>
             </div>
           </div>
@@ -403,8 +406,8 @@ const AdminDashboard = () => {
               <div className="flex items-start gap-3">
                 <AlertTriangle size={24} className="text-orange-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <div>
-                  <p className="font-semibold text-orange-900">Stock faible</p>
-                  <p className="text-sm text-orange-700">{kpis.lowStock} produit(s) en stock faible</p>
+                  <p className="font-semibold text-orange-900">{t('admin.low_stock')}</p>
+                  <p className="text-sm text-orange-700">{t('admin.low_stock_desc', { count: kpis.lowStock })}</p>
                 </div>
               </div>
             </div>
@@ -419,8 +422,8 @@ const AdminDashboard = () => {
               <div className="flex items-start gap-3">
                 <Package size={24} className="text-red-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <div>
-                  <p className="font-semibold text-red-900">Rupture de stock</p>
-                  <p className="text-sm text-red-700">{kpis.outOfStock} produit(s) en rupture</p>
+                  <p className="font-semibold text-red-900">{t('admin.out_of_stock')}</p>
+                  <p className="text-sm text-red-700">{t('admin.out_of_stock_desc', { count: kpis.outOfStock })}</p>
                 </div>
               </div>
             </div>
@@ -485,8 +488,8 @@ const AdminDashboard = () => {
               <div className="flex items-start gap-3">
                 <Calendar size={24} className="text-purple-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <div>
-                  <p className="font-semibold text-purple-900">Péremption proche</p>
-                  <p className="text-sm text-purple-700">{kpis.expiringSoon} produit(s) expirent bientôt</p>
+                  <p className="font-semibold text-purple-900">{t('admin.expiring_soon')}</p>
+                  <p className="text-sm text-purple-700">{t('admin.expiring_soon_desc', { count: kpis.expiringSoon })}</p>
                 </div>
               </div>
             </div>
@@ -703,22 +706,22 @@ const AdminDashboard = () => {
           {/* Suivi des expirations */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Expirations proches</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t('admin.expiring_title')}</h2>
               <select
                 value={expiryThreshold}
                 onChange={(e) => setExpiryThreshold(Number(e.target.value))}
                 className="text-sm border border-gray-300 rounded-lg px-3 py-1.5"
               >
-                <option value={1}>Moins de 1 mois</option>
-                <option value={2}>Moins de 2 mois</option>
-                <option value={3}>Moins de 3 mois</option>
+                <option value={1}>{t('admin.months_threshold', { n: 1 })}</option>
+                <option value={2}>{t('admin.months_threshold', { n: 2 })}</option>
+                <option value={3}>{t('admin.months_threshold', { n: 3 })}</option>
               </select>
             </div>
 
             {expiringProducts.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <Calendar size={48} className="mx-auto text-gray-300 mb-2" />
-                <p>Aucun produit n'expire prochainement</p>
+                <p>{t('admin.no_expiring')}</p>
               </div>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -740,7 +743,7 @@ const AdminDashboard = () => {
                         )}
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900 text-sm">{product.name}</p>
-                          <p className="text-xs text-gray-600">Expire le: {new Date(product.expiryDate).toLocaleDateString('fr-FR')}</p>
+                          <p className="text-xs text-gray-600">{t('admin.expires_on')} {new Date(product.expiryDate).toLocaleDateString(isAr ? 'ar-MA' : 'fr-FR')}</p>
                         </div>
                         <div className="text-right">
                           <p className={`text-lg font-bold ${
@@ -752,7 +755,7 @@ const AdminDashboard = () => {
                           }`}>
                             {daysLeft}
                           </p>
-                          <p className="text-xs text-gray-500">jours restants</p>
+                          <p className="text-xs text-gray-500">{t('admin.days_left')}</p>
                         </div>
                       </div>
                     </div>
@@ -765,7 +768,7 @@ const AdminDashboard = () => {
 
         {/* Carte thermique des créneaux */}
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Carte thermique des créneaux (30 derniers jours)</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">{t('admin.heatmap_title')}</h2>
           
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full">
@@ -783,24 +786,29 @@ const AdminDashboard = () => {
                 })}
 
                 {/* Lignes pour chaque jour */}
-                {['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'].map((day) => (
-                  <React.Fragment key={day}>
+                {['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'].map((dayKey, dayIdx) => {
+                  const dayLabels = isAr
+                    ? ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+                    : ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+                  const dayDisplay = dayLabels[dayIdx]
+                  return (
+                  <React.Fragment key={dayKey}>
                     <div className="text-sm font-medium text-gray-700 flex items-center">
-                      {day}
+                      {dayDisplay}
                     </div>
                     {Array.from({ length: 20 }, (_, i) => {
                       const hour = Math.floor(i / 2) + 9;
                       const minute = i % 2 === 0 ? '00' : '30';
                       const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
-                      const slot = heatmapData.find(s => s.day === day && s.time === timeStr);
+                      const slot = heatmapData.find(s => s.day === dayKey && s.time === timeStr);
                       const count = slot?.count || 0;
                       
                       return (
                         <div
-                          key={`${day}-${i}`}
+                          key={`${dayKey}-${i}`}
                           className="h-10 rounded cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center"
                           style={{ backgroundColor: getHeatmapColor(count) }}
-                          title={`${day} ${timeStr}: ${count} réservation(s)`}
+                          title={`${dayDisplay} ${timeStr}: ${count} ${t('admin.reservations')}`}
                         >
                           {count > 0 && (
                             <span className="text-xs font-medium text-white">{count}</span>
@@ -809,14 +817,15 @@ const AdminDashboard = () => {
                       );
                     })}
                   </React.Fragment>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>
 
           {/* Légende */}
           <div className="flex items-center gap-4 mt-6 justify-center">
-            <span className="text-sm text-gray-600">Moins fréquent</span>
+            <span className="text-sm text-gray-600">{t('admin.less_frequent')}</span>
             <div className="flex gap-1">
               {[0, 2, 5, 10, 15].map((count) => (
                 <div
@@ -826,7 +835,7 @@ const AdminDashboard = () => {
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-600">Plus fréquent</span>
+            <span className="text-sm text-gray-600">{t('admin.more_frequent')}</span>
           </div>
         </div>
           </div>
