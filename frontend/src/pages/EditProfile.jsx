@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { User, Phone, MapPin, Mail, Bell, Send, Upload, ArrowLeft, Trash2 } from 'lucide-react'
+import { User, Phone, MapPin, Mail, Bell, Send, Upload, ArrowLeft, Trash2, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../stores'
+import DeleteAccountModal from '../components/DeleteAccountModal'
 
 const EditProfile = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm()
+  const { user, logout } = useAuth()
   const [apiError, setApiError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(true)
   const [profileImage, setProfileImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [removeImage, setRemoveImage] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -110,6 +114,11 @@ const EditProfile = () => {
       setApiError('Erreur serveur. Veuillez réessayer.')
       console.error('Update profile error:', error)
     }
+  }
+
+  const handleDeleteAccount = () => {
+    logout()
+    navigate('/login')
   }
 
   if (loading) {
@@ -362,7 +371,41 @@ const EditProfile = () => {
 
           </form>
 
+          {/* Zone de danger - Suppression de compte */}
+          <div className="mt-12 pt-8 border-t border-gray-200">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-red-100 rounded-full flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">Zone de danger</h3>
+                  <p className="text-sm text-red-700 mb-4">
+                    La suppression de votre compte est définitive et irréversible. 
+                    Toutes vos données, commandes et historique seront perdus.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Supprimer mon compte
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
+
+        {/* Modal de suppression de compte */}
+        <DeleteAccountModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+          user={user}
+        />
       </div>
     </div>
   )

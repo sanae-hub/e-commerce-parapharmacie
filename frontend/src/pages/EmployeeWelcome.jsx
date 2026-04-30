@@ -5,7 +5,7 @@ import {
   Bell, LogOut, ExternalLink, AlertTriangle,
   RefreshCw, Star, Users, Clock3, AlertCircle, CheckCircle, Truck, FileText
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../stores';
 import { useEmployeeDashboard } from '../context/EmployeeDashboardContext';
 
 const menuItems = [

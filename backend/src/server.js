@@ -29,6 +29,8 @@ import barcodeRouter from './routes/barcode.js';
 import authRouter from './routes/auth.js';
 import timeSlotsRouter from './routes/timeSlots.js';
 import deliveryRouter from './routes/delivery.js';
+import offlineRouter from './routes/offline.js';
+import { trackOfflineData } from './middleware/offlineTracker.js';
 import { setIo, addClientSocket, removeClientSocket } from './io.js';
 
 import ordersRoutes from "./routes/orders.js";
@@ -69,9 +71,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use("/api/orders", ordersRoutes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-app.use('/api/categories', categoriesRouter);
+app.use('/api/categories', trackOfflineData, categoriesRouter);
 app.use('/api/brands', brandsRouter);
-app.use('/api/products', productsRouter);
+app.use('/api/products', trackOfflineData, productsRouter);
 app.use('/api/promo-codes', promoCodesRouter);
 app.use('/api/promotions', promotionsRouter);
 app.use('/api/settings', settingsRouter);
@@ -87,6 +89,7 @@ app.use('/api/user', usersRouter);
 app.use('/api/barcode', barcodeRouter);
 app.use('/api/time-slots', timeSlotsRouter);
 app.use('/api/delivery', deliveryRouter);
+app.use('/api/offline', offlineRouter);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const GOOGLE_CLIENT_ID = '1024523760942-q8q2qqeujam35kcdcvv09vk79d6lm0ho.apps.googleusercontent.com';

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Shield, User, UserRound, Fingerprint } from 'lucide-react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../stores'
 
 // ✅ ID client Google - doit être le même que dans Signup.jsx et configuré dans Google Cloud Console
 const GOOGLE_CLIENT_ID = '1024523760942-q8q2qqeujam35kcdcvv09vk79d6lm0ho.apps.googleusercontent.com'

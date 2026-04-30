@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../stores'
 import { 
   Heart, ShoppingCart, Star, ArrowLeft, Search, Grid3x3, List, Loader2, 
   Filter, X, ChevronDown, SlidersHorizontal, TrendingUp, Clock, DollarSign,

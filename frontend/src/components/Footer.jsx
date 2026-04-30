@@ -83,7 +83,7 @@ const Footer = () => {
                 </button>
               </li>
               <li>
-                <button className="hover:text-sky-400 transition-colors">
+                <button onClick={() => navigate('/privacy-policy')} className="hover:text-sky-400 transition-colors">
                   Politique de confidentialité
                 </button>
               </li>
@@ -141,6 +141,12 @@ const Footer = () => {
               © 2026 ParaClick. Tous droits réservés.
             </p>
             <div className="flex gap-6 text-gray-400">
+              <button 
+                onClick={() => navigate('/privacy-policy')} 
+                className="hover:text-sky-400 transition-colors"
+              >
+                Politique de confidentialité
+              </button>
               <button className="hover:text-sky-400 transition-colors">
                 Mentions légales
               </button>
