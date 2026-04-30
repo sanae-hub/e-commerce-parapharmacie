@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
+import { useCart } from '../stores'
+import { useAuth } from '../stores'
 import {
   ArrowLeft, Calendar, Clock, CheckCircle, Loader2,
   RefreshCw, Users, Truck, Store, MapPin, Phone, Info

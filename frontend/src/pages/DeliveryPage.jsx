@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useCart } from '../stores'
+import { useOffline } from '../hooks/useOffline'
+import OrderRestriction from '../components/OrderRestriction'
 import {
   ArrowLeft,
   MapPin,
@@ -12,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import api from '../api/axios'
+import { deliverySchema } from '../lib/validationSchemas'
 
 const DAY_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
 const DAY_FULL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
@@ -20,7 +25,17 @@ const MONTH_LABELS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 
 const DeliveryPage = () => {
   const navigate = useNavigate()
   const { cartItems, getTotalPrice, getShippingInfo } = useCart()
+  const { canPlaceOrder } = useOffline()
   const shippingInfo = getShippingInfo()
+  
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
+    resolver: zodResolver(deliverySchema),
+    defaultValues: {
+      address: '',
+      phone: '',
+      notes: ''
+    }
+  })
 
   const [deliveryFee, setDeliveryFee] = useState(25)
   const [deliveryType, setDeliveryType] = useState('STANDARD')
@@ -36,14 +51,8 @@ const DeliveryPage = () => {
   const [slotError, setSlotError] = useState(null)
   const [confirming, setConfirming] = useState(false)
 
-  const [address, setAddress] = useState({
-    cityId: '',
-    districtName: '',
-    street: '',
-    phone: '',
-    instructions: '',
-  })
-  const [errors, setErrors] = useState({})
+  const [cityId, setCityId] = useState('')
+  const [districtName, setDistrictName] = useState('')
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -53,7 +62,7 @@ const DeliveryPage = () => {
     localStorage.setItem('orderMode', 'DELIVERY')
 
     const user = JSON.parse(localStorage.getItem('user') || '{}')
-    if (user.phone) setAddress(p => ({ ...p, phone: user.phone }))
+    if (user.phone) setValue('phone', user.phone)
 
     api.get('/settings').then(res => {
       if (res.data.DELIVERY_FEE) setDeliveryFee(parseFloat(res.data.DELIVERY_FEE))
@@ -85,13 +94,13 @@ const DeliveryPage = () => {
 
   useEffect(() => {
     const loadDistricts = async () => {
-      if (!address.cityId) {
+      if (!cityId) {
         setDistricts([])
         return
       }
       setLoadingZones(true)
       try {
-        const { data } = await api.get('/delivery-zones/districts', { params: { cityId: address.cityId } })
+        const { data } = await api.get('/delivery-zones/districts', { params: { cityId } })
         setDistricts(data || [])
       } catch (e) {
         console.error(e)
@@ -101,16 +110,12 @@ const DeliveryPage = () => {
       }
     }
     loadDistricts()
-  }, [address.cityId])
+  }, [cityId])
 
   const validateAddress = () => {
     const e = {}
-    if (!address.cityId) e.cityId = 'Ville requise'
-    if (!address.districtName.trim()) e.districtName = 'Quartier requis'
-    if (!address.street.trim()) e.street = 'Numéro et rue requis'
-    if (!address.phone.trim()) e.phone = 'Téléphone requis'
-    else if (!/^[0-9+\s\-]{8,}$/.test(address.phone.trim())) e.phone = 'Numéro invalide'
-    setErrors(e)
+    if (!cityId) e.cityId = 'Ville requise'
+    if (!districtName.trim()) e.districtName = 'Quartier requis'
     return Object.keys(e).length === 0
   }
 
@@ -118,18 +123,18 @@ const DeliveryPage = () => {
   const actualDeliveryFee = shippingInfo.isFree ? 0 : deliveryFee
   const remainingForFree = Math.max(0, Number(shippingInfo.remaining || 0))
 
-  const handleConfirm = () => {
+  const onSubmit = (data) => {
     if (!validateAddress()) return
     if (!selectedDay?.available) return
 
     setConfirming(true)
-    const cityName = cities.find(c => c.id === address.cityId)?.name || ''
-    localStorage.setItem('deliveryCityId', address.cityId)
+    const cityName = cities.find(c => c.id === cityId)?.name || ''
+    localStorage.setItem('deliveryCityId', cityId)
     localStorage.setItem('deliveryCityName', cityName)
-    localStorage.setItem('deliveryDistrictName', address.districtName)
-    localStorage.setItem('deliveryStreet', address.street)
-    localStorage.setItem('deliveryPhone', address.phone)
-    localStorage.setItem('deliveryInstructions', address.instructions || '')
+    localStorage.setItem('deliveryDistrictName', districtName)
+    localStorage.setItem('deliveryStreet', data.address)
+    localStorage.setItem('deliveryPhone', data.phone)
+    localStorage.setItem('deliveryInstructions', data.notes || '')
 
     localStorage.setItem('selectedTimeSlot', JSON.stringify({
       date: selectedDay.date,
@@ -160,17 +165,18 @@ const DeliveryPage = () => {
           </div>
         </div>
 
-        {shippingInfo.isFree && (
-          <div className="mb-8 bg-green-50 border border-green-200 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
-            <div className="p-3 bg-green-100 rounded-full">
-              <Truck size={24} className="text-green-600" />
+        <OrderRestriction>
+          {shippingInfo.isFree && (
+            <div className="mb-8 bg-green-50 border border-green-200 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+              <div className="p-3 bg-green-100 rounded-full">
+                <Truck size={24} className="text-green-600" />
+              </div>
+              <div>
+                <p className="text-green-800 font-bold text-lg">Livraison gratuite</p>
+                <p className="text-green-700">Votre commande dépasse {shippingInfo.threshold} DH.</p>
+              </div>
             </div>
-            <div>
-              <p className="text-green-800 font-bold text-lg">Livraison gratuite</p>
-              <p className="text-green-700">Votre commande dépasse {shippingInfo.threshold} DH.</p>
-            </div>
-          </div>
-        )}
+          )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-5">
@@ -180,25 +186,24 @@ const DeliveryPage = () => {
                 <h2 className="text-lg font-bold text-gray-900">Adresse de livraison</h2>
               </div>
 
-              <div className="space-y-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Ville <span className="text-red-500">*</span>
                     </label>
                     <select
-                      value={address.cityId}
+                      value={cityId}
                       onChange={(e) => {
-                        setAddress(p => ({ ...p, cityId: e.target.value, districtName: '' }))
-                        setErrors(p => ({ ...p, cityId: '' }))
+                        setCityId(e.target.value)
+                        setDistrictName('')
                       }}
-                      className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 ${errors.cityId ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
                       disabled={loadingZones}
                     >
                       <option value="">Sélectionner une ville</option>
                       {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
-                    {errors.cityId && <p className="text-xs text-red-500 mt-1">{errors.cityId}</p>}
                   </div>
 
                   <div>
@@ -213,12 +218,10 @@ const DeliveryPage = () => {
                             {districts.map(d => (
                               <button
                                 key={d.id}
-                                onClick={() => {
-                                  setAddress(p => ({ ...p, districtName: d.name }))
-                                  setErrors(p => ({ ...p, districtName: '' }))
-                                }}
+                                type="button"
+                                onClick={() => setDistrictName(d.name)}
                                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                                  address.districtName === d.name
+                                  districtName === d.name
                                     ? 'bg-sky-700 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
@@ -231,18 +234,12 @@ const DeliveryPage = () => {
                       )}
                       <input
                         type="text"
-                        value={address.districtName}
-                        onChange={e => {
-                          setAddress(p => ({ ...p, districtName: e.target.value }))
-                          setErrors(p => ({ ...p, districtName: '' }))
-                        }}
+                        value={districtName}
+                        onChange={e => setDistrictName(e.target.value)}
                         placeholder="Saisir le quartier..."
-                        className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 ${
-                          errors.districtName ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                        }`}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
                       />
                     </div>
-                    {errors.districtName && <p className="text-xs text-red-500 mt-1">{errors.districtName}</p>}
                   </div>
                 </div>
 
@@ -252,12 +249,13 @@ const DeliveryPage = () => {
                   </label>
                   <input
                     type="text"
-                    value={address.street}
-                    onChange={e => { setAddress(p => ({ ...p, street: e.target.value })); setErrors(p => ({ ...p, street: '' })) }}
+                    {...register('address')}
                     placeholder="Ex : 12, Rue Mohammed V"
-                    className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 ${errors.street ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                    className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 ${
+                      errors.address ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                   />
-                  {errors.street && <p className="text-xs text-red-500 mt-1">{errors.street}</p>}
+                  {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
                 </div>
 
                 <div>
@@ -266,12 +264,13 @@ const DeliveryPage = () => {
                   </label>
                   <input
                     type="tel"
-                    value={address.phone}
-                    onChange={e => { setAddress(p => ({ ...p, phone: e.target.value })); setErrors(p => ({ ...p, phone: '' })) }}
-                    placeholder="Ex : 06 12 34 56 78"
-                    className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 ${errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                    {...register('phone')}
+                    placeholder="+212 6 12 34 56 78"
+                    className={`w-full px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 ${
+                      errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                   />
-                  {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+                  {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>}
                 </div>
 
                 <div>
@@ -280,13 +279,13 @@ const DeliveryPage = () => {
                   </label>
                   <input
                     type="text"
-                    value={address.instructions}
-                    onChange={e => setAddress(p => ({ ...p, instructions: e.target.value }))}
+                    {...register('notes')}
                     placeholder="Code d'entrée, étage, interphone..."
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
                   />
+                  {errors.notes && <p className="text-xs text-red-500 mt-1">{errors.notes.message}</p>}
                 </div>
-              </div>
+              </form>
             </div>
           </div>
 
@@ -360,12 +359,12 @@ const DeliveryPage = () => {
               )}
 
               <button
-                onClick={handleConfirm}
-                disabled={!selectedDay?.available || confirming || loadingDays}
+                onClick={handleSubmit(onSubmit)}
+                disabled={!selectedDay?.available || confirming || loadingDays || !canPlaceOrder}
                 className={`mt-5 w-full py-4 font-bold rounded-2xl text-lg transition-all flex items-center justify-center gap-3 shadow-lg ${
                   confirming
                     ? 'bg-green-500 text-white scale-105'
-                    : !selectedDay?.available || loadingDays
+                    : !selectedDay?.available || loadingDays || !canPlaceOrder
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                       : 'bg-sky-700 hover:bg-sky-800 text-white'
                 }`}
@@ -397,6 +396,7 @@ const DeliveryPage = () => {
             </div>
           </div>
         </div>
+        </OrderRestriction>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar, X, ArrowLeft } from 'lucide-react'
 import { useWebSocket } from '../context/WebSocketContext'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../stores'
 
 const MyOrders = () => {
   const { setCartItems, setEditingOrder } = useCart()

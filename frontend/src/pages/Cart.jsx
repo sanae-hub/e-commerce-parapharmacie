@@ -2,7 +2,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../stores'
+import { useOffline } from '../hooks/useOffline'
+import OrderRestriction from '../components/OrderRestriction'
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, X, Truck, Loader2, Phone } from 'lucide-react'
 import PhoneRequiredModal from '../components/PhoneRequiredModal'
 import api from '../api/axios'
@@ -10,6 +12,7 @@ import api from '../api/axios'
 const Cart = () => {
   const navigate = useNavigate()
   const { user, updateProfile } = useAuth()
+  const { canPlaceOrder } = useOffline()
   const {
     cartItems,
     removeFromCart,
@@ -318,16 +321,22 @@ const Cart = () => {
               </div>
 
 
-              <button
-                onClick={handleCheckout}
-                disabled={isUpdating}
-                className="w-full py-3 bg-sky-700 hover:bg-sky-800 text-white font-semibold rounded-lg transition-colors mb-3 flex items-center justify-center gap-2"
-              >
-                {isUpdating && <Loader2 size={18} className="animate-spin" />}
-                {editingOrder 
-                  ? (isUpdating ? 'Mise à jour...' : `Mettre à jour la commande ${editingOrder.orderNumber}`)
-                  : 'Passer la commande'}
-              </button>
+              <OrderRestriction>
+                <button
+                  onClick={handleCheckout}
+                  disabled={isUpdating || !canPlaceOrder}
+                  className={`w-full py-3 font-semibold rounded-lg transition-colors mb-3 flex items-center justify-center gap-2 ${
+                    !canPlaceOrder 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-sky-700 hover:bg-sky-800 text-white'
+                  }`}
+                >
+                  {isUpdating && <Loader2 size={18} className="animate-spin" />}
+                  {editingOrder 
+                    ? (isUpdating ? 'Mise à jour...' : `Mettre à jour la commande ${editingOrder.orderNumber}`)
+                    : 'Passer la commande'}
+                </button>
+              </OrderRestriction>
 
               {phoneError && (
                 <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">

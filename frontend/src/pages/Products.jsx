@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../stores'
 import { ArrowLeft, Filter, Grid3x3, List, Loader2, ChevronDown, X } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
 import ProductCardList from '../components/ProductCardList'

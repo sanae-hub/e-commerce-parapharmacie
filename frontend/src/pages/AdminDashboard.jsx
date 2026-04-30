@@ -15,7 +15,7 @@ import adminApi from '../api/adminAxios';
 import AdminNotifications from '../components/AdminNotifications';
 import { useAdminWebSocket } from '../context/AdminWebSocketContext';
 import { usePermissions } from '../context/PermissionsContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../stores';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const AdminDashboard = () => {

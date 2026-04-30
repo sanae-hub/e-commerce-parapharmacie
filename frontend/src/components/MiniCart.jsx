@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../stores'
 import { ShoppingBag, X, ArrowRight } from 'lucide-react'
 
 const MiniCart = ({ onClose }) => {

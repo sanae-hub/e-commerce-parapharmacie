@@ -1,9 +1,9 @@
 // frontend/src/pages/ProductDetail.jsx
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
-import { useFavorites } from '../context/FavoritesContext'
-import { useAuth } from '../context/AuthContext'
+import { useCart } from '../stores'
+import { useFavorites } from '../stores'
+import { useAuth } from '../stores'
 import { ArrowLeft, Heart, ShoppingCart, Star, Package, CheckCircle, Truck, Shield, ZoomIn, X, ChevronLeft, ChevronRight, Facebook, Twitter, MessageCircle, Bell, Mail, Lock } from 'lucide-react'
 import { calculateDiscountPercentage, formatDiscountPercentage } from '../lib/utils'
 import SimilarProductCard from '../components/SimilarProductCard'

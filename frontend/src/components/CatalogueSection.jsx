@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart, Star, Package } from 'lucide-react'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../stores'
 import axios from '../api/axios'
 
 const CatalogueSection = ({ onFavoritesChange }) => {

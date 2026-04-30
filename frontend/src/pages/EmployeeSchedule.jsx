@@ -4,7 +4,7 @@ import {
   Clock, Plus, Trash2, X, AlertCircle, Check, ArrowLeft, Calendar, User
 } from 'lucide-react';
 import adminApi from '../api/adminAxios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../stores';
 
 const DAYS_ALL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const DEFAULT_CAPACITY = 1;

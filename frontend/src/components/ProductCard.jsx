@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, ShoppingCart, Star, Lock } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import { calculateDiscountPercentage, formatPrice, formatDiscountPercentage } from '../lib/utils'  // ← AJOUTER
-
+import { Heart, ShoppingCart, Star, Lock, WifiOff } from 'lucide-react'
+import { useAuth } from '../stores'
+import { useOffline } from '../hooks/useOffline'
+import { calculateDiscountPercentage, formatPrice, formatDiscountPercentage } from '../lib/utils'
 
 const ProductCard = ({ product, onAddToCart, onAddToFavorites }) => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { canPlaceOrder } = useOffline()
   const [isFavorite, setIsFavorite] = useState(false)
   const [isAdded, setIsAdded] = useState(false)
 
@@ -117,7 +118,7 @@ const ProductCard = ({ product, onAddToCart, onAddToFavorites }) => {
 
 
         {/* Add to Cart Button */}
-        {isAuthenticated ? (
+        {isAuthenticated && canPlaceOrder ? (
           <button
             onClick={handleAddToCart}
             className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg mt-3 font-medium text-sm transition-all duration-200 ${
@@ -129,13 +130,21 @@ const ProductCard = ({ product, onAddToCart, onAddToFavorites }) => {
             <ShoppingCart size={16} strokeWidth={1.8} />
             {isAdded ? 'Ajouté !' : 'Ajouter au panier'}
           </button>
-        ) : (
+        ) : !isAuthenticated ? (
           <button
             disabled
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg mt-3 font-medium text-sm bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
           >
             <Lock size={14} />
             Connectez-vous pour commander
+          </button>
+        ) : (
+          <button
+            disabled
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg mt-3 font-medium text-sm bg-orange-100 text-orange-600 border border-orange-200 cursor-not-allowed"
+          >
+            <WifiOff size={14} />
+            Mode hors ligne
           </button>
         )}
       </div>

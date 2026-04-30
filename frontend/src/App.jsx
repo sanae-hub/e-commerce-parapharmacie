@@ -1,10 +1,11 @@
 // frontend/src/App.jsx
 import { useLocation, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from './context/AuthContext'
+import { useAuth } from './stores'
 import Navbar from './components/Navbar'
 import ClientNotifications from './components/ClientNotifications'
 import PhoneRequiredModal from './components/PhoneRequiredModal'
 import ProfileCompletionBanner from './components/ProfileCompletionBanner'
+import OfflineIndicator from './components/OfflineIndicator'
 import Footer from './components/Footer'
 import { useState, useEffect } from 'react'
 
@@ -112,6 +113,9 @@ function App() {
       </main>
 
       <ClientNotifications />
+      
+      {/* Indicateur offline */}
+      {!isAdminRoute && <OfflineIndicator />}
 
       {/* Modal pour compléter le profil */}
       <PhoneRequiredModal

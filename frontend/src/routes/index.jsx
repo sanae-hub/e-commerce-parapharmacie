@@ -1,6 +1,6 @@
 // frontend/src/routes/index.jsx
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../stores'
 import App from '../App'
 import PrivateRoute from '../components/PrivateRoute'
 import AdminRoute from '../components/AdminRoute'
@@ -21,6 +21,7 @@ import Products from '../pages/Products'
 import ProductDetail from '../pages/ProductDetail'
 import SearchResults from '../pages/SearchResults'
 import MyOrders from '../pages/MyOrders'
+import PrivacyPolicy from '../pages/PrivacyPolicy'
 
 // Admin
 import AdminDashboard from '../pages/AdminDashboard'
@@ -78,6 +79,7 @@ const AppRoutes = () => {
         <Route path="product/:id" element={<ProductDetail />} />
         <Route path="products" element={<Products />} />
         <Route path="search" element={<SearchResults />} />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
 
         {/* Auth */}
         <Route path="login" element={<Login />} />

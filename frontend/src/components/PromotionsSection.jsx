@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Heart, ShoppingCart, Star, Package, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useCart } from '../context/CartContext'
-import { useFavorites } from '../context/FavoritesContext'
+import { useCart } from '../stores'
+import { useFavorites } from '../stores'
 import { calculateDiscountPercentage, formatPrice, formatDiscountPercentage } from '../lib/utils'
 import axios from '../api/axios'
 

@@ -1,11 +1,11 @@
 // frontend/src/components/Navbar.jsx
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ShoppingCart, User, UserPlus, Settings, Heart, Bell, X, LogOut, Package, Moon, Sun, Tag, History, Layers, Layers2, Zap } from 'lucide-react'
-import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
+import { Search, ShoppingCart, User, UserPlus, Settings, Heart, Bell, X, LogOut, Package, Moon, Sun, Tag, History, Layers, Layers2, Zap, Shield } from 'lucide-react'
+import { useCart } from '../stores'
+import { useAuth } from '../stores'
 import { useWebSocket } from '../context/WebSocketContext'
-import { useFavorites } from '../context/FavoritesContext'
+import { useFavorites } from '../stores'
 import axios from '../api/axios'
 import MiniCart from './MiniCart'
 import MiniFavorites from './MiniFavorites'
@@ -33,10 +33,10 @@ const Highlight = ({ text, query }) => {
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const { getTotalItems } = useCart()
+  const { getItemCount } = useCart()
   const { user, logout, isAuthenticated } = useAuth()
   const { notifications, removeNotification, requestNotificationPermission } = useWebSocket()
-  const { favorites, removeFavorite, refreshFavorites } = useFavorites()
+  const { favorites, removeFromFavorites, loadFavorites } = useFavorites()
 
   const [searchFocused, setSearchFocused] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -88,11 +88,11 @@ const Navbar = () => {
   useEffect(() => {
     if (isAuthenticated && !favoritesLoaded.current) {
       favoritesLoaded.current = true
-      refreshFavorites()
+      loadFavorites()
       requestNotificationPermission()
     }
     setLoading(false)
-  }, [isAuthenticated])
+  }, [isAuthenticated, loadFavorites, requestNotificationPermission])
 
   const fetchSearchHistory = useCallback(async () => {
     if (!isAuthenticated) {
@@ -567,7 +567,7 @@ const Navbar = () => {
                 )}
               </button>
               {showMiniFavorites && (
-                <MiniFavorites favorites={favorites} onRemove={removeFavorite} onClose={() => setShowMiniFavorites(false)} />
+                <MiniFavorites favorites={favorites} onRemove={removeFromFavorites} onClose={() => setShowMiniFavorites(false)} />
               )}
             </div>
 
@@ -576,9 +576,9 @@ const Navbar = () => {
               <button onClick={() => setShowMiniCart(!showMiniCart)}
                 className="relative p-2 md:p-2.5 rounded-lg hover:bg-gray-100 transition-colors group">
                 <ShoppingCart size={20} className="text-gray-600 group-hover:text-sky-700 transition-colors" strokeWidth={1.8} />
-{isAuthenticated && getTotalItems() > 0 && (
+{isAuthenticated && getItemCount() > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {getTotalItems()}
+                    {getItemCount()}
                   </span>
                 )}
               </button>
@@ -615,6 +615,10 @@ const Navbar = () => {
                       <button onClick={() => { navigate('/my-orders'); setShowMenu(false) }}
                         className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                         <Package size={16} className="text-gray-500" /><span>Mes commandes</span>
+                      </button>
+                      <button onClick={() => { navigate('/privacy-policy'); setShowMenu(false) }}
+                        className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                        <Shield size={16} className="text-gray-500" /><span>Politique de confidentialité</span>
                       </button>
                       <button onClick={() => { navigate('/edit-profile'); setShowMenu(false) }}
                         className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">

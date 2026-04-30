@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../stores'
 import { CheckCircle, Calendar, Clock, MapPin, Package, Download, Mail, MessageSquare, QrCode, Zap } from 'lucide-react'
 import QRCode from 'qrcode'
 

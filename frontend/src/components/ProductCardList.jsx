@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
-import { useFavorites } from '../context/FavoritesContext'
+import { useFavorites } from '../stores'
 import { calculateDiscountPercentage, formatPrice, formatDiscountPercentage } from '../lib/utils'  // ← AJOUTER
 
 
