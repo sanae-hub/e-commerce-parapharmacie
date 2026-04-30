@@ -1,6 +1,6 @@
 // frontend/src/App.jsx
 import { useLocation, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from './stores'
+import { useAuthNew } from './context/AuthContextNew'
 import Navbar from './components/Navbar'
 import ClientNotifications from './components/ClientNotifications'
 import PhoneRequiredModal from './components/PhoneRequiredModal'
@@ -10,7 +10,7 @@ import Footer from './components/Footer'
 import { useState, useEffect } from 'react'
 
 function App() {
-  const { user, loading, updateProfile } = useAuth()
+  const { user, initializing: loading, updateProfile } = useAuthNew()
   const location = useLocation()
   const navigate = useNavigate()
   const [showClickCollectInfo, setShowClickCollectInfo] = useState(false)

@@ -193,9 +193,23 @@ const AdminCategories = () => {
   };
 
   const handleDeleteCategory = async (category) => {
-    if (!confirm(`ATTENTION: La suppression de "${category.name}" supprimera aussi les produits rattachés. Continuer ?`)) return;
+    const productsCount = category._count?.products || 0;
+    const getAuthHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+    if (productsCount > 0) {
+      if (!confirm(`ATTENTION: "${category.name}" contient ${productsCount} produit(s) qui seront aussi supprimés définitivement. Continuer quand même ?`)) return;
+      try {
+        await axios.delete(`/categories/admin/main/${category.id}?force=true`, getAuthHeader());
+        setSuccess('Catégorie et ses produits supprimés avec succès');
+        fetchCategories();
+        setTimeout(() => setSuccess(''), 3000);
+      } catch (error) {
+        setError(error.response?.data?.message || 'Erreur lors de la suppression');
+      }
+      return;
+    }
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer "${category.name}" ?`)) return;
     try {
-      await axios.delete(`/categories/admin/main/${category.id}`);
+      await axios.delete(`/categories/admin/main/${category.id}`, getAuthHeader());
       setSuccess('Catégorie supprimée avec succès');
       fetchCategories();
       setTimeout(() => setSuccess(''), 3000);

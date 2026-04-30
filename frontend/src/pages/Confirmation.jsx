@@ -6,7 +6,7 @@ import QRCode from 'qrcode'
 
 const Confirmation = () => {
   const navigate = useNavigate()
-  const { cartItems, getTotalPrice, clearCart, getShippingInfo } = useCart()
+  const { cartItems, getTotalPrice, clearCart, getShippingInfo, promoCode } = useCart()
   const [orderNumber, setOrderNumber] = useState('')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [timeSlot, setTimeSlot] = useState(null)
@@ -116,7 +116,8 @@ const Confirmation = () => {
         deliveryPhone: orderMode === 'DELIVERY' ? (localStorage.getItem('deliveryPhone') || null) : null,
         deliveryInstructions: orderMode === 'DELIVERY' ? (localStorage.getItem('deliveryInstructions') || null) : null,
         deliveryType: orderMode === 'DELIVERY' ? deliveryType : null,
-        deliveryPrice: orderMode === 'DELIVERY' ? deliveryPrice : 0
+        deliveryPrice: orderMode === 'DELIVERY' ? deliveryPrice : 0,
+        promoCode: promoCode ? promoCode.code : null
       }
 
       const response = await fetch('http://localhost:5000/api/orders/create', {

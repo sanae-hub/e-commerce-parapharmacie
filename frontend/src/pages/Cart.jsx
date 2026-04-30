@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../stores'
-import { useAuth } from '../stores'
+import { useAuthNew } from '../context/AuthContextNew'
 import { useOffline } from '../hooks/useOffline'
 import OrderRestriction from '../components/OrderRestriction'
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, X, Truck, Loader2, Phone } from 'lucide-react'
@@ -11,7 +11,7 @@ import api from '../api/axios'
 
 const Cart = () => {
   const navigate = useNavigate()
-  const { user, updateProfile } = useAuth()
+  const { user, updateProfile } = useAuthNew()
   const { canPlaceOrder } = useOffline()
   const {
     cartItems,
@@ -111,8 +111,8 @@ const Cart = () => {
   }
 
   const handleApplyPromo = async () => {
-    if (validating) return
-    const success = await applyPromoCode(promoInput)
+    if (validating || !promoInput.trim()) return
+    const success = await applyPromoCode(promoInput.trim())
     if (success) {
       setPromoInput('')
     }

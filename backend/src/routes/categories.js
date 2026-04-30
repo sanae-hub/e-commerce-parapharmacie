@@ -121,17 +121,56 @@ router.put('/admin/main/:id', verifyAdmin, async (req, res) => {
 router.delete('/admin/main/:id', verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
+    const { force } = req.query; // ?force=true pour suppression en cascade
     
     const category = await prisma.category.findUnique({ where: { id } });
     if (!category) return res.status(404).json({ message: 'Catégorie non trouvée' });
     
-    // Vérifier s'il y a des produits associés
     const productsCount = await prisma.product.count({ where: { categoryId: id } });
-    if (productsCount > 0) {
-      return res.status(400).json({ message: `Impossible, ${productsCount} produit(s) utilisent cette catégorie.` });
+    
+    if (productsCount > 0 && force !== 'true') {
+      return res.status(400).json({ 
+        message: `Cette catégorie contient ${productsCount} produit(s).`,
+        productsCount,
+        requiresForce: true
+      });
     }
 
-    await prisma.category.delete({ where: { id } });
+    // Suppression en cascade
+    await prisma.$transaction(async (tx) => {
+      if (productsCount > 0) {
+        // Récupérer les IDs des produits de cette catégorie
+        const products = await tx.product.findMany({
+          where: { categoryId: id },
+          select: { id: true }
+        });
+        const productIds = products.map(p => p.id);
+
+        // Récupérer les IDs des variantes
+        const variants = await tx.productVariant.findMany({
+          where: { productId: { in: productIds } },
+          select: { id: true }
+        });
+        const variantIds = variants.map(v => v.id);
+
+        if (variantIds.length > 0) {
+          await tx.stockMovement.deleteMany({ where: { variantId: { in: variantIds } } });
+          await tx.orderItem.deleteMany({ where: { variantId: { in: variantIds } } });
+        }
+        await tx.stockMovement.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.orderItem.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.favorite.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.review.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.productVariant.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.productImage.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.stockNotification.deleteMany({ where: { productId: { in: productIds } } });
+        await tx.product.deleteMany({ where: { id: { in: productIds } } });
+      }
+      await tx.subcategoryItem.deleteMany({ where: { subcategory: { categoryId: id } } });
+      await tx.subcategory.deleteMany({ where: { categoryId: id } });
+      await tx.category.delete({ where: { id } });
+    });
+
     await invalidateCategoryCache();
     res.json({ message: 'Catégorie supprimée avec succès' });
   } catch (error) {
