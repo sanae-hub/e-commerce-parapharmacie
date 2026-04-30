@@ -17,6 +17,7 @@ const Cart = () => {
     cartItems,
     removeFromCart,
     updateQuantity,
+    syncItemStock,
     clearCart,
     getDiscount,
     getTotalPrice,
@@ -34,6 +35,36 @@ const Cart = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
   const [phoneError, setPhoneError] = useState('')
+
+  // Synchroniser le stock réel depuis l'API au chargement
+  useEffect(() => {
+    const syncStock = async () => {
+      if (cartItems.length === 0) return
+      try {
+        const ids = [...new Set(cartItems.map(i => i.id))]
+        const results = await Promise.all(
+          ids.map(id => fetch(`/api/products/${id}`).then(r => r.ok ? r.json() : null).catch(() => null))
+        )
+        const stockMap = {}
+        results.forEach(p => { if (p) stockMap[p.id] = p.stock })
+        // Mettre à jour le stock dans chaque item ET limiter la quantité
+        const updated = cartItems.map(item => {
+          const realStock = stockMap[item.id] ?? item.stock
+          return {
+            ...item,
+            stock: realStock,
+            quantity: realStock != null ? Math.min(item.quantity, realStock) : item.quantity
+          }
+        })
+        // Appliquer si changement
+        const hasChange = updated.some((u, i) => u.stock !== cartItems[i].stock || u.quantity !== cartItems[i].quantity)
+        if (hasChange) {
+          updated.forEach(u => { if (u.stock != null) syncItemStock(u.id, u.stock, u.variantId) })
+        }
+      } catch {}
+    }
+    syncStock()
+  }, [])
 
 
   useEffect(() => {
@@ -222,10 +253,14 @@ const Cart = () => {
                           <span className="w-8 text-center font-medium">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1, item.variantId)}
-                            className="p-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={item.stock != null && item.quantity >= item.stock}
+                            className="p-1 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <Plus size={16} />
                           </button>
+                          {item.stock != null && item.quantity >= item.stock && (
+                            <span className="text-xs text-red-500 font-medium">Max</span>
+                          )}
                         </div>
 
                         <div className="text-right">

@@ -19,6 +19,9 @@ const useCartStore = create(
         )
 
         if (existingItemIndex >= 0) {
+          const existingItem = cartItems[existingItemIndex]
+          const maxStock = existingItem.stock ?? Infinity
+          if (existingItem.quantity >= maxStock) return // bloquer si stock atteint
           set({
             cartItems: cartItems.map((item, index) =>
               index === existingItemIndex
@@ -33,18 +36,19 @@ const useCartStore = create(
             price: product.price,
             image: product.image,
             quantity: 1,
+            stock: product.stock ?? null,
             variantId,
             variantType: null,
             variantValue: null
           }
 
-          // Si c'est une variante, ajouter les infos
           if (variantId && product.variants) {
             const variant = product.variants.find(v => v.id === variantId)
             if (variant) {
               cartItem.variantType = variant.type
               cartItem.variantValue = variant.value
               cartItem.price = variant.priceTTC || variant.price || product.price
+              cartItem.stock = variant.stock ?? product.stock ?? null
             }
           }
 
@@ -68,10 +72,25 @@ const useCartStore = create(
         }
 
         const { cartItems } = get()
+        const item = cartItems.find(i => i.id === productId && i.variantId === variantId)
+        const maxStock = item?.stock ?? Infinity
+        const clampedQty = Math.min(newQuantity, maxStock)
+
+        set({
+          cartItems: cartItems.map(i =>
+            i.id === productId && i.variantId === variantId
+              ? { ...i, quantity: clampedQty }
+              : i
+          )
+        })
+      },
+
+      syncItemStock: (productId, stock, variantId = null) => {
+        const { cartItems } = get()
         set({
           cartItems: cartItems.map(item =>
             item.id === productId && item.variantId === variantId
-              ? { ...item, quantity: newQuantity }
+              ? { ...item, stock, quantity: Math.min(item.quantity, stock) }
               : item
           )
         })
@@ -239,7 +258,18 @@ const useCartStore = create(
       partialize: (state) => ({
         cartItems: state.cartItems,
         promoCode: state.promoCode
-      })
+      }),
+      // Migration : nettoyer les anciens items sans stock
+      onRehydrateStorage: () => (state) => {
+        if (state && state.cartItems) {
+          // Si des items n'ont pas de stock, les garder mais marquer stock=null
+          // Ils seront limités au prochain fetch du produit
+          state.cartItems = state.cartItems.map(item => ({
+            ...item,
+            stock: item.stock !== undefined ? item.stock : null
+          }))
+        }
+      }
     }
   )
 )

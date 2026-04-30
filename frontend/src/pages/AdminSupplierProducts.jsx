@@ -20,6 +20,9 @@ const AdminSupplierProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalSearch, setModalSearch] = useState('');
+  // Multi-sélection : { productId: { price, reference } }
+  const [multiSelection, setMultiSelection] = useState({});
   
   // États pour les avoirs
   const [credits, setCredits] = useState([]);
@@ -80,7 +83,6 @@ const AdminSupplierProducts = () => {
       setError('Sélectionnez un produit et entrez le prix');
       return;
     }
-
     try {
       await adminApi.post(`/suppliers/${supplierId}/link-product`, {
         productId: linkForm.productId,
@@ -95,6 +97,30 @@ const AdminSupplierProducts = () => {
     } catch (error) {
       setError(error.response?.data?.message || 'Erreur lors de la liaison');
     }
+  };
+
+  const handleLinkMultiple = async () => {
+    const entries = Object.entries(multiSelection).filter(([, v]) => v.selected);
+    if (entries.length === 0) { setError('Sélectionnez au moins un produit'); return; }
+    const missing = entries.filter(([, v]) => !v.price || parseFloat(v.price) <= 0);
+    if (missing.length > 0) { setError('Entrez un prix valide pour tous les produits sélectionnés'); return; }
+    let ok = 0, fail = 0;
+    for (const [productId, val] of entries) {
+      try {
+        await adminApi.post(`/suppliers/${supplierId}/link-product`, {
+          productId,
+          price: parseFloat(val.price),
+          reference: val.reference || ''
+        });
+        ok++;
+      } catch { fail++; }
+    }
+    setSuccess(`${ok} produit(s) lié(s)${fail > 0 ? `, ${fail} échec(s)` : ''}`);
+    setShowModal(false);
+    setMultiSelection({});
+    setModalSearch('');
+    fetchLinkedProducts();
+    setTimeout(() => setSuccess(''), 3000);
   };
 
   const handleUnlinkProduct = async (productId) => {
@@ -179,6 +205,7 @@ const AdminSupplierProducts = () => {
 
   const openLinkModal = (product = null) => {
     if (product) {
+      // Mode édition d'un produit déjà lié
       setSelectedProduct(product);
       setLinkForm({
         productId: product.productId,
@@ -186,7 +213,10 @@ const AdminSupplierProducts = () => {
         reference: product.reference || ''
       });
     } else {
-      resetForm();
+      // Mode multi-sélection
+      setSelectedProduct(null);
+      setMultiSelection({});
+      setModalSearch('');
     }
     setShowModal(true);
   };
@@ -423,97 +453,186 @@ const AdminSupplierProducts = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">
-                {selectedProduct ? 'Modifier le prix' : 'Lier un produit'}
-              </h2>
+          <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b bg-white rounded-t-lg">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {selectedProduct ? 'Modifier le prix d\'achat' : 'Lier des produits au fournisseur'}
+                </h2>
+                {!selectedProduct && (
+                  <p className="text-sm text-gray-500">
+                    {Object.values(multiSelection).filter(v => v.selected).length} produit(s) sélectionné(s)
+                  </p>
+                )}
+              </div>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X size={24} />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
-              {!selectedProduct && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Produit</label>
-                  <select
-                    value={linkForm.productId}
-                    onChange={(e) => setLinkForm({ ...linkForm, productId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
-                  >
-                    <option value="">Sélectionner un produit</option>
-                    {getUnlinkedProducts().map(p => (
-                      <option key={p.id} value={p.id}>{p.name} - {p.priceTTC?.toFixed(2)} DH</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix d'achat (HT) *
-                </label>
-                <div className="relative">
-                  <DollarSign size={18} className="absolute left-3 top-2.5 text-gray-400" />
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={linkForm.price}
-                    onChange={(e) => setLinkForm({ ...linkForm, price: e.target.value })}
-                    placeholder="0.00"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Référence fournisseur
-                </label>
-                <input
-                  type="text"
-                  value={linkForm.reference}
-                  onChange={(e) => setLinkForm({ ...linkForm, reference: e.target.value })}
-                  placeholder="Référence (optionnel)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
-                />
-              </div>
-
-              {linkForm.productId && linkForm.price && (
+            {/* Mode édition d'un produit existant */}
+            {selectedProduct ? (
+              <div className="p-6 space-y-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm text-gray-600">
-                    Prix d'achat: <span className="font-medium">{parseFloat(linkForm.price).toFixed(2)} DH</span>
+                  <p className="font-medium text-gray-900">{selectedProduct.product?.name}</p>
+                  <p className="text-sm text-gray-500">Prix TTC actuel : {selectedProduct.product?.priceTTC?.toFixed(2)} DH</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prix d'achat (HT) *</label>
+                  <div className="relative">
+                    <DollarSign size={16} className="absolute left-3 top-2.5 text-gray-400" />
+                    <input type="number" step="0.01" value={linkForm.price}
+                      onChange={(e) => setLinkForm({ ...linkForm, price: e.target.value })}
+                      placeholder="0.00" className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
                   </div>
-                  {allProducts.find(p => p.id === linkForm.productId) && (
-                    <>
-                      <div className="text-sm text-gray-600">
-                        Prix de vente: <span className="font-medium">{allProducts.find(p => p.id === linkForm.productId)?.priceTTC?.toFixed(2)} DH</span>
-                      </div>
-                      <div className="text-sm">
-                        Marge: <span className="font-medium">{calculateMargin(parseFloat(linkForm.price), allProducts.find(p => p.id === linkForm.productId)?.priceTTC)}%</span>
-                      </div>
-                    </>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Référence fournisseur</label>
+                  <input type="text" value={linkForm.reference}
+                    onChange={(e) => setLinkForm({ ...linkForm, reference: e.target.value })}
+                    placeholder="Référence (optionnel)" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700" />
+                </div>
+                {linkForm.price && (
+                  <div className="p-3 bg-sky-50 rounded-lg text-sm">
+                    <span className="text-gray-600">Marge : </span>
+                    <span className="font-bold text-sky-700">{calculateMargin(parseFloat(linkForm.price), selectedProduct.product?.priceTTC)}%</span>
+                  </div>
+                )}
+                <div className="flex justify-end gap-3 pt-3 border-t">
+                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Annuler</button>
+                  <button onClick={handleLinkProduct} className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg flex items-center gap-2">
+                    <Save size={16} /> Mettre à jour
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Mode multi-sélection */
+              <>
+                <div className="px-5 py-3 border-b">
+                  <div className="relative">
+                    <Search size={15} className="absolute left-3 top-2.5 text-gray-400" />
+                    <input type="text" placeholder="Rechercher un produit..." value={modalSearch}
+                      onChange={(e) => setModalSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500" />
+                  </div>
+                </div>
+
+                <div className="overflow-y-auto flex-1">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="px-4 py-2 text-left w-8">
+                          <input type="checkbox"
+                            onChange={(e) => {
+                              const visible = getUnlinkedProducts().filter(p =>
+                                !modalSearch || p.name?.toLowerCase().includes(modalSearch.toLowerCase())
+                              );
+                              const next = {};
+                              visible.forEach(p => {
+                                next[p.id] = { selected: e.target.checked, price: multiSelection[p.id]?.price || '', reference: multiSelection[p.id]?.reference || '' };
+                              });
+                              setMultiSelection(prev => ({ ...prev, ...next }));
+                            }}
+                            className="rounded"
+                          />
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs text-gray-500">Produit</th>
+                        <th className="px-4 py-2 text-center text-xs text-gray-500">Stock</th>
+                        <th className="px-4 py-2 text-center text-xs text-gray-500">Prix HT</th>
+                        <th className="px-4 py-2 text-center text-xs text-gray-500">Prix TTC</th>
+                        <th className="px-4 py-2 text-center text-xs text-gray-500">Prix achat *</th>
+                        <th className="px-4 py-2 text-center text-xs text-gray-500">Référence</th>
+                        <th className="px-4 py-2 text-center text-xs text-gray-500">Marge</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {getUnlinkedProducts()
+                        .filter(p => !modalSearch || p.name?.toLowerCase().includes(modalSearch.toLowerCase()))
+                        .map(p => {
+                          const sel = multiSelection[p.id] || { selected: false, price: '', reference: '' };
+                          const margin = sel.price ? calculateMargin(parseFloat(sel.price), p.priceTTC) : null;
+                          return (
+                            <tr key={p.id} className={sel.selected ? 'bg-sky-50' : 'hover:bg-gray-50'}>
+                              <td className="px-4 py-2">
+                                <input type="checkbox" checked={!!sel.selected}
+                                  onChange={(e) => setMultiSelection(prev => ({
+                                    ...prev,
+                                    [p.id]: { ...sel, selected: e.target.checked }
+                                  }))}
+                                  className="rounded" />
+                              </td>
+                              <td className="px-4 py-2">
+                                <div className="font-medium text-gray-900">{p.name}</div>
+                                {p.brand && <div className="text-xs text-gray-400">{p.brand}</div>}
+                                {p.category && <div className="text-xs text-gray-400">{p.category?.name}</div>}
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                <span className={`text-xs font-bold ${
+                                  p.stock <= 0 ? 'text-red-600' : p.stock <= p.stockAlert ? 'text-orange-600' : 'text-green-700'
+                                }`}>{p.stock}</span>
+                              </td>
+                              <td className="px-4 py-2 text-center text-xs text-gray-600">{(p.priceHT || 0).toFixed(2)} DH</td>
+                              <td className="px-4 py-2 text-center text-xs font-medium text-sky-700">{(p.priceTTC || p.price || 0).toFixed(2)} DH</td>
+                              <td className="px-4 py-2 text-center">
+                                <input type="number" step="0.01" min="0"
+                                  value={sel.price}
+                                  disabled={!sel.selected}
+                                  onChange={(e) => setMultiSelection(prev => ({
+                                    ...prev,
+                                    [p.id]: { ...sel, price: e.target.value }
+                                  }))}
+                                  placeholder="0.00"
+                                  className="w-24 px-2 py-1 border border-gray-300 rounded text-center text-xs focus:outline-none focus:border-sky-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                />
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                <input type="text"
+                                  value={sel.reference}
+                                  disabled={!sel.selected}
+                                  onChange={(e) => setMultiSelection(prev => ({
+                                    ...prev,
+                                    [p.id]: { ...sel, reference: e.target.value }
+                                  }))}
+                                  placeholder="Réf."
+                                  className="w-24 px-2 py-1 border border-gray-300 rounded text-center text-xs focus:outline-none focus:border-sky-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                />
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                {margin !== null ? (
+                                  <span className={`text-xs font-bold ${
+                                    parseFloat(margin) >= 20 ? 'text-green-600' : 'text-orange-600'
+                                  }`}>{margin}%</span>
+                                ) : <span className="text-xs text-gray-300">-</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                  {getUnlinkedProducts().length === 0 && (
+                    <div className="text-center py-10 text-gray-400">
+                      <Package size={32} className="mx-auto mb-2" />
+                      <p className="text-sm">Tous les produits sont déjà liés</p>
+                    </div>
                   )}
                 </div>
-              )}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleLinkProduct}
-                  className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white rounded-lg flex items-center gap-2"
-                >
-                  <Save size={18} />
-                  {selectedProduct ? 'Mettre à jour' : 'Lier'}
-                </button>
-              </div>
-            </div>
+                <div className="flex justify-between items-center p-5 border-t bg-gray-50 rounded-b-lg">
+                  <p className="text-sm text-gray-600">
+                    {Object.values(multiSelection).filter(v => v.selected).length} produit(s) sélectionné(s)
+                  </p>
+                  <div className="flex gap-3">
+                    <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">Annuler</button>
+                    <button onClick={handleLinkMultiple}
+                      disabled={Object.values(multiSelection).filter(v => v.selected).length === 0}
+                      className="px-5 py-2 bg-sky-700 hover:bg-sky-800 disabled:bg-gray-300 text-white rounded-lg flex items-center gap-2">
+                      <Save size={16} />
+                      Lier les produits sélectionnés
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
