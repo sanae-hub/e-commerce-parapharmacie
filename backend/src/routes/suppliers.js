@@ -257,8 +257,8 @@ router.get('/suppliers/:id/products', verifyAdmin, async (req, res) => {
   }
 });
 
-// GET /api/admin/products - Liste de tous les produits (pour picker dans fournisseurs)
-router.get('/products', verifyAdmin, async (req, res) => {
+// GET /api/admin/supplier-products - Liste de tous les produits avec leurs fournisseurs
+router.get('/supplier-products', verifyAdmin, async (req, res) => {
   try {
     const { page = 1, limit = 1000, search } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -364,6 +364,72 @@ router.delete('/suppliers/:id/unlink-product/:productId', verifyAdmin, async (re
 
 // ============ ROUTES BONS DE COMMANDE ============
 
+// GET /api/admin/purchase-orders/auto-generate
+router.get('/purchase-orders/auto-generate', verifyAdmin, async (req, res) => {
+  try {
+    // Tous les produits actifs sous seuil d'alerte (avec ou sans fournisseur)
+    const allLowStock = await prisma.product.findMany({
+      where: { active: true },
+      include: {
+        suppliers: {
+          include: { supplier: { select: { id: true, name: true, email: true, active: true } } }
+        },
+        category: { select: { name: true } }
+      }
+    });
+
+    const filtered = allLowStock.filter(p => p.stock <= p.stockAlert);
+
+    // Séparer : avec fournisseur vs sans fournisseur
+    const withSupplier = filtered.filter(p => p.suppliers.some(s => s.supplier.active));
+    const withoutSupplier = filtered.filter(p => !p.suppliers.some(s => s.supplier.active));
+
+    // Grouper par fournisseur
+    const bySupplier = {};
+    for (const product of withSupplier) {
+      const activeSupplier = product.suppliers.find(s => s.supplier.active);
+      const supplierId = activeSupplier.supplier.id;
+      if (!bySupplier[supplierId]) {
+        bySupplier[supplierId] = { supplier: activeSupplier.supplier, products: [] };
+      }
+      const suggestedQty = Math.max((product.stockAlert * 3) - product.stock, 1);
+      bySupplier[supplierId].products.push({
+        productId: product.id,
+        productName: product.name,
+        category: product.category?.name,
+        currentStock: product.stock,
+        stockAlert: product.stockAlert,
+        unitPrice: activeSupplier.price || product.priceHT || 0,
+        suggestedQty,
+        status: product.stock <= 0 ? 'RUPTURE' : 'ALERTE'
+      });
+    }
+
+    const result = Object.values(bySupplier).sort((a, b) => {
+      const aR = a.products.filter(p => p.status === 'RUPTURE').length;
+      const bR = b.products.filter(p => p.status === 'RUPTURE').length;
+      return bR - aR;
+    });
+
+    res.json({
+      totalProducts: filtered.length,
+      totalSuppliers: result.length,
+      bySupplier: result,
+      withoutSupplier: withoutSupplier.map(p => ({
+        productId: p.id,
+        productName: p.name,
+        category: p.category?.name,
+        currentStock: p.stock,
+        stockAlert: p.stockAlert,
+        status: p.stock <= 0 ? 'RUPTURE' : 'ALERTE'
+      }))
+    });
+  } catch (error) {
+    console.error('Auto-generate error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
 // GET /api/admin/purchase-orders - Liste des bons de commande
 router.get('/purchase-orders', verifyAdmin, async (req, res) => {
   try {
@@ -424,15 +490,15 @@ router.post('/purchase-orders', verifyAdmin, async (req, res) => {
     }
 
     const existingOrder = await prisma.purchaseOrder.findFirst({
-      where: {
-        supplierId,
-        status: { in: ['BROUILLON', 'ENVOYÉ'] }
-      }
+      where: { supplierId, status: { in: ['BROUILLON', 'ENVOYÉ'] } }
     });
 
     if (existingOrder) {
       return res.status(409).json({ 
-        message: 'Un bon existe déjà pour ce fournisseur. Veuillez modifier l\'existant ou annuler le précédent.' 
+        message: `Un bon en cours existe déjà pour ce fournisseur (${existingOrder.orderNumber} - ${existingOrder.status}). Supprimez-le ou attendez sa réception avant d'en créer un nouveau.`,
+        existingOrderId: existingOrder.id,
+        existingOrderNumber: existingOrder.orderNumber,
+        existingStatus: existingOrder.status
       });
     }
 
@@ -625,7 +691,14 @@ router.post('/purchase-orders/:id/send', verifyAdmin, async (req, res) => {
     }
 
     if (existingOrder.status === 'ENVOYÉ') {
-      return res.status(400).json({ message: 'Bon déjà envoyé' });
+      // Permettre le renvoi : juste mettre à jour la date d'envoi
+      const order = await prisma.purchaseOrder.update({
+        where: { id },
+        data: { sentDate: new Date() },
+        include: { supplier: true, items: { include: { product: true } } }
+      });
+      res.json({ message: 'Bon renvoyé au fournisseur', order });
+      return;
     }
 
     if (existingOrder.status === 'VALIDÉ') {
