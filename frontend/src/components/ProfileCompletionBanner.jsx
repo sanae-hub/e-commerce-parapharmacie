@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { X, Phone, AlertCircle } from 'lucide-react'
-import { useAuth } from '../stores'
+import { useAuthNew } from '../context/AuthContextNew'
 
 const ProfileCompletionBanner = ({ onOpenModal }) => {
-  const { user } = useAuth()
+  const { user } = useAuthNew()
   const [dismissed, setDismissed] = useState(false)
 
   // Ne pas afficher si :

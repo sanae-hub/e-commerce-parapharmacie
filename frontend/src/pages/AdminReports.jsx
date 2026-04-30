@@ -21,26 +21,31 @@ const AdminReports = () => {
   // Filtres
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
-    date.setDate(date.getDate() - 90);
+    date.setFullYear(date.getFullYear() - 2); // 2 ans en arrière
     return date.toISOString().split('T')[0];
   });
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 2); // 2 ans en avant
+    return date.toISOString().split('T')[0];
+  });
 
   const applyQuickFilter = (filter) => {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
+    const futureStr = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate()).toISOString().split('T')[0];
     if (filter === 'today') {
       setStartDate(todayStr);
-      setEndDate(todayStr);
+      setEndDate(futureStr);
     } else if (filter === 'week') {
       const weekStart = new Date(today);
       weekStart.setDate(today.getDate() - today.getDay());
       setStartDate(weekStart.toISOString().split('T')[0]);
-      setEndDate(todayStr);
+      setEndDate(futureStr);
     } else if (filter === 'month') {
       const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
       setStartDate(monthStart.toISOString().split('T')[0]);
-      setEndDate(todayStr);
+      setEndDate(futureStr);
     }
   };
 

@@ -96,7 +96,18 @@ const Signup = () => {
       }
 
       localStorage.setItem('token', result.token)
-      localStorage.setItem('user', JSON.stringify(result.user))
+      // Fetch profil complet pour avoir phone, whatsapp, authProvider
+      try {
+        const profileRes = await fetch('/api/user/profile', { headers: { 'Authorization': `Bearer ${result.token}` } })
+        if (profileRes.ok) {
+          const profile = await profileRes.json()
+          localStorage.setItem('user', JSON.stringify({ ...result.user, ...profile }))
+        } else {
+          localStorage.setItem('user', JSON.stringify(result.user))
+        }
+      } catch {
+        localStorage.setItem('user', JSON.stringify(result.user))
+      }
       setWelcomeBack(!!result.welcomeBack)
       setSuccess(true)
       setTimeout(() => navigate('/'), 2000)

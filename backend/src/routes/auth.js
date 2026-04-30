@@ -50,11 +50,61 @@ router.post('/login', async (req, res) => {
     res.json({
       message: 'Connexion réussie',
       token,
-      user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role }
+      user: { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email, role, phone: user.phone || null, whatsapp: user.whatsapp || null, authProvider: user.authProvider || 'local' }
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// POST /api/auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ message: 'Credential Google requis' });
+
+    const { OAuth2Client } = await import('google-auth-library');
+    const GOOGLE_CLIENT_ID = '1024523760942-q8q2qqeujam35kcdcvv09vk79d6lm0ho.apps.googleusercontent.com';
+    const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+    const payload = ticket.getPayload();
+    const { email, given_name: firstName, family_name: lastName } = payload;
+
+    let client = await prisma.client.findUnique({ where: { email } });
+    const isNew = !client;
+
+    if (!client) {
+      client = await prisma.client.create({
+        data: {
+          email,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10),
+          authProvider: 'google',
+          phone: null,
+          whatsapp: null,
+        }
+      });
+    }
+
+    if (!client.isActive) return res.status(403).json({ message: 'Compte désactivé' });
+
+    const token = jwt.sign({ id: client.id, email: client.email, role: 'CLIENT' }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      message: isNew ? 'Compte créé via Google' : 'Connexion Google réussie',
+      token,
+      user: {
+        id: client.id, firstName: client.firstName, lastName: client.lastName,
+        email: client.email, role: 'CLIENT',
+        phone: client.phone, whatsapp: client.whatsapp, authProvider: client.authProvider
+      }
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({ message: 'Erreur authentification Google' });
   }
 });
 
@@ -106,7 +156,7 @@ router.post('/signup', async (req, res) => {
       message: isReturning ? 'Bienvenue à nouveau !' : 'Inscription réussie',
       welcomeBack: isReturning,
       token,
-      user: { id: client.id, firstName: client.firstName, lastName: client.lastName, email: client.email, role: 'CLIENT' }
+      user: { id: client.id, firstName: client.firstName, lastName: client.lastName, email: client.email, role: 'CLIENT', phone: client.phone, whatsapp: client.whatsapp, authProvider: client.authProvider }
     });
   } catch (error) {
     console.error('Signup error:', error);

@@ -16,6 +16,24 @@ export const AuthProviderNew = ({ children }) => {
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser)
+        // Si le profil stocké est incomplet (pas de phone/authProvider), fetch le profil complet
+        if (parsedUser.role === 'CLIENT' && parsedUser.phone === undefined) {
+          fetch('/api/user/profile', { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(r => r.ok ? r.json() : null)
+            .then(profile => {
+              const fullUser = profile ? { ...parsedUser, ...profile } : parsedUser
+              localStorage.setItem('user', JSON.stringify(fullUser))
+              setUser(fullUser)
+              setIsAuthenticated(true)
+              useAuthStore.setState({ user: fullUser, isAuthenticated: true })
+            })
+            .catch(() => {
+              setUser(parsedUser)
+              setIsAuthenticated(true)
+            })
+            .finally(() => setInitializing(false))
+          return
+        }
         setUser(parsedUser)
         setIsAuthenticated(true)
         useAuthStore.setState({ user: parsedUser, isAuthenticated: true })
@@ -34,10 +52,18 @@ export const AuthProviderNew = ({ children }) => {
       const data = await res.json()
       if (res.ok) {
         localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        setUser(data.user); setIsAuthenticated(true); setLoading(false)
-        useAuthStore.setState({ user: data.user, isAuthenticated: true })
-        return { success: true, user: data.user }
+        let fullUser = data.user
+        if (data.user.role === 'CLIENT') {
+          const profileRes = await fetch('/api/user/profile', { headers: { 'Authorization': `Bearer ${data.token}` } })
+          if (profileRes.ok) {
+            const profile = await profileRes.json()
+            fullUser = { ...data.user, ...profile }
+          }
+        }
+        localStorage.setItem('user', JSON.stringify(fullUser))
+        setUser(fullUser); setIsAuthenticated(true); setLoading(false)
+        useAuthStore.setState({ user: fullUser, isAuthenticated: true })
+        return { success: true, user: fullUser }
       }
       setError(data.message); setLoading(false)
       return { success: false, error: data.message, accountDeleted: !!data.accountDeleted }
@@ -95,9 +121,14 @@ export const AuthProviderNew = ({ children }) => {
       const data = await res.json()
       if (res.ok) {
         localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        setUser(data.user); setIsAuthenticated(true); setLoading(false)
-        return { success: true, user: data.user }
+        // Fetch full profile to get authProvider, phone, whatsapp
+        const profileRes = await fetch('/api/user/profile', { headers: { 'Authorization': `Bearer ${data.token}` } })
+        const profile = profileRes.ok ? await profileRes.json() : data.user
+        const fullUser = { ...data.user, ...profile }
+        localStorage.setItem('user', JSON.stringify(fullUser))
+        setUser(fullUser); setIsAuthenticated(true); setLoading(false)
+        useAuthStore.setState({ user: fullUser, isAuthenticated: true })
+        return { success: true, user: fullUser }
       }
       setError(data.message); setLoading(false)
       return { success: false, error: data.message }

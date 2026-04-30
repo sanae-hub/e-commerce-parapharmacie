@@ -300,9 +300,9 @@ router.put('/orders/:orderId/status', verifyAdmin, autoCheckEmployeePermission, 
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-    const orderBefore = await prisma.order.findUnique({ where: { id: orderId }, include: { user: true, items: { include: { product: { select: { id: true, name: true, stock: true, stockAlert: true } } } } } });
+    const orderBefore = await prisma.order.findUnique({ where: { id: orderId }, include: { client: true, items: { include: { product: { select: { id: true, name: true, stock: true, stockAlert: true } } } } } });
     if (!orderBefore) return res.status(404).json({ message: 'Commande non trouvée' });
-    const order = await prisma.order.update({ where: { id: orderId }, data: { status }, include: { user: true, items: { include: { product: true } } } });
+    const order = await prisma.order.update({ where: { id: orderId }, data: { status }, include: { client: true, items: { include: { product: true } } } });
     const io = getIo();
     if (status === 'PREPARING' && orderBefore.status === 'RECEIVED') {
       for (const item of orderBefore.items) {
@@ -1649,8 +1649,8 @@ router.get('/reports/weekly', verifyAdmin, autoCheckEmployeePermission, async (r
 router.get('/reports/click-collect', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const end = endDate ? new Date(endDate) : new Date();
+    const start = startDate ? new Date(startDate) : new Date('2020-01-01');
+    const end = endDate ? new Date(endDate + 'T23:59:59.999Z') : new Date('2030-12-31');
 
     // Récupérer les commandes Click & Collect
     const clickCollectOrders = await prisma.order.findMany({
@@ -3472,8 +3472,8 @@ router.get('/audit-logs/stats', verifyAdmin, autoCheckEmployeePermission, async 
 router.get('/reports/sales', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
   try {
     const { startDate, endDate, period = 'monthly' } = req.query;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = startDate ? new Date(startDate) : new Date('2020-01-01');
+    const end = endDate ? new Date(endDate + 'T23:59:59.999Z') : new Date('2030-12-31');
     const SALE_STATUSES = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
 
     const orders = await prisma.order.findMany({
@@ -3530,8 +3530,8 @@ router.get('/reports/sales', verifyAdmin, autoCheckEmployeePermission, async (re
 router.get('/reports/products', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = startDate ? new Date(startDate) : new Date('2020-01-01');
+    const end = endDate ? new Date(endDate + 'T23:59:59.999Z') : new Date('2030-12-31');
     const SALE_STATUSES = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
 
     const orderItems = await prisma.orderItem.findMany({
@@ -3703,8 +3703,8 @@ router.get('/reports/products-detailed', verifyAdmin, autoCheckEmployeePermissio
 router.get('/reports/top-products', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
   try {
     const { startDate, endDate, limit = 10 } = req.query;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = startDate ? new Date(startDate) : new Date('2020-01-01');
+    const end = endDate ? new Date(endDate + 'T23:59:59.999Z') : new Date('2030-12-31');
     const SALE_STATUSES = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
 
     const orderItems = await prisma.orderItem.findMany({
@@ -3751,8 +3751,8 @@ router.get('/reports/top-products', verifyAdmin, autoCheckEmployeePermission, as
 router.get('/reports/bottom-products', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
   try {
     const { startDate, endDate, limit = 10 } = req.query;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = startDate ? new Date(startDate) : new Date('2020-01-01');
+    const end = endDate ? new Date(endDate + 'T23:59:59.999Z') : new Date('2030-12-31');
     const SALE_STATUSES = ['RECEIVED', 'PREPARING', 'READY', 'COMPLETED', 'PICKED_UP', 'DELIVERED'];
 
     const orderItems = await prisma.orderItem.findMany({

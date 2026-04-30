@@ -193,7 +193,7 @@ app.get('/api/user/cart', verifyToken, async (req, res) => {
 // ============ ROUTES COMMANDES ============
 app.post('/api/orders/create', async (req, res) => {
   try {
-    const { items, total, timeSlot, orderNumber, type, deliveryType, deliveryPrice, deliveryAddress, deliveryCityId, deliveryDistrictId, deliveryStreet, deliveryPhone, deliveryInstructions } = req.body;
+    const { items, total, timeSlot, orderNumber, type, deliveryType, deliveryPrice, deliveryAddress, deliveryCityId, deliveryDistrictId, deliveryStreet, deliveryPhone, deliveryInstructions, promoCode } = req.body;
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Vous devez être connecté' });
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -230,6 +230,15 @@ app.post('/api/orders/create', async (req, res) => {
     });
     
     await decrementStock(order.items, order.id, userId);
+
+    // Incrémenter usageCount si un code promo a été utilisé
+    if (promoCode) {
+      await prisma.promoCode.updateMany({
+        where: { code: promoCode.toUpperCase(), active: true },
+        data: { usageCount: { increment: 1 } }
+      });
+    }
+
     io.to(`user_${userId}`).emit('notification', { type: 'ORDER_CREATED', title: 'Commande créée', message: `Votre commande ${orderNumber} a été créée`, orderId: order.id, timestamp: new Date() });
     io.to('admin_room').emit('admin_new_order', { id: order.id, orderNumber: order.orderNumber, type: order.type, total: order.total, status: order.status, customerName: order.client ? `${order.client.firstName} ${order.client.lastName}` : 'Client', timeSlotDate: order.timeSlotDate, timeSlotStart: order.timeSlotStart, createdAt: order.createdAt });
     

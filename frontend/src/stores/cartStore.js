@@ -107,14 +107,14 @@ const useCartStore = create(
 
           if (response.ok) {
             set({ 
-              promoCode: data.promoCode, 
+              promoCode: data.promoCode || data, 
               validating: false,
               promoError: '' 
             })
             return true
           } else {
             set({ 
-              promoError: data.message, 
+              promoError: data.message || data.error || 'Code promo invalide', 
               validating: false 
             })
             return false
