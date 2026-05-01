@@ -8,6 +8,7 @@ import app from './app.js';
 import { setIo, addClientSocket, removeClientSocket } from './io.js';
 import { sendReminderEmail } from './services/emailService.js';
 import { initWhatsAppClient } from './services/whatsappService.js';
+import { sendSmsReminder } from './services/smsService.js';
 import { startStockNotifier } from './cron/stockNotifier.js';
 import { startBackupCron } from './cron/backupDb.js';
 
@@ -79,6 +80,9 @@ cron.schedule('*/15 * * * *', async () => {
       const diffMinutes = (slotDateMorocco.getTime() - new Date().getTime()) / (1000 * 60);
       if (diffMinutes >= 105 && diffMinutes <= 135) {
         await sendReminderEmail(order.client.email, order);
+        if (order.client?.phone && order.client.notificationSMS) {
+          await sendSmsReminder(order.client.phone, order, order.client).catch(err => console.error('Erreur SMS rappel cron:', err));
+        }
         await prisma.order.update({ where: { id: order.id }, data: { reminderSent: true } });
       }
     }

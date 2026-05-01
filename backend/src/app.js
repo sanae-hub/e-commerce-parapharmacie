@@ -65,6 +65,8 @@ app.use('/api/user', usersRouter);
 app.use('/api/barcode', barcodeRouter);
 app.use('/api/time-slots', timeSlotsRouter);
 app.use('/api/delivery', deliveryRouter);
+app.use('/api/delivery-zones', deliveryRouter);
+app.use('/api/delivery-days', deliveryRouter);
 app.use('/api/offline', offlineRouter);
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK' }));

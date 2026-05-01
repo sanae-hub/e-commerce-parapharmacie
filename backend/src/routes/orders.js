@@ -3,6 +3,8 @@ import express from "express";
 import prisma from "../prismaClient.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { getIo } from '../io.js';
+import { sendWhatsAppNewOrder } from '../services/whatsappService.js';
+import { sendSmsOrderCreated } from '../services/smsService.js';
 
 const router = express.Router();
 
@@ -11,8 +13,8 @@ function generateOrderNumber() {
   return "ORD-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
 }
 
-// POST /api/orders/create-order - Créer une commande et réduire le stock
-router.post("/create-order", authenticateToken, async (req, res) => {
+// POST /api/orders/create-order et /api/orders/create - Créer une commande
+router.post(["/create-order", "/create"], authenticateToken, async (req, res) => {
   try {
     const { phone, isUrgent, items, total, deliveryInfo, paymentMethod } = req.body;
     const userId = req.userId;
@@ -115,7 +117,6 @@ router.post("/create-order", authenticateToken, async (req, res) => {
             type: "SALE",
             quantity: -item.quantity,
             reason: `Commande ${newOrder.orderNumber}`,
-            orderId: newOrder.id,
           },
         });
       }
@@ -123,8 +124,28 @@ router.post("/create-order", authenticateToken, async (req, res) => {
       return newOrder;
     });
 
+    // Notification WhatsApp nouvelle commande
+    try {
+      const client = await prisma.client.findUnique({
+        where: { id: userId },
+        select: { firstName: true, whatsapp: true, notificationWhatsApp: true, phone: true, notificationSMS: true }
+      });
+      if (client?.whatsapp && client.notificationWhatsApp) {
+        sendWhatsAppNewOrder(client.whatsapp, order, client).catch(err =>
+          console.error('Erreur WhatsApp nouvelle commande:', err)
+        );
+      }
+      if (client?.phone && client.notificationSMS) {
+        sendSmsOrderCreated(client.phone, order, client).catch(err =>
+          console.error('Erreur SMS nouvelle commande:', err)
+        );
+      }
+    } catch (wsErr) {
+      console.error('Erreur recuperation client pour WhatsApp:', wsErr);
+    }
+
     res.status(201).json({
-      message: req.t("order_created") || "Commande créée avec succès",
+      message: "Commande créée avec succès",
       order,
     });
 

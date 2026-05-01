@@ -85,6 +85,30 @@ export const sendWhatsAppOrderNotification = async (whatsappNumber, order, newSt
 };
 
 /**
+ * Envoie une notification de nouvelle commande
+ */
+export const sendWhatsAppNewOrder = async (whatsappNumber, order, client) => {
+    const phone = formatPhoneNumber(whatsappNumber);
+    if (!phone) return;
+
+    if (!ULTRAMSG_INSTANCE_ID || ULTRAMSG_INSTANCE_ID === 'votre_instance_id_ici') {
+        console.log(`[ULTRAMSG MOCK] Nouvelle commande WhatsApp à ${phone} simulée.`);
+        return;
+    }
+
+    try {
+        const url = `https://api.ultramsg.com/${ULTRAMSG_INSTANCE_ID}/messages/chat`;
+        const firstName = client?.firstName || 'Client';
+        const body = `*ParaClick* 🛒\n\nBonjour ${firstName},\n\nVotre commande n°*${order.orderNumber}* a bien été reçue !\n\nMontant total : *${order.total} DH*\n\nNous vous informerons dès qu'elle sera prête. Merci pour votre confiance ! 🌿`;
+
+        await axios.post(url, { token: ULTRAMSG_TOKEN, to: phone, body });
+        console.log(`💬 ✅ WhatsApp nouvelle commande envoyé à ${phone}`);
+    } catch (error) {
+        console.error(`💬 ❌ Erreur Ultramsg nouvelle commande pour ${phone}:`, error.response?.data || error.message);
+    }
+};
+
+/**
  * Envoie une notification de promotion
  */
 export const sendWhatsAppPromotion = async (whatsappNumber, promotion) => {
