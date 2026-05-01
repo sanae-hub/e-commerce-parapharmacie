@@ -19,9 +19,6 @@ const useCartStore = create(
         )
 
         if (existingItemIndex >= 0) {
-          const existingItem = cartItems[existingItemIndex]
-          const maxStock = existingItem.stock ?? Infinity
-          if (existingItem.quantity >= maxStock) return // bloquer si stock atteint
           set({
             cartItems: cartItems.map((item, index) =>
               index === existingItemIndex
@@ -70,16 +67,11 @@ const useCartStore = create(
           get().removeFromCart(productId, variantId)
           return
         }
-
         const { cartItems } = get()
-        const item = cartItems.find(i => i.id === productId && i.variantId === variantId)
-        const maxStock = item?.stock ?? Infinity
-        const clampedQty = Math.min(newQuantity, maxStock)
-
         set({
           cartItems: cartItems.map(i =>
             i.id === productId && i.variantId === variantId
-              ? { ...i, quantity: clampedQty }
+              ? { ...i, quantity: newQuantity }
               : i
           )
         })

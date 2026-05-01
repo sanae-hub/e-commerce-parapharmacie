@@ -16,12 +16,14 @@ import AdminNotifications from '../components/AdminNotifications';
 import { useAdminWebSocket } from '../context/AdminWebSocketContext';
 import { usePermissionsStore } from '../stores';
 import { useAuth } from '../stores';
+import { useAuthNew } from '../context/AuthContextNew';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isConnected, stats, notificationCount, clearNotifications } = useAdminWebSocket();
+  const { user } = useAuthNew();
+  const { isConnected, stats: wsStats, notificationCount, clearNotifications } = useAdminWebSocket();
+  const stats = wsStats || { newOrders: 0, pendingOrders: 0 };
   const { canView, loading: permissionsLoading } = usePermissionsStore();
 
   // Menu dynamique — filtré selon les permissions
@@ -71,6 +73,15 @@ const AdminDashboard = () => {
     }
     
     fetchAllData();
+  }, []);
+
+  // Polling KPIs toutes les 30 secondes
+  useEffect(() => {
+    const kpiInterval = setInterval(() => {
+      fetchKPIs().catch(() => {});
+      fetchPersistentNotificationCount().catch(() => {});
+    }, 30000);
+    return () => clearInterval(kpiInterval);
   }, []);
 
   // Refresh urgent orders when timeframe changes
@@ -170,7 +181,9 @@ const AdminDashboard = () => {
 
   const fetchSalesChart = async () => {
     const { data } = await adminApi.get(`/sales-chart?period=${salesPeriod}`);
-    setSalesData(data);
+    // Trier par date pour affichage correct
+    const sorted = Array.isArray(data) ? [...data].sort((a, b) => a.date?.localeCompare(b.date)) : [];
+    setSalesData(sorted);
   };
 
   const fetchUrgentOrders = async () => {
