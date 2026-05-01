@@ -38,7 +38,8 @@ const AdminPurchaseOrders = () => {
   const [autoLoading, setAutoLoading] = useState(false);
   const [autoSelected, setAutoSelected] = useState({});
   const [autoCreating, setAutoCreating] = useState(false);
-  const [productSearch, setProductSearch] = useState('');
+  const [autoExpectedDate, setAutoExpectedDate] = useState('');
+  const [modalError, setModalError] = useState('');
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [exchangeHistory, setExchangeHistory] = useState({});
 
@@ -59,6 +60,7 @@ const AdminPurchaseOrders = () => {
         products.forEach(p => { selected[supplier.id][p.productId] = p.suggestedQty; });
       });
       setAutoSelected(selected);
+      setAutoExpectedDate('');
       setShowAutoModal(true);
     } catch (err) {
       setError('Erreur lors de la génération automatique');
@@ -69,7 +71,8 @@ const AdminPurchaseOrders = () => {
 
   const handleCreateAutoOrders = async () => {
     setAutoCreating(true);
-    let created = 0, skipped = 0;
+    let created = 0;
+    const skippedSuppliers = [];
     try {
       for (const { supplier } of autoData.bySupplier) {
         const selectedProducts = autoSelected[supplier.id] || {};
@@ -86,16 +89,31 @@ const AdminPurchaseOrders = () => {
           await adminApi.post('/purchase-orders', {
             supplierId: supplier.id,
             items,
-            notes: "Généré automatiquement - stock sous seuil d'alerte"
+            notes: "Généré automatiquement - stock sous seuil d'alerte",
+            expectedDate: autoExpectedDate || null
           });
           created++;
-        } catch { skipped++; }
+        } catch (err) {
+          if (err.response?.status === 409) {
+            const d = err.response.data;
+            skippedSuppliers.push(`${supplier.name} (bon existant : ${d?.existingOrderNumber || '?'} - ${d?.existingStatus || '?'})`);
+          } else {
+            skippedSuppliers.push(`${supplier.name} (erreur)`);
+          }
+        }
       }
       setShowAutoModal(false);
       setAutoData(null);
       fetchOrders();
-      setSuccess(`${created} bon(s) créé(s)${skipped > 0 ? `, ${skipped} ignoré(s) (bon existant)` : ''}`);
-      setTimeout(() => setSuccess(''), 4000);
+      if (created > 0 && skippedSuppliers.length === 0) {
+        setSuccess(`${created} bon(s) créé(s) avec succès`);
+      } else if (created > 0 && skippedSuppliers.length > 0) {
+        setSuccess(`${created} bon(s) créé(s)`);
+        setError(`Ignoré(s) car bon existant : ${skippedSuppliers.join(' | ')}. Supprimez ou réceptionnez ces bons d'abord.`);
+      } else {
+        setError(`Aucun bon créé. Bons existants : ${skippedSuppliers.join(' | ')}. Supprimez ou réceptionnez ces bons d'abord.`);
+      }
+      setTimeout(() => setSuccess(''), 5000);
     } finally {
       setAutoCreating(false);
     }
@@ -153,6 +171,7 @@ const AdminPurchaseOrders = () => {
       await adminApi.post('/purchase-orders', orderForm);
       setSuccess('Bon de commande créé avec succès');
       setShowModal(false);
+      setModalError('');
       resetForm();
       setProductSearch('');
       fetchOrders();
@@ -160,9 +179,9 @@ const AdminPurchaseOrders = () => {
     } catch (err) {
       const data = err.response?.data;
       if (err.response?.status === 409) {
-        setError(`Bon existant : ${data?.existingOrderNumber} (${data?.existingStatus}). Supprimez-le ou attendez sa réception.`);
+        setModalError(`Un bon en cours existe déjà pour ce fournisseur : ${data?.existingOrderNumber || ''} (${data?.existingStatus || ''}). Supprimez-le ou attendez sa réception avant d'en créer un nouveau.`);
       } else {
-        setError(data?.message || `Erreur ${err.response?.status || 'inconnue'}`);
+        setModalError(data?.message || `Erreur ${err.response?.status || 'inconnue'}`);
       }
     }
   };
@@ -797,9 +816,20 @@ const AdminPurchaseOrders = () => {
                   {autoData.totalProducts} produit(s) sous seuil d'alerte • {autoData.totalSuppliers} fournisseur(s)
                 </p>
               </div>
-              <button onClick={() => setShowAutoModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X size={24} />
-              </button>
+              <div className="flex items-center gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date de livraison prévue</label>
+                  <input
+                    type="date"
+                    value={autoExpectedDate}
+                    onChange={(e) => setAutoExpectedDate(e.target.value)}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <button onClick={() => setShowAutoModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-6">
@@ -973,7 +1003,7 @@ const AdminPurchaseOrders = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Fournisseur *</label>
                   <select
                     value={orderForm.supplierId}
-                    onChange={(e) => { setOrderForm({ ...orderForm, supplierId: e.target.value, items: [] }); setProductSearch(''); }}
+                    onChange={(e) => { setOrderForm({ ...orderForm, supplierId: e.target.value, items: [] }); setProductSearch(''); setModalError(''); }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-sky-700"
                   >
                     <option value="">Sélectionner un fournisseur</option>
@@ -1134,17 +1164,28 @@ const AdminPurchaseOrders = () => {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 p-5 border-t bg-gray-50 rounded-b-lg">
-              <button onClick={() => { setShowModal(false); setProductSearch(''); }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
-                Annuler
-              </button>
-              <button onClick={handleCreateOrder}
-                disabled={!orderForm.supplierId || orderForm.items.length === 0}
-                className="px-5 py-2 bg-sky-700 hover:bg-sky-800 disabled:bg-gray-300 text-white rounded-lg flex items-center gap-2">
-                <Save size={16} />
-                Créer le bon ({orderForm.items.length} produit(s))
-              </button>
+            <div className="flex flex-col gap-3 p-5 border-t bg-gray-50 rounded-b-lg">
+              {modalError && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-800">{modalError}</p>
+                  <button onClick={() => setModalError('')} className="ml-auto text-red-400 hover:text-red-600">
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+              <div className="flex justify-end gap-3">
+                <button onClick={() => { setShowModal(false); setProductSearch(''); setModalError(''); }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+                  Annuler
+                </button>
+                <button onClick={handleCreateOrder}
+                  disabled={!orderForm.supplierId || orderForm.items.length === 0}
+                  className="px-5 py-2 bg-sky-700 hover:bg-sky-800 disabled:bg-gray-300 text-white rounded-lg flex items-center gap-2">
+                  <Save size={16} />
+                  Créer le bon ({orderForm.items.length} produit(s))
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -112,7 +112,7 @@ const CategoryBar = () => {
       <div className="w-full px-4 md:px-6">
 
         {/* Desktop */}
-        <div className="hidden md:flex justify-center items-center py-3 gap-2 flex-wrap">
+        <div className="hidden md:grid py-3 gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(categories.length, 1)}, minmax(0, 1fr))` }}>
           {categories.map((cat) => {
             const Icon = getIcon(cat.icon)
             const hasSubs = cat.subcategories?.length > 0
@@ -125,15 +125,15 @@ const CategoryBar = () => {
               >
                 <button
                   onClick={() => handleCategoryClick(cat)}
-                  className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all text-sm font-medium whitespace-nowrap ${
+                  className={`w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all text-sm font-medium ${
                     isOpen(cat.id)
                       ? 'bg-sky-700 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <Icon size={16} strokeWidth={1.8} />
-                  {cat.name}
-                  {hasSubs && <ChevronDown size={13} strokeWidth={2} />}
+                  <span className="truncate">{cat.name}</span>
+                  {hasSubs && <ChevronDown size={13} strokeWidth={2} className="flex-shrink-0" />}
                 </button>
               </div>
             )

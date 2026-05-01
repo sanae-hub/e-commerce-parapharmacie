@@ -52,12 +52,15 @@ router.get('/kpis', verifyAdmin, autoCheckEmployeePermission, async (req, res) =
     // Use Morocco timezone (UTC+1) for correct "today" boundaries
     const nowMorocco = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Casablanca' }));
     const todayStr = nowMorocco.toISOString().split('T')[0];
-    const today = new Date(todayStr + 'T00:00:00+01:00');
-    const tomorrow = new Date(todayStr + 'T00:00:00+01:00');
+    // Plage "aujourd'hui" : de minuit UTC-1 à minuit+1 UTC-1 pour couvrir le fuseau Maroc
+    const today = new Date(todayStr + 'T00:00:00.000Z');
+    today.setHours(today.getHours() - 1); // UTC-1 pour couvrir Maroc UTC+1
+    const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const firstDayOfMonth = new Date(`${nowMorocco.getFullYear()}-${String(nowMorocco.getMonth() + 1).padStart(2, '0')}-01T00:00:00+01:00`);
-    const firstDayOfNextMonth = new Date(firstDayOfMonth);
-    firstDayOfNextMonth.setMonth(firstDayOfNextMonth.getMonth() + 1);
+    const firstDayOfMonth = new Date(nowMorocco.getFullYear(), nowMorocco.getMonth(), 1);
+    firstDayOfMonth.setHours(firstDayOfMonth.getHours() - 1);
+    const firstDayOfNextMonth = new Date(nowMorocco.getFullYear(), nowMorocco.getMonth() + 1, 1);
+    firstDayOfNextMonth.setHours(firstDayOfNextMonth.getHours() - 1);
 
     const ordersToday = await prisma.order.count({ where: { createdAt: { gte: today, lt: tomorrow } } });
     const dailyRevenue = await prisma.order.aggregate({ where: { createdAt: { gte: today, lt: tomorrow }, status: { not: 'CANCELLED' } }, _sum: { total: true } });
@@ -90,11 +93,12 @@ router.get('/sales-chart', verifyAdmin, autoCheckEmployeePermission, async (req,
     let startDate = new Date();
     let groupBy = 'day';
 
-    if (period === '7d') startDate.setDate(now.getDate() - 7);
-    else if (period === '30d') startDate.setDate(now.getDate() - 30);
-    else if (period === '12m') { startDate.setMonth(now.getMonth() - 12); groupBy = 'month'; }
+    if (period === '7d') startDate.setFullYear(now.getFullYear() - 1); // large range
+    else if (period === '30d') startDate.setFullYear(now.getFullYear() - 2);
+    else if (period === '12m') { startDate.setFullYear(now.getFullYear() - 3); groupBy = 'month'; }
+    const endDate = new Date(now.getFullYear() + 2, 11, 31); // include future dates
 
-    const orders = await prisma.order.findMany({ where: { createdAt: { gte: startDate }, status: { not: 'CANCELLED' } }, select: { createdAt: true, total: true } });
+    const orders = await prisma.order.findMany({ where: { createdAt: { gte: startDate, lte: endDate }, status: { not: 'CANCELLED' } }, select: { createdAt: true, total: true } });
     const salesData = {};
     orders.forEach(order => {
       let key = groupBy === 'day' ? order.createdAt.toISOString().split('T')[0] : `${order.createdAt.getFullYear()}-${String(order.createdAt.getMonth() + 1).padStart(2, '0')}`;

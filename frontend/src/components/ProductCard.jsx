@@ -2,16 +2,19 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart, Star, Lock, WifiOff } from 'lucide-react'
 import { useAuth } from '../stores'
+import { useAuthNew } from '../context/AuthContextNew'
 import { useOffline } from '../hooks/useOffline'
 import { calculateDiscountPercentage, formatPrice, formatDiscountPercentage } from '../lib/utils'
 
 const ProductCard = ({ product, onAddToCart, onAddToFavorites }) => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { user } = useAuthNew()
   const { canPlaceOrder } = useOffline()
   const [isFavorite, setIsFavorite] = useState(false)
   const [isAdded, setIsAdded] = useState(false)
 
+  const isAdminOrEmployee = ['ADMIN', 'EMPLOYE', 'PREPARATEUR', 'CAISSIER'].includes(user?.role)
   const discountPercentage = calculateDiscountPercentage(product.oldPrice, product.price)
 
   const handleAddToFavorites = () => {
@@ -114,17 +117,26 @@ const ProductCard = ({ product, onAddToCart, onAddToFavorites }) => {
             )}
           </div>
           <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Prix TTC</p>
+          {/* Stock visible uniquement pour admin/employé */}
+          {isAdminOrEmployee && (
+            <div className={`mt-1 text-xs font-semibold ${
+              product.stock <= 0 ? 'text-red-600' :
+              product.stock <= (product.stockAlert || 10) ? 'text-orange-500' :
+              'text-green-600'
+            }`}>
+              {product.stock <= 0 ? `⚠️ Rupture (stock: ${product.stock})` :
+               product.stock <= (product.stockAlert || 10) ? `⚠️ Stock faible: ${product.stock}` :
+               `✅ Stock: ${product.stock}`}
+            </div>
+          )}
         </div>
 
-
-        {/* Add to Cart Button */}
+        {/* Add to Cart — toujours actif pour les clients connectés */}
         {isAuthenticated && canPlaceOrder ? (
           <button
             onClick={handleAddToCart}
             className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg mt-3 font-medium text-sm transition-all duration-200 ${
-              isAdded
-                ? 'bg-green-500 text-white'
-                : 'bg-sky-700 hover:bg-sky-800 text-white'
+              isAdded ? 'bg-green-500 text-white' : 'bg-sky-700 hover:bg-sky-800 text-white'
             }`}
           >
             <ShoppingCart size={16} strokeWidth={1.8} />
