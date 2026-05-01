@@ -5,8 +5,8 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// GET /api/delivery-zones/cities - Récupérer toutes les villes de livraison
-router.get('/zones/cities', async (req, res) => {
+// GET /api/delivery-zones/cities
+router.get('/cities', async (req, res) => {
   try {
     const cities = await prisma.deliveryCity.findMany({
       where: { active: true },
@@ -25,8 +25,8 @@ router.get('/zones/cities', async (req, res) => {
   }
 });
 
-// GET /api/delivery-zones/districts - Récupérer les quartiers d'une ville
-router.get('/zones/districts', async (req, res) => {
+// GET /api/delivery-zones/districts
+router.get('/districts', async (req, res) => {
   try {
     const { cityId } = req.query;
     
@@ -54,8 +54,8 @@ router.get('/zones/districts', async (req, res) => {
   }
 });
 
-// GET /api/delivery-days/available - Récupérer les jours de livraison disponibles
-router.get('/days/available', async (req, res) => {
+// GET /api/delivery-days/available
+router.get('/available', async (req, res) => {
   try {
     const { days = 7 } = req.query;
     const daysToCheck = parseInt(days);
@@ -145,8 +145,8 @@ router.get('/days/available', async (req, res) => {
   }
 });
 
-// GET /api/delivery-days/config - Récupérer la configuration des jours de livraison (admin)
-router.get('/days/config', async (req, res) => {
+// GET /api/delivery-days/config
+router.get('/config', async (req, res) => {
   try {
     const configs = await prisma.deliveryDayConfig.findMany({
       orderBy: { dayOfWeek: 'asc' }

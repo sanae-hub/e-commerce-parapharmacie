@@ -8,6 +8,7 @@ import { autoCheckEmployeePermission } from '../middleware/employeePermission.js
 import employeePermissionsRouter from './employeePermissions.js';
 import { sendWhatsAppOrderNotification, sendWhatsAppPromotion } from '../services/whatsappService.js';
 import { sendOrderStatusUpdate, sendOrderInvoice } from '../services/emailService.js';
+import { sendSmsOrderStatus, sendSmsReminder } from '../services/smsService.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -330,6 +331,9 @@ router.put('/orders/:orderId/status', verifyAdmin, autoCheckEmployeePermission, 
     }
     if (order.client?.whatsapp && order.client.notificationWhatsApp) {
       try { await sendWhatsAppOrderNotification(order.client.whatsapp, order, status); } catch (wsError) { console.error('Erreur envoi notification WhatsApp:', wsError); }
+    }
+    if (order.client?.phone && order.client.notificationSMS) {
+      try { await sendSmsOrderStatus(order.client.phone, order, status, order.client); } catch (smsErr) { console.error('Erreur envoi SMS statut:', smsErr); }
     }
     if (order.client?.email && order.client.notificationEmail !== false) {
       try { await sendOrderStatusUpdate(order.client.email, order, status); } catch (mailErr) { console.error('Erreur envoi email statut:', mailErr); }
@@ -920,11 +924,11 @@ router.get('/time-slots/config', verifyAdmin, autoCheckEmployeePermission, async
     const where = {};
     if (all !== 'true') where.active = true;
     if (type) where.type = type;
-    if (employeeId) where.userId = employeeId;
+    if (employeeId) where.employeeId = employeeId;
     
     // If user is EMPLOYE, and no employeeId requested, default to their own
     if (req.userRole === 'EMPLOYE' && !employeeId && type === 'EMPLOYEE') {
-      where.userId = req.userId;
+      where.employeeId = req.userId;
     }
 
     const configs = await prisma.timeSlotConfig.findMany({ 
@@ -957,7 +961,7 @@ router.post('/time-slots/config', verifyAdmin, autoCheckEmployeePermission, asyn
       where: {
         dayOfWeek: parseInt(dayOfWeek),
         type: req.body.type || 'STORE',
-        userId: (req.body.type === 'EMPLOYEE' && req.body.userId) ? req.body.userId : (req.body.type === 'EMPLOYEE' && req.userRole === 'EMPLOYE' ? req.userId : null),
+        employeeId: (req.body.type === 'EMPLOYEE' && req.body.employeeId) ? req.body.employeeId : (req.body.type === 'EMPLOYEE' && req.userRole === 'EMPLOYE' ? req.userId : null),
         active: true,
         OR: [
           { startTime: { lt: endTime }, endTime: { gt: startTime } }
@@ -978,7 +982,7 @@ router.post('/time-slots/config', verifyAdmin, autoCheckEmployeePermission, asyn
         intervalMinutes: intervalMinutes || 30, 
         active: active !== undefined ? active : true,
         type: req.body.type || 'STORE',
-        userId: (req.body.type === 'EMPLOYEE' && req.body.userId) ? req.body.userId : (req.body.type === 'EMPLOYEE' && req.userRole === 'EMPLOYE' ? req.userId : null)
+        employeeId: (req.body.type === 'EMPLOYEE' && req.body.employeeId) ? req.body.employeeId : (req.body.type === 'EMPLOYEE' && req.userRole === 'EMPLOYE' ? req.userId : null)
       } 
     });
     
@@ -1021,7 +1025,7 @@ router.put('/time-slots/config/:id', verifyAdmin, autoCheckEmployeePermission, a
         id: { not: id },
         dayOfWeek: currentConfig.dayOfWeek,
         type: currentConfig.type,
-        userId: (currentConfig.type === 'EMPLOYEE' && req.body.userId) ? req.body.userId : currentConfig.userId,
+        employeeId: (currentConfig.type === 'EMPLOYEE' && req.body.employeeId) ? req.body.employeeId : currentConfig.employeeId,
         active: true,
         OR: [
           { startTime: { lt: newEndTime }, endTime: { gt: newStartTime } }
@@ -1042,7 +1046,7 @@ router.put('/time-slots/config/:id', verifyAdmin, autoCheckEmployeePermission, a
         ...(intervalMinutes !== undefined && { intervalMinutes }), 
         ...(active !== undefined && { active }),
         ...(req.body.type && { type: req.body.type }),
-        ...(req.body.userId !== undefined && { userId: req.body.userId })
+        ...(req.body.employeeId !== undefined && { employeeId: req.body.employeeId })
       } 
     });
     
@@ -3980,5 +3984,23 @@ router.delete('/reviews/:id', verifyAdmin, autoCheckEmployeePermission, async (r
 
 // ==================== PERMISSIONS EMPLOYÉS ====================
 router.use('/employees/permissions', employeePermissionsRouter);
+
+// ==================== SMS MANUEL ====================
+router.post('/orders/:orderId/send-sms-reminder', verifyAdmin, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { client: { select: { firstName: true, phone: true, notificationSMS: true } } }
+    });
+    if (!order) return res.status(404).json({ message: 'Commande non trouvée' });
+    if (!order.client?.phone) return res.status(400).json({ message: 'Aucun numéro de téléphone pour ce client' });
+    await sendSmsReminder(order.client.phone, order, order.client);
+    res.json({ message: 'SMS de rappel envoyé' });
+  } catch (error) {
+    console.error('Send SMS reminder error:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
 
 export default router;
