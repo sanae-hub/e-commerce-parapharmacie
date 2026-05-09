@@ -3,8 +3,9 @@ import express from "express";
 import prisma from "../prismaClient.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { getIo } from '../io.js';
-import { sendWhatsAppNewOrder } from '../services/whatsappService.js';
-import { sendSmsOrderCreated } from '../services/smsService.js';
+import { generateOrderQRCode } from '../services/qrCodeService.js';
+import notify from '../services/notificationService.js';
+import { cacheDel, CACHE_KEYS } from '../utils/redisCache.js';
 
 const router = express.Router();
 
@@ -16,22 +17,21 @@ function generateOrderNumber() {
 // POST /api/orders/create-order et /api/orders/create - Créer une commande
 router.post(["/create-order", "/create"], authenticateToken, async (req, res) => {
   try {
-    const { phone, isUrgent, items, total, deliveryInfo, paymentMethod } = req.body;
+    const { phone, isUrgent, items, total, deliveryInfo, paymentMethod, cashAmount } = req.body;
     const userId = req.userId;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "Le panier est vide" });
     }
 
-    // Vérifier que les produits existent (sans bloquer sur le stock)
-    for (const item of items) {
-      if (item.variantId) {
-        const variant = await prisma.productVariant.findUnique({ where: { id: item.variantId } });
-        if (!variant) return res.status(404).json({ error: `Variante non trouvée: ${item.name}` });
-      } else {
-        const product = await prisma.product.findUnique({ where: { id: item.id } });
-        if (!product) return res.status(404).json({ error: `Produit non trouvé: ${item.name}` });
-      }
+    // Vérifier que les produits existent en parallèle
+    const checks = await Promise.all(items.map(item =>
+      item.variantId
+        ? prisma.productVariant.findUnique({ where: { id: item.variantId }, select: { id: true } })
+        : prisma.product.findUnique({ where: { id: item.id }, select: { id: true } })
+    ));
+    for (let i = 0; i < items.length; i++) {
+      if (!checks[i]) return res.status(404).json({ error: `Produit non trouvé: ${items[i].name}` });
     }
 
     // Créer la commande avec les items et réduire le stock dans une transaction
@@ -44,13 +44,13 @@ router.post(["/create-order", "/create"], authenticateToken, async (req, res) =>
           total: total || 0,
           isUrgent: isUrgent || false,
           clientId: userId || null,
+          cashAmount: cashAmount ? parseFloat(cashAmount) : null,
         },
       });
 
-      // Créer les order items et réduire le stock
-      for (const item of items) {
-        // Créer l'item de commande
-        await tx.orderItem.create({
+      // Créer les order items, réduire le stock et créer les mouvements en parallèle
+      await Promise.all(items.map(item => [
+        tx.orderItem.create({
           data: {
             orderId: newOrder.id,
             productId: item.id,
@@ -61,99 +61,77 @@ router.post(["/create-order", "/create"], authenticateToken, async (req, res) =>
             variantType: item.variantType || null,
             variantValue: item.variantValue || null,
           },
-        });
-
-        // Réduire le stock
-        if (item.variantId) {
-          // Réduire le stock de la variante
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              stock: {
-                decrement: item.quantity
-              },
-            },
-          });
-        }
-        
-        // Toujours réduire le stock du produit principal (même avec variante)
-        await tx.product.update({
+        }),
+        item.variantId && tx.productVariant.update({
+          where: { id: item.variantId },
+          data: { stock: { decrement: item.quantity } },
+        }),
+        tx.product.update({
           where: { id: item.id },
-          data: {
-            stock: {
-              decrement: item.quantity
-            },
-          },
-        });
-
-        // Créer un mouvement de stock pour tracer la vente
-        await tx.stockMovement.create({
+          data: { stock: { decrement: item.quantity } },
+        }),
+        tx.stockMovement.create({
           data: {
             productId: item.id,
             type: "SALE",
             quantity: -item.quantity,
             reason: `Commande ${newOrder.orderNumber}`,
           },
-        });
-      }
+        }),
+      ].filter(Boolean)).flat());
 
       return newOrder;
     });
 
-    // Alertes stock négatif après la transaction
+    // Alertes stock négatif + QR code + notification client en parallèle (non bloquant)
+    const [productsAfter, qrCode, client] = await Promise.all([
+      prisma.product.findMany({
+        where: { id: { in: items.map(i => i.id) } },
+        select: { id: true, name: true, stock: true }
+      }),
+      generateOrderQRCode(order),
+      prisma.client.findUnique({
+        where: { id: userId },
+        select: { firstName: true, email: true, notificationEmail: true }
+      })
+    ]);
+
     const io = getIo();
-    for (const item of items) {
-      const product = await prisma.product.findUnique({ where: { id: item.id }, select: { id: true, name: true, stock: true } });
-      if (product && product.stock < 0) {
-        await prisma.notification.create({
+    const negativeStockItems = productsAfter.filter(p => p.stock < 0);
+    if (negativeStockItems.length > 0) {
+      await Promise.all(negativeStockItems.map(product =>
+        prisma.notification.create({
           data: {
             type: 'NEGATIVE_STOCK',
             title: '⚠️ Stock négatif',
             message: `${product.name} : stock = ${product.stock} (commande ${order.orderNumber})`,
             data: { productId: product.id, stock: product.stock, orderId: order.id }
           }
-        });
-        if (io) io.to('admin_room').emit('notification', {
+        })
+      ));
+      if (io) negativeStockItems.forEach(product =>
+        io.to('admin_room').emit('notification', {
           type: 'NEGATIVE_STOCK',
           title: '⚠️ Stock négatif',
           message: `${product.name} : stock = ${product.stock}`,
           data: { productId: product.id, stock: product.stock }
-        });
-      }
+        })
+      );
     }
 
-    // Notification WhatsApp + SMS + Email nouvelle commande
-    try {
-      const client = await prisma.client.findUnique({
-        where: { id: userId },
-        select: { firstName: true, email: true, whatsapp: true, notificationWhatsApp: true, phone: true, notificationSMS: true, notificationEmail: true }
-      });
-      console.log(`[SMS DEBUG] client phone: ${client?.phone}, notificationSMS: ${client?.notificationSMS}`);
-      if (client?.whatsapp && client.notificationWhatsApp) {
-        sendWhatsAppNewOrder(client.whatsapp, order, client).catch(err =>
-          console.error('Erreur WhatsApp nouvelle commande:', err)
-        );
-      }
-      if (client?.phone && client.notificationSMS) {
-        sendSmsOrderCreated(client.phone, order, client).catch(err =>
-          console.error('Erreur SMS nouvelle commande:', err)
-        );
-      } else {
-        console.log(`[SMS DEBUG] SMS non envoyé — phone: ${client?.phone}, notificationSMS: ${client?.notificationSMS}`);
-      }
-      if (client?.email && client.notificationEmail !== false) {
-        const { sendOrderConfirmation } = await import('../services/emailService.js');
-        sendOrderConfirmation(client.email, order).catch(err =>
-          console.error('Erreur email confirmation commande:', err)
-        );
-      }
-    } catch (wsErr) {
-      console.error('Erreur recuperation client pour notifications:', wsErr);
+    const orderWithQR = { ...order, qrCode };
+
+    // Email async (fire-and-forget) + invalider cache KPIs
+    cacheDel(CACHE_KEYS.ADMIN_KPIS).catch(() => {});
+    if (client?.email && client.notificationEmail !== false) {
+      notify.orderConfirmation(client.email, orderWithQR).catch(e =>
+        console.error('Erreur notification email:', e)
+      );
     }
 
     res.status(201).json({
       message: "Commande créée avec succès",
-      order,
+      order: orderWithQR,
     });
 
   } catch (error) {
@@ -189,17 +167,33 @@ router.post("/send-confirmation", authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/orders/my-orders - Récupérer les commandes de l'utilisateur connecté
-// IMPORTANT: Must be BEFORE /:id route to avoid matching "my-orders" as an ID
+// GET /api/orders/my-orders
 router.get("/my-orders", authenticateToken, async (req, res) => {
   try {
-    const orders = await prisma.order.findMany({
-      where: { clientId: req.userId },
-      include: { items: { include: { product: true } } },
-      orderBy: { createdAt: 'desc' }
-    });
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    res.json({ orders });
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where: { clientId: req.userId },
+        select: {
+          id: true, orderNumber: true, status: true, total: true,
+          createdAt: true, timeSlotDate: true, timeSlotStart: true,
+          items: {
+            select: {
+              id: true, quantity: true, price: true, name: true,
+              product: { select: { id: true, name: true, image: true } }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: parseInt(limit)
+      }),
+      prisma.order.count({ where: { clientId: req.userId } })
+    ]);
+
+    res.json({ orders, pagination: { page: parseInt(page), limit: parseInt(limit), total } });
   } catch (error) {
     console.error("Get orders error:", error.message);
     res.status(500).json({ error: error.message });

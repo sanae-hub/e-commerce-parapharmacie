@@ -115,6 +115,7 @@ const Confirmation = () => {
         deliveryStreet: orderMode === 'DELIVERY' ? (localStorage.getItem('deliveryStreet') || null) : null,
         deliveryPhone: orderMode === 'DELIVERY' ? (localStorage.getItem('deliveryPhone') || null) : null,
         deliveryInstructions: orderMode === 'DELIVERY' ? (localStorage.getItem('deliveryInstructions') || null) : null,
+        cashAmount: orderMode === 'DELIVERY' ? (localStorage.getItem('cashAmount') ? parseFloat(localStorage.getItem('cashAmount')) : null) : null,
         deliveryType: orderMode === 'DELIVERY' ? deliveryType : null,
         deliveryPrice: orderMode === 'DELIVERY' ? deliveryPrice : 0,
         promoCode: promoCode ? promoCode.code : null
@@ -158,6 +159,7 @@ const Confirmation = () => {
         localStorage.removeItem('deliveryStreet')
         localStorage.removeItem('deliveryPhone')
         localStorage.removeItem('deliveryInstructions')
+        localStorage.removeItem('cashAmount')
         localStorage.removeItem('lastVisitedPath') // Fix stale redirect loop
         localStorage.setItem('postCheckoutRedirect', '/products')
         localStorage.removeItem('lastVisitedPath') // ← FIX: Clear stale redirect path
