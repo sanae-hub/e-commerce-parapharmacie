@@ -264,6 +264,10 @@ model Product {
   @@index([brand, name])
   @@index([barcode])
   @@index([sku])
+  @@index([active, categoryId])
+  @@index([active, createdAt])
+  @@index([name])
+  @@index([categoryId, active, createdAt])
 }
 
 model ProductImage {
@@ -390,6 +394,8 @@ model Order {
   @@index([clientId])
   @@index([timeSlotDate])
   @@index([employeeId])
+  @@index([clientId, createdAt])
+  @@index([status, createdAt])
 }
 
 model OrderItem {
@@ -456,6 +462,7 @@ model Notification {
   @@index([clientId])
   @@index([read])
   @@index([type])
+  @@index([clientId, read, createdAt])
 }
 
 // ==================== RESTE DES MODÈLES (inchangés) ====================

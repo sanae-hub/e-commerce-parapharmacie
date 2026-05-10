@@ -83,55 +83,62 @@ router.post(["/create-order", "/create"], authenticateToken, async (req, res) =>
       return newOrder;
     });
 
-    // Alertes stock négatif + QR code + notification client en parallèle (non bloquant)
-    const [productsAfter, qrCode, client] = await Promise.all([
-      prisma.product.findMany({
-        where: { id: { in: items.map(i => i.id) } },
-        select: { id: true, name: true, stock: true }
-      }),
-      generateOrderQRCode(order),
-      prisma.client.findUnique({
-        where: { id: userId },
-        select: { firstName: true, email: true, notificationEmail: true }
-      })
-    ]);
-
-    const io = getIo();
-    const negativeStockItems = productsAfter.filter(p => p.stock < 0);
-    if (negativeStockItems.length > 0) {
-      await Promise.all(negativeStockItems.map(product =>
-        prisma.notification.create({
-          data: {
-            type: 'NEGATIVE_STOCK',
-            title: '⚠️ Stock négatif',
-            message: `${product.name} : stock = ${product.stock} (commande ${order.orderNumber})`,
-            data: { productId: product.id, stock: product.stock, orderId: order.id }
-          }
-        })
-      ));
-      if (io) negativeStockItems.forEach(product =>
-        io.to('admin_room').emit('notification', {
-          type: 'NEGATIVE_STOCK',
-          title: '⚠️ Stock négatif',
-          message: `${product.name} : stock = ${product.stock}`,
-          data: { productId: product.id, stock: product.stock }
-        })
-      );
-    }
-
-    const orderWithQR = { ...order, qrCode };
-
-    // Email async (fire-and-forget) + invalider cache KPIs
-    cacheDel(CACHE_KEYS.ADMIN_KPIS).catch(() => {});
-    if (client?.email && client.notificationEmail !== false) {
-      notify.orderConfirmation(client.email, orderWithQR).catch(e =>
-        console.error('Erreur notification email:', e)
-      );
-    }
-
+    // Répondre immédiatement au client sans attendre QR code ni notifications
     res.status(201).json({
       message: "Commande créée avec succès",
-      order: orderWithQR,
+      order: { ...order, qrCode: null },
+    });
+
+    // Tâches post-réponse en arrière-plan (non bloquantes)
+    setImmediate(async () => {
+      try {
+        const [productsAfter, qrCode, client] = await Promise.all([
+          prisma.product.findMany({
+            where: { id: { in: items.map(i => i.id) } },
+            select: { id: true, name: true, stock: true }
+          }),
+          generateOrderQRCode(order),
+          prisma.client.findUnique({
+            where: { id: userId },
+            select: { firstName: true, email: true, notificationEmail: true }
+          })
+        ]);
+
+        // Sauvegarder le QR code
+        if (qrCode) {
+          await prisma.order.update({ where: { id: order.id }, data: { qrCode } }).catch(() => {});
+        }
+
+        const io = getIo();
+        const negativeStockItems = productsAfter.filter(p => p.stock < 0);
+        if (negativeStockItems.length > 0) {
+          await Promise.all(negativeStockItems.map(product =>
+            prisma.notification.create({
+              data: {
+                type: 'NEGATIVE_STOCK',
+                title: 'Stock negatif',
+                message: `${product.name} : stock = ${product.stock} (commande ${order.orderNumber})`,
+                data: { productId: product.id, stock: product.stock, orderId: order.id }
+              }
+            })
+          ));
+          if (io) negativeStockItems.forEach(product =>
+            io.to('admin_room').emit('notification', {
+              type: 'NEGATIVE_STOCK',
+              title: 'Stock negatif',
+              message: `${product.name} : stock = ${product.stock}`,
+              data: { productId: product.id, stock: product.stock }
+            })
+          );
+        }
+
+        cacheDel(CACHE_KEYS.ADMIN_KPIS).catch(() => {});
+        if (client?.email && client.notificationEmail !== false) {
+          notify.orderConfirmation(client.email, { ...order, qrCode }).catch(() => {});
+        }
+      } catch (bgErr) {
+        console.error('Erreur tâche arrière-plan commande:', bgErr.message);
+      }
     });
 
   } catch (error) {

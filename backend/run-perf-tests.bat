@@ -5,7 +5,7 @@ REM Usage : run-perf-tests.bat [smoke|load|stress|all]
 REM Exemple : run-perf-tests.bat smoke
 
 SET K6="C:\Program Files\k6\k6.exe"
-SET BASE_URL=http://localhost:5000
+SET BASE_URL=http://127.0.0.1:5000
 SET TESTS_DIR=tests\performance
 SET MODE=%1
 

@@ -2,9 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 import logger from './utils/logger.js';
 import { httpLogger } from './middleware/httpLogger.js';
 import { trackOfflineData } from './middleware/offlineTracker.js';
+import { cacheGet } from './utils/redisCache.js';
 
 import categoriesRouter from './routes/categories.js';
 import usersRouter from './routes/users.js';
@@ -30,6 +33,38 @@ import reviewsRouter from './routes/reviews.js';
 dotenv.config();
 
 const app = express();
+
+// ── Compression gzip ─────────────────────────────────────────────────────────
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  }
+}));
+
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  // En test de charge : désactivé (NODE_ENV=test) ou limite très haute
+  max: process.env.NODE_ENV === 'test' ? 0 : 2000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Trop de requêtes, réessayez dans 15 minutes' },
+  skip: (req) => req.path === '/api/health' || process.env.DISABLE_RATE_LIMIT === 'true',
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'test' ? 0 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Trop de tentatives, réessayez dans 15 minutes' },
+  skip: () => process.env.DISABLE_RATE_LIMIT === 'true',
+});
+
+app.use(globalLimiter);
 
 app.use(httpLogger); // Log toutes les requêtes HTTP
 
@@ -65,6 +100,8 @@ app.use('/api/variant-types', variantTypesRouter);
 app.use('/api/user/favorites', favoritesRouter);
 app.use('/api/favorites', favoritesRouter);
 app.use('/api/admin', suppliersRouter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/auth', secureAuthRouter);
 app.use('/api/user', usersRouter);

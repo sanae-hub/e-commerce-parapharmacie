@@ -1,7 +1,7 @@
 import express from 'express';
 import prisma from '../prismaClient.js';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from '../utils/bcryptQueue.js';
 import crypto from 'crypto';
 import notify from '../services/notificationService.js';
 
@@ -14,7 +14,6 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Email et mot de passe requis' });
 
-    // Check if email was permanently deleted
     const deleted = await prisma.deletedAccount.findUnique({ where: { email } });
     if (deleted) {
       return res.status(403).json({
@@ -23,17 +22,21 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Query all user types in parallel
-    const [client, employee, admin] = await Promise.all([
-      prisma.client.findUnique({ where: { email } }),
-      prisma.employee.findUnique({ where: { email } }),
-      prisma.admin.findUnique({ where: { email } }),
-    ]);
-
-    let user = client;
+    // Chercher client en premier (cas le plus fréquent), puis employee/admin seulement si nécessaire
+    let user = await prisma.client.findUnique({
+      where: { email },
+      select: { id: true, email: true, firstName: true, lastName: true, password: true, phone: true, whatsapp: true, authProvider: true, isActive: true }
+    });
     let role = 'CLIENT';
-    if (!user && employee) { user = employee; role = 'EMPLOYE'; }
-    if (!user && admin) { user = admin; role = 'ADMIN'; }
+
+    if (!user) {
+      const [employee, admin] = await Promise.all([
+        prisma.employee.findUnique({ where: { email }, select: { id: true, email: true, firstName: true, lastName: true, password: true, phone: true, isActive: true } }),
+        prisma.admin.findUnique({ where: { email }, select: { id: true, email: true, firstName: true, lastName: true, password: true, phone: true, isActive: true } }),
+      ]);
+      if (employee) { user = employee; role = 'EMPLOYE'; }
+      else if (admin) { user = admin; role = 'ADMIN'; }
+    }
 
     if (!user) return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
 
@@ -78,7 +81,7 @@ router.post('/google', async (req, res) => {
           email,
           firstName: firstName || '',
           lastName: lastName || '',
-          password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10),
+          password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 8),
           authProvider: 'google',
           phone: null,
           whatsapp: null,
@@ -194,7 +197,7 @@ router.post('/reset-password', async (req, res) => {
 
     if (!client) return res.status(400).json({ message: 'Token invalide ou expiré' });
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 8);
     await prisma.client.update({
       where: { id: client.id },
       data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null }

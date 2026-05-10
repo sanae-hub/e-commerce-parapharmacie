@@ -1,6 +1,6 @@
 // Services d'authentification sécurisés - Séparation par type d'utilisateur
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()

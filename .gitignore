@@ -7,6 +7,14 @@ yarn.lock
 .env
 .env.local
 .env.production
+.env.*.local
+backend/.env
+backend/.env.test
+frontend/.env
+
+# Garder .env.docker comme template (sans vraies valeurs)
+# Pour les vraies valeurs, utiliser .env.docker.local (non commite)
+backend/.env.docker.local
 
 # Logs
 logs/
@@ -36,3 +44,5 @@ coverage/
 # Uploads temporaires
 uploads/
 temp/
+backend/.env.docker.backup
+**/*.backup

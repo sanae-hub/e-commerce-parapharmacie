@@ -1,0 +1,524 @@
+{
+  "metrics": {
+    "error_rate": {
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 1080
+      },
+      "type": "rate"
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "min": 15,
+        "max": 15,
+        "value": 15
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 3123.863345925926,
+        "min": 3049.7798,
+        "med": 3111.2974000000004,
+        "max": 3360.3897,
+        "p(90)": 3182.17207,
+        "p(95)": 3208.5443
+      }
+    },
+    "http_req_failed": {
+      "thresholds": {
+        "rate<0.01": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 1353
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.01700251293422025,
+        "min": 0,
+        "med": 0,
+        "max": 5.788,
+        "p(90)": 0,
+        "p(95)": 0
+      }
+    },
+    "order_list_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 12.04305074074074,
+        "min": 1.3264,
+        "med": 7.8042,
+        "max": 170.3104,
+        "p(90)": 22.41088,
+        "p(95)": 26.97984499999999
+      },
+      "thresholds": {
+        "p(95)<500": {
+          "ok": true
+        }
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1353,
+        "rate": 9.180864388275504
+      }
+    },
+    "order_create_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 25.930363703703694,
+        "min": 0.8157,
+        "med": 21.28555,
+        "max": 253.5337,
+        "p(90)": 45.54097,
+        "p(95)": 52.37152499999999
+      },
+      "thresholds": {
+        "p(95)<1500": {
+          "ok": true
+        }
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 602057,
+        "rate": 4085.294657067247
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 66.10653999999988,
+        "avg": 22.8377923872875,
+        "min": 0.8157,
+        "med": 14.4446,
+        "max": 253.5337,
+        "p(90)": 49.964279999999995
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 5.788,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.024453806356245385,
+        "min": 0,
+        "med": 0
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 253.1432,
+        "p(90)": 49.26067999999999,
+        "p(95)": 65.64469999999996,
+        "avg": 22.21440458240949,
+        "min": 0.5212,
+        "med": 13.9484
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0,
+        "med": 0,
+        "max": 2.5339,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.02417317073170732
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 1,
+        "min": 0,
+        "max": 15
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 30140671,
+        "rate": 204521.3695658745
+      }
+    },
+    "iterations": {
+      "contains": "default",
+      "values": {
+        "count": 270,
+        "rate": 1.8321015408975507
+      },
+      "type": "counter"
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 2970,
+        "fails": 0
+      },
+      "thresholds": {
+        "rate>0.99": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 16.8322,
+        "p(90)": 1.00054,
+        "p(95)": 1.2317799999999992,
+        "avg": 0.5992146341463415,
+        "min": 0,
+        "med": 0.4282
+      }
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 66.10653999999988,
+        "avg": 22.8377923872875,
+        "min": 0.8157,
+        "med": 14.4446,
+        "max": 253.5337,
+        "p(90)": 49.964279999999995
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        },
+        "p(99)<2000": {
+          "ok": true
+        }
+      }
+    }
+  },
+  "setup_data": {
+    "adminToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcwZDExMmE4LTdkNzUtNDY0Ny1hN2JhLTIwY2M0N2NiOWYzYSIsImVtYWlsIjoiYWRtaW5AcGFyYXBoYXJtYWNpZS5tYSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3ODQ0MTMxMCwiZXhwIjoxNzc5MDQ2MTEwfQ.HX0AHQOyFTOz0d6Ix4U6EZ5HisKMv86aoZVQGTwnX4Y",
+    "clientToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxMjI1OTViLWUwNmQtNDY3Zi1iMjgxLTM5ZTc5OGNmYjhhOCIsImVtYWlsIjoiY2xpZW50QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODQ0MTMxMCwiZXhwIjoxNzc5MDQ2MTEwfQ.UxjeG3RqxtVSSV6kD6q2OJ4y3GOn8ilXl4KNqbGbobs",
+    "product": {
+      "priceTTC": 96,
+      "productVariants": [],
+      "reviews": 0,
+      "stock": -1139,
+      "updatedAt": "2026-05-10T19:00:29.781Z",
+      "brand": "Nivea",
+      "brandId": "092693b7-97fe-4a19-9351-eb46f9ee4061",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFEC_tnO1-D03EeUMyGVyBSuds3fkrUhjQrQ&s",
+      "variants": [],
+      "id": "0c6b0ea9-65da-4e44-a52b-861df58fbdba",
+      "oldPriceHT": null,
+      "sku": null,
+      "subcategory": {
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "icon": "Droplet",
+            "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+            "image": null,
+            "order": 2,
+            "title": "Soins Corps",
+            "updatedAt": "2026-04-30T12:31:40.326Z",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
+          },
+      "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+      "taxRate": 20,
+      "type": null,
+      "usage": null,
+      "rating": 0,
+      "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+      "images": [],
+      "price": 96,
+      "priceHT": 80,
+      "active": true,
+      "barcode": "5465465356564658",
+      "brandModel": {
+              "createdAt": "2026-04-30T13:34:47.823Z",
+              "description": null,
+              "id": "092693b7-97fe-4a19-9351-eb46f9ee4061",
+              "logo": null,
+              "name": "Nivea",
+              "updatedAt": "2026-04-30T13:34:47.823Z",
+              "active": true
+            },
+      "createdAt": "2026-04-30T13:34:47.824Z",
+      "stockAlert": 5,
+      "composition": null,
+      "subcategoryItemId": "39868bad-d8ad-4100-8666-51be35e60280",
+      "productImages": [],
+      "category": {
+                "hasSubcategories": true,
+                "icon": "Sparkles",
+                "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                "image": null,
+                "order": 1,
+                "updatedAt": "2026-04-30T12:31:40.133Z",
+                "createdAt": "2026-04-30T12:31:40.133Z",
+                "name": "Cosmétiques & Soin",
+                "subcategories": [
+                  {
+                    "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                    "items": [
+                      {
+                        "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                        "name": "Nettoyants bio"
+                      },
+                      {
+                        "name": "Crèmes bio",
+                        "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860"
+                      },
+                      {
+                        "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                        "name": "Sérums bio"
+                      },
+                      {
+                        "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                        "name": "Huiles visage bio"
+                      }
+                    ],
+                    "title": "Soins bio visage"
+                  },
+                  {
+                    "title": "Produits Capillaires",
+                    "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                    "items": [
+                      {
+                        "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                        "name": "Shampooings"
+                      },
+                      {
+                        "name": "Après-shampooings",
+                        "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5"
+                      },
+                      {
+                        "name": "Masques capillaires",
+                        "id": "efbecb59-36b7-4910-a312-a746ac99b758"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                    "items": [
+                      {
+                        "name": "Nettoyants",
+                        "id": "0507f1d2-f33f-4327-8264-5ada225cecbd"
+                      },
+                      {
+                        "id": "76844027-9137-420b-83be-5e2169264b3f",
+                        "name": "Hydratants"
+                      },
+                      {
+                        "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                        "name": "Anti-âge"
+                      },
+                      {
+                        "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                        "name": "Soins ciblés"
+                      }
+                    ],
+                    "title": "Soins Visage"
+                  },
+                  {
+                    "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                    "items": [
+                      {
+                        "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                        "name": "Shampooings bio"
+                      },
+                      {
+                        "id": "d3e84038-d97c-481c-90da-618d36242001",
+                        "name": "Après-shampooings bio"
+                      },
+                      {
+                        "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                        "name": "Masques bio"
+                      },
+                      {
+                        "name": "Huiles capillaires bio",
+                        "id": "ca9e7632-a21c-409e-83d1-68d971fd1678"
+                      }
+                    ],
+                    "title": "Soins bio cheveux"
+                  },
+                  {
+                    "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                    "items": [
+                      {
+                        "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                        "name": "Laits corporels"
+                      },
+                      {
+                        "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                        "name": "Baumes"
+                      },
+                      {
+                        "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                        "name": "Gommages"
+                      }
+                    ],
+                    "title": "Soins Corps"
+                  }
+                ]
+              },
+      "expiryDate": "2029-03-02T00:30:20.000Z",
+      "isNew": false,
+      "name": "Lait corporel nivea",
+      "oldPrice": null,
+      "subcategoryItem": {
+                "name": "Laits corporels",
+                "order": 1,
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "39868bad-d8ad-4100-8666-51be35e60280"
+              },
+      "benefits": [],
+      "description": "bien"
+    }
+  },
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [],
+    "checks": [
+        {
+          "name": "POST /orders/create — 201",
+          "path": "::POST /orders/create — 201",
+          "id": "9b290cc350de580f8c3b0124f34947c7",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "name": "POST /orders/create — has order",
+          "path": "::POST /orders/create — has order",
+          "id": "e3c9c4fbb134f16bf276af8e78766e48",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "path": "::POST /orders/create — < 1500ms",
+          "id": "2a00646d014ae4bbbbe08e361dbb7822",
+          "passes": 270,
+          "fails": 0,
+          "name": "POST /orders/create — < 1500ms"
+        },
+        {
+          "name": "GET /orders/my-orders — 200",
+          "path": "::GET /orders/my-orders — 200",
+          "id": "9c25f05f9ac5910abf94006fea4833b1",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "name": "GET /orders/my-orders — < 500ms",
+          "path": "::GET /orders/my-orders — < 500ms",
+          "id": "c61722fed319bb3afd722098f7f6142b",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "name": "GET /orders/:id — 200",
+          "path": "::GET /orders/:id — 200",
+          "id": "6a3ab742e855995d204cef6ba618ae7c",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "id": "21cdc10e57515c7f4345691ab4c0b933",
+          "passes": 270,
+          "fails": 0,
+          "name": "GET /orders/:id — < 400ms",
+          "path": "::GET /orders/:id — < 400ms"
+        },
+        {
+          "id": "9b1b9a2c66976df918dd61f4b87f1235",
+          "passes": 270,
+          "fails": 0,
+          "name": "PUT /orders/:id/cancel — 200",
+          "path": "::PUT /orders/:id/cancel — 200"
+        },
+        {
+          "name": "PUT /orders/:id/cancel — < 500ms",
+          "path": "::PUT /orders/:id/cancel — < 500ms",
+          "id": "b3c7aff732d13c1419a51a6ce551a498",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "name": "GET /admin/orders — 200",
+          "path": "::GET /admin/orders — 200",
+          "id": "2d263f7e0b67b818e299cd16041ccaa8",
+          "passes": 270,
+          "fails": 0
+        },
+        {
+          "name": "GET /admin/orders — < 600ms",
+          "path": "::GET /admin/orders — < 600ms",
+          "id": "f2aa0d3482f94d62b54c0d17dab46a9d",
+          "passes": 270,
+          "fails": 0
+        }
+      ],
+    "name": ""
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  },
+  "state": {
+    "isStdOutTTY": true,
+    "isStdErrTTY": true,
+    "testRunDurationMs": 147371.7444
+  }
+}

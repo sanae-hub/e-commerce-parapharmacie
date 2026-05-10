@@ -6,7 +6,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Trend, Rate } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:5000';
 const HEADERS  = { 'Content-Type': 'application/json' };
 
 const loginDuration  = new Trend('login_duration',  true);

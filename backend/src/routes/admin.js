@@ -1,7 +1,7 @@
 import express from 'express';
 import prisma from '../prismaClient.js';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { getIo } from '../io.js';
 import { verifyAdmin, verifyAdminOnly } from '../middleware/auth.js';
 import { autoCheckEmployeePermission } from '../middleware/employeePermission.js';

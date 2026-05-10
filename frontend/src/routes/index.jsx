@@ -1,49 +1,53 @@
 // frontend/src/routes/index.jsx
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '../stores'
 import App from '../App'
 import PrivateRoute from '../components/PrivateRoute'
 import AdminRoute from '../components/AdminRoute'
 
-// Pages
-import Login from '../pages/Login'
-import Signup from '../pages/Signup'
-import ForgotPassword from '../pages/ForgotPassword'
-import ResetPassword from '../pages/ResetPassword'
-import EditProfile from '../pages/EditProfile'
-import Cart from '../pages/Cart'
-import Checkout from '../pages/Checkout'
-import TimeSlot from '../pages/TimeSlot'
-import Confirmation from '../pages/Confirmation'
-import DeliveryPage from '../pages/DeliveryPage'
-import PromotionCheckout from '../pages/PromotionCheckout'
+// Pages publiques (chargées immédiatement — critiques pour le premier rendu)
 import Products from '../pages/Products'
 import ProductDetail from '../pages/ProductDetail'
-import SearchResults from '../pages/SearchResults'
-import MyOrders from '../pages/MyOrders'
-import PrivacyPolicy from '../pages/PrivacyPolicy'
+import Login from '../pages/Login'
+import Signup from '../pages/Signup'
 import NotFound from '../pages/NotFound'
 
-// Admin
-import AdminLogin from '../pages/AdminLogin'
-import AdminLoginDebug from '../pages/AdminLoginDebug'
-import AdminDashboard from '../pages/AdminDashboard'
-import AdminProducts from '../pages/AdminProducts'
-import AdminOrders from '../pages/AdminOrders'
-import AdminUsers from '../pages/AdminUsers'
-import AdminPromotions from '../pages/AdminPromotions'
-import AdminTimeSlots from '../pages/AdminTimeSlots'
-import AdminReports from '../pages/AdminReports'
-import AdminNotifications from '../pages/AdminNotifications'
-import AdminCategories from '../pages/AdminCategories'
-import AdminSuppliers from '../pages/AdminSuppliers'
-import AdminPurchaseOrders from '../pages/AdminPurchaseOrders'
-import AdminSupplierProducts from '../pages/AdminSupplierProducts'
-import AdminSupplierDiscounts from '../pages/AdminSupplierDiscounts'
-import AdminReviews from '../pages/AdminReviews'
-import AdminStock from '../pages/AdminStock'
-import AdminSettings from '../pages/AdminSettings'
-import EmployeeWelcome from '../pages/EmployeeWelcome'
+// Pages lazy (chargées à la demande)
+const ForgotPassword     = lazy(() => import('../pages/ForgotPassword'))
+const ResetPassword      = lazy(() => import('../pages/ResetPassword'))
+const EditProfile        = lazy(() => import('../pages/EditProfile'))
+const Cart               = lazy(() => import('../pages/Cart'))
+const Checkout           = lazy(() => import('../pages/Checkout'))
+const TimeSlot           = lazy(() => import('../pages/TimeSlot'))
+const Confirmation       = lazy(() => import('../pages/Confirmation'))
+const DeliveryPage       = lazy(() => import('../pages/DeliveryPage'))
+const PromotionCheckout  = lazy(() => import('../pages/PromotionCheckout'))
+const SearchResults      = lazy(() => import('../pages/SearchResults'))
+const MyOrders           = lazy(() => import('../pages/MyOrders'))
+const PrivacyPolicy      = lazy(() => import('../pages/PrivacyPolicy'))
+
+// Admin — tout en lazy (jamais chargé par les clients)
+const AdminLogin              = lazy(() => import('../pages/AdminLogin'))
+const AdminLoginDebug         = lazy(() => import('../pages/AdminLoginDebug'))
+const AdminDashboard          = lazy(() => import('../pages/AdminDashboard'))
+const AdminProducts           = lazy(() => import('../pages/AdminProducts'))
+const AdminOrders             = lazy(() => import('../pages/AdminOrders'))
+const AdminUsers              = lazy(() => import('../pages/AdminUsers'))
+const AdminPromotions         = lazy(() => import('../pages/AdminPromotions'))
+const AdminTimeSlots          = lazy(() => import('../pages/AdminTimeSlots'))
+const AdminReports            = lazy(() => import('../pages/AdminReports'))
+const AdminNotifications      = lazy(() => import('../pages/AdminNotifications'))
+const AdminCategories         = lazy(() => import('../pages/AdminCategories'))
+const AdminSuppliers          = lazy(() => import('../pages/AdminSuppliers'))
+const AdminPurchaseOrders     = lazy(() => import('../pages/AdminPurchaseOrders'))
+const AdminSupplierProducts   = lazy(() => import('../pages/AdminSupplierProducts'))
+const AdminSupplierDiscounts  = lazy(() => import('../pages/AdminSupplierDiscounts'))
+const AdminReviews            = lazy(() => import('../pages/AdminReviews'))
+const AdminStock              = lazy(() => import('../pages/AdminStock'))
+const AdminSettings           = lazy(() => import('../pages/AdminSettings'))
+const EmployeeWelcome         = lazy(() => import('../pages/EmployeeWelcome'))
+
 import { EmployeeDashboardProvider } from '../context/EmployeeDashboardContext';
 
 // Home components
@@ -51,16 +55,16 @@ import CategoryBar from '../components/CategoryBar'
 import CatalogueSection from '../components/PromotionsSection'
 import PromotionSlider from '../components/PromotionSlider'
 
+const PageLoader = () => (
+  <div className="flex justify-center items-center min-h-[60vh]">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700" />
+  </div>
+)
+
 const HomeContent = () => {
   const { loading } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-700" />
-      </div>
-    )
-  }
+  if (loading) return <PageLoader />
 
   return (
     <>
@@ -73,64 +77,63 @@ const HomeContent = () => {
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="/" element={<App />}>
-        {/* Home - Page d'accueil publique pour tous les utilisateurs */}
-        <Route index element={<HomeContent />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<App />}>
+          {/* Home */}
+          <Route index element={<HomeContent />} />
 
-        {/* Public */}
-        <Route path="product/:id" element={<ProductDetail />} />
-        <Route path="products" element={<Products />} />
-        <Route path="search" element={<SearchResults />} />
-        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+          {/* Public */}
+          <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="products" element={<Products />} />
+          <Route path="search" element={<SearchResults />} />
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
 
-        {/* Auth */}
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<Signup />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password" element={<ResetPassword />} />
+          {/* Auth */}
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
 
-        {/* Client sécurisé */}
-        <Route path="cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
-        <Route path="edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
-        <Route path="checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
-        <Route path="checkout/delivery" element={<PrivateRoute><DeliveryPage /></PrivateRoute>} />
-        <Route path="checkout/time-slot" element={<PrivateRoute><TimeSlot /></PrivateRoute>} />
-        <Route path="checkout/confirmation" element={<PrivateRoute><Confirmation /></PrivateRoute>} />
-        <Route path="promotion/:id" element={<PromotionCheckout />} />
-        <Route path="profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
-        <Route path="my-orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
-      </Route>
+          {/* Client sécurisé */}
+          <Route path="cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          <Route path="edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
+          <Route path="checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+          <Route path="checkout/delivery" element={<PrivateRoute><DeliveryPage /></PrivateRoute>} />
+          <Route path="checkout/time-slot" element={<PrivateRoute><TimeSlot /></PrivateRoute>} />
+          <Route path="checkout/confirmation" element={<PrivateRoute><Confirmation /></PrivateRoute>} />
+          <Route path="promotion/:id" element={<PromotionCheckout />} />
+          <Route path="profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
+          <Route path="my-orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
+        </Route>
 
-      {/* Admin */}
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/employee" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/admin/admindashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-      <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-      <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
-      <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-      <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-      <Route path="/admin/promotions" element={<AdminRoute><AdminPromotions /></AdminRoute>} />
-      <Route path="/admin/time-slots" element={<AdminRoute><AdminTimeSlots /></AdminRoute>} />
-      <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
-      <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
-      <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
-      <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
-      <Route path="/admin/suppliers/:supplierId/products" element={<AdminRoute><AdminSupplierProducts /></AdminRoute>} />
-      <Route path="/admin/suppliers/:supplierId/discounts" element={<AdminRoute><AdminSupplierDiscounts /></AdminRoute>} />
-      <Route path="/admin/purchase-orders" element={<AdminRoute><AdminPurchaseOrders /></AdminRoute>} />
-      <Route path="/admin/reviews" element={<AdminRoute><AdminReviews /></AdminRoute>} />
-      <Route path="/admin/stock" element={<AdminRoute><AdminStock /></AdminRoute>} />
+        {/* Admin */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/employee" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/admindashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+        <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+        <Route path="/admin/promotions" element={<AdminRoute><AdminPromotions /></AdminRoute>} />
+        <Route path="/admin/time-slots" element={<AdminRoute><AdminTimeSlots /></AdminRoute>} />
+        <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
+        <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+        <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
+        <Route path="/admin/suppliers" element={<AdminRoute><AdminSuppliers /></AdminRoute>} />
+        <Route path="/admin/suppliers/:supplierId/products" element={<AdminRoute><AdminSupplierProducts /></AdminRoute>} />
+        <Route path="/admin/suppliers/:supplierId/discounts" element={<AdminRoute><AdminSupplierDiscounts /></AdminRoute>} />
+        <Route path="/admin/purchase-orders" element={<AdminRoute><AdminPurchaseOrders /></AdminRoute>} />
+        <Route path="/admin/reviews" element={<AdminRoute><AdminReviews /></AdminRoute>} />
+        <Route path="/admin/stock" element={<AdminRoute><AdminStock /></AdminRoute>} />
+        <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+        <Route path="/admin/login-debug" element={<AdminLoginDebug />} />
 
-      <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
-
-      {/* Debug route */}
-      <Route path="/admin/login-debug" element={<AdminLoginDebug />} />
-
-      {/* fallback */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* fallback */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   )
 }
 

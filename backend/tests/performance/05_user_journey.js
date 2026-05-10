@@ -7,7 +7,7 @@ import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Trend, Rate, Counter } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:5000';
 const HEADERS  = { 'Content-Type': 'application/json' };
 
 const journeyDuration = new Trend('journey_duration', true);
@@ -32,7 +32,7 @@ export const options = {
     http_req_duration: ['p(95)<1000', 'p(99)<2000'],
     http_req_failed:   ['rate<0.02'],  // 2% toléré pour le parcours complet
     checks:            ['rate>0.95'],
-    journey_duration:  ['p(95)<5000'], // parcours complet < 5s
+    journey_duration:  ['p(95)<12000'], // parcours complet < 12s (inclut 7.5s de sleep simulant la navigation)
   },
 };
 
