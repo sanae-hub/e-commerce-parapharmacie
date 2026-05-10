@@ -16,6 +16,21 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui':     ['lucide-react'],
+          'vendor-charts': ['recharts'],
+          'vendor-forms':  ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-utils':  ['axios', 'zustand', 'socket.io-client'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    sourcemap: false,
+  },
   server: {
     port: 3000,
     open: true,

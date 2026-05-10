@@ -1,0 +1,1624 @@
+{
+  "metrics": {
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "max": 0,
+        "p(90)": 0
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 421335,
+        "rate": 2767.3477841232807
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "max": 20,
+        "value": 20,
+        "min": 20
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 169,
+        "rate": 1.1099998232210342
+      }
+    },
+    "http_req_failed": {
+      "contains": "default",
+      "values": {
+        "fails": 1861,
+        "rate": 0,
+        "passes": 0
+      },
+      "thresholds": {
+        "rate<0.02": {
+          "ok": true
+        }
+      },
+      "type": "rate"
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 14.85646910263297,
+        "min": 0,
+        "med": 6.2447,
+        "max": 191.7001,
+        "p(90)": 40.3334,
+        "p(95)": 58.4389
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 0,
+        "max": 11.6747,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.03730042987641054,
+        "min": 0
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 14.308303224073095,
+        "min": 0,
+        "med": 5.6456,
+        "max": 191.4185,
+        "p(90)": 39.8154,
+        "p(95)": 58.1403
+      }
+    },
+    "http_reqs": {
+      "values": {
+        "count": 1861,
+        "rate": 12.223134148013873
+      },
+      "type": "counter",
+      "contains": "default"
+    },
+    "group_duration": {
+      "values": {
+        "p(95)": 73.30094,
+        "avg": 23.823243956043942,
+        "min": 1.8979,
+        "med": 14.9389,
+        "max": 191.7001,
+        "p(90)": 54.539579999999994
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(90)": 0,
+        "p(95)": 0.3582,
+        "avg": 0.042451209027404645,
+        "min": 0,
+        "med": 0,
+        "max": 5.3577
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 7208145,
+        "rate": 47343.43003403302
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 7674.949454437872,
+        "min": 7579.4316,
+        "med": 7671.8702,
+        "max": 7864.226,
+        "p(90)": 7734.376719999999,
+        "p(95)": 7757.38148
+      }
+    },
+    "checks": {
+      "thresholds": {
+        "rate>0.95": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 2873,
+        "fails": 0
+      }
+    },
+    "http_req_connecting": {
+      "contains": "time",
+      "values": {
+        "avg": 0.01986759806555615,
+        "min": 0,
+        "med": 0,
+        "max": 5.2692,
+        "p(90)": 0,
+        "p(95)": 0
+      },
+      "type": "trend"
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 11.9607,
+        "p(90)": 1.0013,
+        "p(95)": 1.1113,
+        "avg": 0.5057146695325095,
+        "min": 0,
+        "med": 0.3971
+      }
+    },
+    "orders_created": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "rate": 1.1099998232210342,
+        "count": 169
+      }
+    },
+    "error_rate": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 507
+      }
+    },
+    "http_req_duration": {
+      "values": {
+        "max": 191.7001,
+        "p(90)": 40.3334,
+        "p(95)": 58.4389,
+        "avg": 14.85646910263297,
+        "min": 0,
+        "med": 6.2447
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        },
+        "p(99)<2000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "vus": {
+      "contains": "default",
+      "values": {
+        "min": 0,
+        "max": 20,
+        "value": 1
+      },
+      "type": "gauge"
+    },
+    "journey_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 6754.8,
+        "avg": 6673.201183431953,
+        "min": 6579,
+        "med": 6671,
+        "max": 6859,
+        "p(90)": 6730.8
+      },
+      "thresholds": {
+        "p(95)<12000": {
+          "ok": true
+        }
+      }
+    }
+  },
+  "setup_data": {
+    "categories": [
+      {
+        "name": "Cosmétiques & Soin",
+        "subcategories": [
+          {
+            "title": "Soins Visage",
+            "updatedAt": "2026-04-30T12:31:40.326Z",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "icon": "Sparkle",
+            "image": null,
+            "order": 1,
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+            "items": [
+              {
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                "name": "Nettoyants",
+                "order": 1,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
+              },
+              {
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "76844027-9137-420b-83be-5e2169264b3f",
+                "name": "Hydratants",
+                "order": 2
+              },
+              {
+                "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                "name": "Anti-âge",
+                "order": 3,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                "name": "Soins ciblés",
+                "order": 4,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z"
+              }
+            ]
+          },
+          {
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+            "image": null,
+            "items": [
+              {
+                "name": "Laits corporels",
+                "order": 1,
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "39868bad-d8ad-4100-8666-51be35e60280"
+              },
+              {
+                "order": 2,
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                "name": "Baumes"
+              },
+              {
+                "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                "name": "Gommages",
+                "order": 3,
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z"
+              }
+            ],
+            "order": 2,
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "icon": "Droplet",
+            "title": "Soins Corps",
+            "updatedAt": "2026-04-30T12:31:40.326Z"
+          },
+          {
+            "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+            "image": null,
+            "title": "Produits Capillaires",
+            "updatedAt": "2026-04-30T12:31:40.327Z",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "createdAt": "2026-04-30T12:31:40.327Z",
+            "icon": "Wind",
+            "items": [
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                "name": "Shampooings",
+                "order": 1,
+                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                "name": "Après-shampooings",
+                "order": 2,
+                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "order": 3,
+                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "updatedAt": "2026-04-30T12:31:40.327Z",
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                "name": "Masques capillaires"
+              }
+            ],
+            "order": 3
+          },
+          {
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "icon": "Wind",
+            "updatedAt": "2026-04-30T12:31:40.327Z",
+            "createdAt": "2026-04-30T12:31:40.327Z",
+            "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+            "image": null,
+            "items": [
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                "name": "Shampooings bio",
+                "order": 1,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "name": "Après-shampooings bio",
+                "order": 2,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z",
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "d3e84038-d97c-481c-90da-618d36242001"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                "name": "Masques bio",
+                "order": 3,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                "name": "Huiles capillaires bio",
+                "order": 4,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              }
+            ],
+            "order": 4,
+            "title": "Soins bio cheveux"
+          },
+          {
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "createdAt": "2026-04-30T12:31:40.328Z",
+            "icon": "Sparkle",
+            "image": null,
+            "title": "Soins bio visage",
+            "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+            "items": [
+              {
+                "order": 1,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "updatedAt": "2026-04-30T12:31:40.328Z",
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                "name": "Nettoyants bio"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                "name": "Crèmes bio",
+                "order": 2,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "updatedAt": "2026-04-30T12:31:40.328Z"
+              },
+              {
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "updatedAt": "2026-04-30T12:31:40.328Z",
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                "name": "Sérums bio",
+                "order": 3
+              },
+              {
+                "updatedAt": "2026-04-30T12:31:40.328Z",
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                "name": "Huiles visage bio",
+                "order": 4,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb"
+              }
+            ],
+            "order": 5,
+            "updatedAt": "2026-04-30T12:31:40.328Z"
+          }
+        ],
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "_count": {
+          "products": 7
+        },
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "image": null,
+        "order": 1,
+        "icon": "Sparkles"
+      },
+      {
+        "_count": {
+          "products": 0
+        },
+        "icon": "Droplets",
+        "id": "b7a26dcf-3607-488e-99b6-ce9cebf2eb25",
+        "image": null,
+        "name": "Hygiène & Corps",
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "order": 2
+      },
+      {
+        "id": "ca89609b-f5fe-4010-8451-b72d5810d483",
+        "name": "Bébé & Maternité",
+        "order": 3,
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "image": null,
+        "_count": {
+            "products": 0
+          },
+        "icon": "Baby"
+      },
+      {
+        "image": null,
+        "order": 4,
+        "_count": {
+          "products": 0
+        },
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "icon": "Pill",
+        "name": "Complémentaires",
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "id": "b2b510d8-6d69-43aa-a8df-7c6c2b9d0385"
+      },
+      {
+        "hasSubcategories": true,
+        "icon": "Sun",
+        "order": 5,
+        "_count": {
+          "products": 0
+        },
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "id": "b1091eae-ec44-4383-8cd5-ab66152c78a0",
+        "image": null,
+        "name": "Solaire & Protection",
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z"
+      },
+      {
+        "icon": "Stethoscope",
+        "image": null,
+        "order": 6,
+        "_count": {
+          "products": 0
+        },
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "id": "80cd7a67-0fe6-4155-be1a-6e60e4be1a5e",
+        "name": "Orthopédique",
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z"
+      }
+    ],
+    "products": [
+      {
+        "description": "bien",
+        "expiryDate": "2029-03-02T00:30:20.000Z",
+        "images": [],
+        "isNew": false,
+        "priceHT": 80,
+        "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+        "subcategoryItemId": "39868bad-d8ad-4100-8666-51be35e60280",
+        "name": "Lait corporel nivea",
+        "oldPrice": null,
+        "productVariants": [],
+        "stock": -1578,
+        "brand": "Nivea",
+        "brandId": "092693b7-97fe-4a19-9351-eb46f9ee4061",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFEC_tnO1-D03EeUMyGVyBSuds3fkrUhjQrQ&s",
+        "rating": 0,
+        "usage": null,
+        "active": true,
+        "category": {
+              "icon": "Sparkles",
+              "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+              "name": "Cosmétiques & Soin",
+              "subcategories": [
+                {
+                  "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                  "items": [
+                    {
+                      "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                      "name": "Nettoyants bio"
+                    },
+                    {
+                      "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                      "name": "Crèmes bio"
+                    },
+                    {
+                      "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                      "name": "Sérums bio"
+                    },
+                    {
+                      "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                      "name": "Huiles visage bio"
+                    }
+                  ],
+                  "title": "Soins bio visage"
+                },
+                {
+                  "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                  "items": [
+                    {
+                      "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                      "name": "Shampooings"
+                    },
+                    {
+                      "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                      "name": "Après-shampooings"
+                    },
+                    {
+                      "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                      "name": "Masques capillaires"
+                    }
+                  ],
+                  "title": "Produits Capillaires"
+                },
+                {
+                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                  "items": [
+                    {
+                      "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                      "name": "Nettoyants"
+                    },
+                    {
+                      "name": "Hydratants",
+                      "id": "76844027-9137-420b-83be-5e2169264b3f"
+                    },
+                    {
+                      "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                      "name": "Anti-âge"
+                    },
+                    {
+                      "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                      "name": "Soins ciblés"
+                    }
+                  ],
+                  "title": "Soins Visage"
+                },
+                {
+                  "items": [
+                    {
+                      "name": "Shampooings bio",
+                      "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf"
+                    },
+                    {
+                      "id": "d3e84038-d97c-481c-90da-618d36242001",
+                      "name": "Après-shampooings bio"
+                    },
+                    {
+                      "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                      "name": "Masques bio"
+                    },
+                    {
+                      "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                      "name": "Huiles capillaires bio"
+                    }
+                  ],
+                  "title": "Soins bio cheveux",
+                  "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a"
+                },
+                {
+                  "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                  "items": [
+                    {
+                      "name": "Laits corporels",
+                      "id": "39868bad-d8ad-4100-8666-51be35e60280"
+                    },
+                    {
+                      "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                      "name": "Baumes"
+                    },
+                    {
+                      "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                      "name": "Gommages"
+                    }
+                  ],
+                  "title": "Soins Corps"
+                }
+              ],
+              "createdAt": "2026-04-30T12:31:40.133Z",
+              "hasSubcategories": true,
+              "image": null,
+              "order": 1,
+              "updatedAt": "2026-04-30T12:31:40.133Z"
+            },
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "oldPriceHT": null,
+        "variants": [],
+        "benefits": [],
+        "createdAt": "2026-04-30T13:34:47.824Z",
+        "price": 96,
+        "priceTTC": 96,
+        "subcategory": {
+                  "createdAt": "2026-04-30T12:31:40.326Z",
+                  "icon": "Droplet",
+                  "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                  "image": null,
+                  "order": 2,
+                  "title": "Soins Corps",
+                  "updatedAt": "2026-04-30T12:31:40.326Z",
+                  "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
+                },
+        "brandModel": {
+                  "createdAt": "2026-04-30T13:34:47.823Z",
+                  "description": null,
+                  "id": "092693b7-97fe-4a19-9351-eb46f9ee4061",
+                  "logo": null,
+                  "name": "Nivea",
+                  "updatedAt": "2026-04-30T13:34:47.823Z",
+                  "active": true
+                },
+        "composition": null,
+        "type": null,
+        "sku": null,
+        "stockAlert": 5,
+        "subcategoryItem": {
+                  "createdAt": "2026-04-30T12:31:40.326Z",
+                  "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                  "name": "Laits corporels",
+                  "order": 1,
+                  "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                  "updatedAt": "2026-04-30T12:31:40.326Z"
+                },
+        "taxRate": 20,
+        "barcode": "5465465356564658",
+        "id": "0c6b0ea9-65da-4e44-a52b-861df58fbdba",
+        "productImages": [],
+        "reviews": 0,
+        "updatedAt": "2026-05-10T19:38:03.507Z"
+      },
+      {
+        "description": "bien",
+        "oldPriceHT": null,
+        "priceHT": 120,
+        "rating": 0,
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "id": "fd23f6db-8cc5-43e3-a56b-1aa22e38126a",
+        "oldPrice": null,
+        "active": true,
+        "subcategory": {
+          "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+          "createdAt": "2026-04-30T12:31:40.326Z",
+          "icon": "Sparkle",
+          "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+          "image": null,
+          "order": 1,
+          "title": "Soins Visage",
+          "updatedAt": "2026-04-30T12:31:40.326Z"
+        },
+        "subcategoryItemId": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+        "type": null,
+        "barcode": "5433432654323567",
+        "benefits": [],
+        "brandId": "636eae27-f895-494f-90bb-f2e316d511f4",
+        "price": 144,
+        "productImages": [],
+        "reviews": 0,
+        "taxRate": 20,
+        "usage": null,
+        "expiryDate": "2030-02-07T00:30:20.000Z",
+        "productVariants": [],
+        "sku": null,
+        "stock": -585,
+        "subcategoryItem": {
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                "name": "Nettoyants",
+                "order": 1,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z"
+              },
+        "brand": "ACM",
+        "category": {
+                "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                "image": null,
+                "name": "Cosmétiques & Soin",
+                "subcategories": [
+                  {
+                    "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                    "items": [
+                      {
+                        "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                        "name": "Nettoyants bio"
+                      },
+                      {
+                        "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                        "name": "Crèmes bio"
+                      },
+                      {
+                        "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                        "name": "Sérums bio"
+                      },
+                      {
+                        "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                        "name": "Huiles visage bio"
+                      }
+                    ],
+                    "title": "Soins bio visage"
+                  },
+                  {
+                    "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                    "items": [
+                      {
+                        "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                        "name": "Shampooings"
+                      },
+                      {
+                        "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                        "name": "Après-shampooings"
+                      },
+                      {
+                        "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                        "name": "Masques capillaires"
+                      }
+                    ],
+                    "title": "Produits Capillaires"
+                  },
+                  {
+                    "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                    "items": [
+                      {
+                        "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                        "name": "Nettoyants"
+                      },
+                      {
+                        "id": "76844027-9137-420b-83be-5e2169264b3f",
+                        "name": "Hydratants"
+                      },
+                      {
+                        "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                        "name": "Anti-âge"
+                      },
+                      {
+                        "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                        "name": "Soins ciblés"
+                      }
+                    ],
+                    "title": "Soins Visage"
+                  },
+                  {
+                    "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                    "items": [
+                      {
+                        "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                        "name": "Shampooings bio"
+                      },
+                      {
+                        "id": "d3e84038-d97c-481c-90da-618d36242001",
+                        "name": "Après-shampooings bio"
+                      },
+                      {
+                        "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                        "name": "Masques bio"
+                      },
+                      {
+                        "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                        "name": "Huiles capillaires bio"
+                      }
+                    ],
+                    "title": "Soins bio cheveux"
+                  },
+                  {
+                    "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                    "items": [
+                      {
+                        "name": "Laits corporels",
+                        "id": "39868bad-d8ad-4100-8666-51be35e60280"
+                      },
+                      {
+                        "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                        "name": "Baumes"
+                      },
+                      {
+                        "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                        "name": "Gommages"
+                      }
+                    ],
+                    "title": "Soins Corps"
+                  }
+                ],
+                "createdAt": "2026-04-30T12:31:40.133Z",
+                "hasSubcategories": true,
+                "icon": "Sparkles",
+                "order": 1,
+                "updatedAt": "2026-04-30T12:31:40.133Z"
+              },
+        "createdAt": "2026-04-30T13:34:47.809Z",
+        "name": "gel nettoyant ACM",
+        "priceTTC": 144,
+        "updatedAt": "2026-05-10T08:34:28.767Z",
+        "brandModel": {
+                "logo": null,
+                "name": "ACM",
+                "updatedAt": "2026-04-30T13:34:47.807Z",
+                "active": true,
+                "createdAt": "2026-04-30T13:34:47.807Z",
+                "description": null,
+                "id": "636eae27-f895-494f-90bb-f2e316d511f4"
+              },
+        "composition": null,
+        "image": "https://novapara.ma/cdn/shop/products/Acm-Sensitelial-Gel-Nettoyant-Surgras-200ml--nova-parapharmacie-maroc.jpg?v=1758700144",
+        "images": [],
+        "isNew": false,
+        "stockAlert": 2,
+        "variants": [],
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
+      },
+      {
+        "category": {
+          "image": null,
+          "order": 1,
+          "updatedAt": "2026-04-30T12:31:40.133Z",
+          "name": "Cosmétiques & Soin",
+          "subcategories": [
+            {
+              "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+              "items": [
+                {
+                  "name": "Nettoyants bio",
+                  "id": "a7a62bae-d230-436d-9303-692ea526b083"
+                },
+                {
+                  "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                  "name": "Crèmes bio"
+                },
+                {
+                  "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                  "name": "Sérums bio"
+                },
+                {
+                  "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                  "name": "Huiles visage bio"
+                }
+              ],
+              "title": "Soins bio visage"
+            },
+            {
+              "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+              "items": [
+                {
+                  "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                  "name": "Shampooings"
+                },
+                {
+                  "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                  "name": "Après-shampooings"
+                },
+                {
+                  "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                  "name": "Masques capillaires"
+                }
+              ],
+              "title": "Produits Capillaires"
+            },
+            {
+              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "items": [
+                {
+                  "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                  "name": "Nettoyants"
+                },
+                {
+                  "id": "76844027-9137-420b-83be-5e2169264b3f",
+                  "name": "Hydratants"
+                },
+                {
+                  "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                  "name": "Anti-âge"
+                },
+                {
+                  "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                  "name": "Soins ciblés"
+                }
+              ],
+              "title": "Soins Visage"
+            },
+            {
+              "items": [
+                {
+                  "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                  "name": "Shampooings bio"
+                },
+                {
+                  "id": "d3e84038-d97c-481c-90da-618d36242001",
+                  "name": "Après-shampooings bio"
+                },
+                {
+                  "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                  "name": "Masques bio"
+                },
+                {
+                  "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                  "name": "Huiles capillaires bio"
+                }
+              ],
+              "title": "Soins bio cheveux",
+              "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a"
+            },
+            {
+              "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+              "items": [
+                {
+                  "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                  "name": "Laits corporels"
+                },
+                {
+                  "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                  "name": "Baumes"
+                },
+                {
+                  "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                  "name": "Gommages"
+                }
+              ],
+              "title": "Soins Corps"
+            }
+          ],
+          "createdAt": "2026-04-30T12:31:40.133Z",
+          "hasSubcategories": true,
+          "icon": "Sparkles",
+          "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
+        },
+        "id": "99b301e0-0459-40c6-a472-a4ff97fd35bd",
+        "oldPriceHT": null,
+        "productVariants": [],
+        "type": null,
+        "barcode": "6754545556765454",
+        "description": "bien",
+        "sku": null,
+        "active": true,
+        "composition": null,
+        "expiryDate": "2029-03-07T00:30:20.000Z",
+        "image": "https://www.paratypic.ma/1496-large_default/cetaphil-creme-hydratante-visage-et-corps-50-g.jpg",
+        "isNew": false,
+        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
+        "benefits": [],
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "images": [],
+        "rating": 0,
+        "reviews": 0,
+        "stockAlert": 2,
+        "updatedAt": "2026-05-10T08:35:55.662Z",
+        "priceTTC": 120,
+        "productImages": [],
+        "usage": null,
+        "brandId": "938130e8-dd97-4fd5-b17b-52c8b3f33936",
+        "brandModel": {
+                  "createdAt": "2026-04-30T13:34:47.790Z",
+                  "description": null,
+                  "id": "938130e8-dd97-4fd5-b17b-52c8b3f33936",
+                  "logo": null,
+                  "name": "cetaphil",
+                  "updatedAt": "2026-04-30T13:34:47.790Z",
+                  "active": true
+                },
+        "createdAt": "2026-04-30T13:34:47.792Z",
+        "oldPrice": null,
+        "stock": -561,
+        "taxRate": 20,
+        "variants": [],
+        "name": "créme hydratante cetaphil",
+        "price": 120,
+        "priceHT": 100,
+        "brand": "cetaphil",
+        "subcategory": {
+                    "updatedAt": "2026-04-30T12:31:40.326Z",
+                    "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                    "createdAt": "2026-04-30T12:31:40.326Z",
+                    "icon": "Sparkle",
+                    "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                    "image": null,
+                    "order": 1,
+                    "title": "Soins Visage"
+                  },
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+        "subcategoryItem": {
+                    "name": "Hydratants",
+                    "order": 2,
+                    "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                    "updatedAt": "2026-04-30T12:31:40.326Z",
+                    "createdAt": "2026-04-30T12:31:40.326Z",
+                    "id": "76844027-9137-420b-83be-5e2169264b3f"
+                  }
+      },
+      {
+        "description": "bien",
+        "name": "gommage visage caudalie",
+        "createdAt": "2026-04-30T13:34:47.775Z",
+        "oldPrice": null,
+        "category": {
+          "hasSubcategories": true,
+          "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+          "name": "Cosmétiques & Soin",
+          "order": 1,
+          "subcategories": [
+            {
+              "items": [
+                {
+                  "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                  "name": "Nettoyants bio"
+                },
+                {
+                  "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                  "name": "Crèmes bio"
+                },
+                {
+                  "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                  "name": "Sérums bio"
+                },
+                {
+                  "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                  "name": "Huiles visage bio"
+                }
+              ],
+              "title": "Soins bio visage",
+              "id": "c41800f7-1c37-46ed-9d10-68cb249180eb"
+            },
+            {
+              "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+              "items": [
+                {
+                  "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                  "name": "Shampooings"
+                },
+                {
+                  "name": "Après-shampooings",
+                  "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5"
+                },
+                {
+                  "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                  "name": "Masques capillaires"
+                }
+              ],
+              "title": "Produits Capillaires"
+            },
+            {
+              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "items": [
+                {
+                  "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                  "name": "Nettoyants"
+                },
+                {
+                  "id": "76844027-9137-420b-83be-5e2169264b3f",
+                  "name": "Hydratants"
+                },
+                {
+                  "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                  "name": "Anti-âge"
+                },
+                {
+                  "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                  "name": "Soins ciblés"
+                }
+              ],
+              "title": "Soins Visage"
+            },
+            {
+              "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+              "items": [
+                {
+                  "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                  "name": "Shampooings bio"
+                },
+                {
+                  "id": "d3e84038-d97c-481c-90da-618d36242001",
+                  "name": "Après-shampooings bio"
+                },
+                {
+                  "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                  "name": "Masques bio"
+                },
+                {
+                  "name": "Huiles capillaires bio",
+                  "id": "ca9e7632-a21c-409e-83d1-68d971fd1678"
+                }
+              ],
+              "title": "Soins bio cheveux"
+            },
+            {
+              "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+              "items": [
+                {
+                  "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                  "name": "Laits corporels"
+                },
+                {
+                  "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                  "name": "Baumes"
+                },
+                {
+                  "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                  "name": "Gommages"
+                }
+              ],
+              "title": "Soins Corps"
+            }
+          ],
+          "createdAt": "2026-04-30T12:31:40.133Z",
+          "icon": "Sparkles",
+          "image": null,
+          "updatedAt": "2026-04-30T12:31:40.133Z"
+        },
+        "id": "5f81b54f-1ddf-40a3-b4b9-7d0fd3b07517",
+        "price": 156,
+        "rating": 0,
+        "stockAlert": 6,
+        "composition": null,
+        "expiryDate": "2028-08-03T00:30:20.000Z",
+        "priceHT": 130,
+        "updatedAt": "2026-05-10T08:35:20.936Z",
+        "productVariants": [],
+        "reviews": 0,
+        "stock": -537,
+        "subcategory": {
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "icon": "Sparkle",
+            "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+            "image": null,
+            "order": 1,
+            "title": "Soins Visage",
+            "updatedAt": "2026-04-30T12:31:40.326Z"
+          },
+        "image": "https://m1.quebecormedia.com/emp/emp/cre_me_exfoliante747c5624-1de9-4cf0-bb5c-5add09be560f_ORIGINAL.jpg?impolicy=crop-resize&x=0&y=0&w=1400&h=1400&width=925",
+        "images": [],
+        "isNew": false,
+        "sku": null,
+        "subcategoryItem": {
+              "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "updatedAt": "2026-04-30T12:31:40.326Z",
+              "createdAt": "2026-04-30T12:31:40.326Z",
+              "id": "76844027-9137-420b-83be-5e2169264b3f",
+              "name": "Hydratants",
+              "order": 2
+            },
+        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
+        "taxRate": 20,
+        "usage": null,
+        "benefits": [],
+        "brand": "Caudalie",
+        "brandId": "5b201061-2de0-4436-a755-3a70930754d0",
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "oldPriceHT": null,
+        "productImages": [],
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+        "type": null,
+        "active": true,
+        "barcode": "6775454555656656",
+        "brandModel": {
+                  "id": "5b201061-2de0-4436-a755-3a70930754d0",
+                  "logo": null,
+                  "name": "Caudalie",
+                  "updatedAt": "2026-04-30T13:34:47.774Z",
+                  "active": true,
+                  "createdAt": "2026-04-30T13:34:47.774Z",
+                  "description": null
+                },
+        "priceTTC": 156,
+        "variants": []
+      },
+      {
+        "brand": "Cerave",
+        "oldPrice": null,
+        "oldPriceHT": null,
+        "priceTTC": 108,
+        "stock": -541,
+        "stockAlert": 1,
+        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
+        "barcode": "7534588543567889",
+        "benefits": [],
+        "category": {
+            "icon": "Sparkles",
+            "name": "Cosmétiques & Soin",
+            "hasSubcategories": true,
+            "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "image": null,
+            "order": 1,
+            "subcategories": [
+              {
+                "items": [
+                  {
+                    "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                    "name": "Nettoyants bio"
+                  },
+                  {
+                    "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                    "name": "Crèmes bio"
+                  },
+                  {
+                    "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                    "name": "Sérums bio"
+                  },
+                  {
+                    "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                    "name": "Huiles visage bio"
+                  }
+                ],
+                "title": "Soins bio visage",
+                "id": "c41800f7-1c37-46ed-9d10-68cb249180eb"
+              },
+              {
+                "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "items": [
+                  {
+                    "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                    "name": "Shampooings"
+                  },
+                  {
+                    "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                    "name": "Après-shampooings"
+                  },
+                  {
+                    "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                    "name": "Masques capillaires"
+                  }
+                ],
+                "title": "Produits Capillaires"
+              },
+              {
+                "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "items": [
+                  {
+                    "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                    "name": "Nettoyants"
+                  },
+                  {
+                    "id": "76844027-9137-420b-83be-5e2169264b3f",
+                    "name": "Hydratants"
+                  },
+                  {
+                    "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                    "name": "Anti-âge"
+                  },
+                  {
+                    "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                    "name": "Soins ciblés"
+                  }
+                ],
+                "title": "Soins Visage"
+              },
+              {
+                "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "items": [
+                  {
+                    "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                    "name": "Shampooings bio"
+                  },
+                  {
+                    "name": "Après-shampooings bio",
+                    "id": "d3e84038-d97c-481c-90da-618d36242001"
+                  },
+                  {
+                    "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                    "name": "Masques bio"
+                  },
+                  {
+                    "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                    "name": "Huiles capillaires bio"
+                  }
+                ],
+                "title": "Soins bio cheveux"
+              },
+              {
+                "title": "Soins Corps",
+                "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "items": [
+                  {
+                    "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                    "name": "Laits corporels"
+                  },
+                  {
+                    "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                    "name": "Baumes"
+                  },
+                  {
+                    "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                    "name": "Gommages"
+                  }
+                ]
+              }
+            ],
+            "updatedAt": "2026-04-30T12:31:40.133Z",
+            "createdAt": "2026-04-30T12:31:40.133Z"
+          },
+        "expiryDate": "2027-05-12T00:30:20.000Z",
+        "id": "b0134c8d-5e5f-4b6e-9665-9c7990338d05",
+        "images": [],
+        "name": "créme hydratante ceraVe",
+        "reviews": 0,
+        "subcategory": {
+              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "image": null,
+              "order": 1,
+              "title": "Soins Visage",
+              "updatedAt": "2026-04-30T12:31:40.326Z",
+              "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+              "createdAt": "2026-04-30T12:31:40.326Z",
+              "icon": "Sparkle"
+            },
+        "createdAt": "2026-04-30T13:34:47.759Z",
+        "description": "bien",
+        "rating": 0,
+        "subcategoryItem": {
+              "createdAt": "2026-04-30T12:31:40.326Z",
+              "id": "76844027-9137-420b-83be-5e2169264b3f",
+              "name": "Hydratants",
+              "order": 2,
+              "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "updatedAt": "2026-04-30T12:31:40.326Z"
+            },
+        "taxRate": 20,
+        "type": null,
+        "active": true,
+        "brandId": "24a3f95e-00c3-41f8-8971-7be60a291c0e",
+        "price": 108,
+        "updatedAt": "2026-05-10T08:35:55.669Z",
+        "brandModel": {
+              "updatedAt": "2026-04-30T13:34:47.757Z",
+              "active": true,
+              "createdAt": "2026-04-30T13:34:47.757Z",
+              "description": null,
+              "id": "24a3f95e-00c3-41f8-8971-7be60a291c0e",
+              "logo": null,
+              "name": "Cerave"
+            },
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "composition": null,
+        "priceHT": 90,
+        "productImages": [],
+        "isNew": false,
+        "productVariants": [],
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+        "variants": [],
+        "image": "https://www.zinabel.ma/9422-large_default/creme-hydratante-cerave-177ml.jpg",
+        "sku": null,
+        "usage": null
+      }
+    ]
+  },
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [
+      {
+        "id": "ed1e8af73d0d1d792e80bc85ced61e7b",
+        "groups": [],
+        "checks": [
+            {
+              "path": "::1. Page accueil::Promotions actives — 200",
+              "id": "df35ef57292186285e64161182cc1ff4",
+              "passes": 169,
+              "fails": 0,
+              "name": "Promotions actives — 200"
+            },
+            {
+              "id": "9eee855a0f3fdecdb0af6fd935270d4c",
+              "passes": 169,
+              "fails": 0,
+              "name": "Catégories — 200",
+              "path": "::1. Page accueil::Catégories — 200"
+            }
+          ],
+        "name": "1. Page accueil",
+        "path": "::1. Page accueil"
+      },
+      {
+        "name": "2. Catalogue produits",
+        "path": "::2. Catalogue produits",
+        "id": "9025ace44199cccb0978990186ffda9a",
+        "groups": [],
+        "checks": [
+            {
+              "name": "Liste produits — 200",
+              "path": "::2. Catalogue produits::Liste produits — 200",
+              "id": "32a55440f32160c18b0ecf56ae1c2358",
+              "passes": 169,
+              "fails": 0
+            },
+            {
+              "path": "::2. Catalogue produits::Liste produits — < 500ms",
+              "id": "b7fc30ac8482c2d826315b8e7b75cf10",
+              "passes": 169,
+              "fails": 0,
+              "name": "Liste produits — < 500ms"
+            },
+            {
+              "fails": 0,
+              "name": "Produits par catégorie — 200",
+              "path": "::2. Catalogue produits::Produits par catégorie — 200",
+              "id": "0d5e04ee622fe7b7ac2d84f9d27c297c",
+              "passes": 169
+            }
+          ]
+      },
+      {
+        "id": "4798e127664c33b990ab8d5aba62e5d1",
+        "groups": [],
+        "checks": [
+            {
+              "name": "Recherche — 200",
+              "path": "::3. Recherche::Recherche — 200",
+              "id": "dc08029c24d999ca23671a2aefb1338c",
+              "passes": 169,
+              "fails": 0
+            },
+            {
+              "id": "8e5fe470f9cdd6fb8c866125dc79c01c",
+              "passes": 169,
+              "fails": 0,
+              "name": "Recherche — < 600ms",
+              "path": "::3. Recherche::Recherche — < 600ms"
+            }
+          ],
+        "name": "3. Recherche",
+        "path": "::3. Recherche"
+      },
+      {
+        "name": "4. Fiche produit",
+        "path": "::4. Fiche produit",
+        "id": "91a2babb344d45f345e1f3ab50d72fe1",
+        "groups": [],
+        "checks": [
+            {
+              "id": "50d82cb02bcb572654ec7255ac687abd",
+              "passes": 169,
+              "fails": 0,
+              "name": "Fiche produit — 200",
+              "path": "::4. Fiche produit::Fiche produit — 200"
+            },
+            {
+              "id": "15f6e981e7e48aae4285af5a8f178a57",
+              "passes": 169,
+              "fails": 0,
+              "name": "Fiche produit — < 400ms",
+              "path": "::4. Fiche produit::Fiche produit — < 400ms"
+            },
+            {
+              "name": "Avis produit — 200",
+              "path": "::4. Fiche produit::Avis produit — 200",
+              "id": "94a115e4e528d423fc3a5b7184dc29f0",
+              "passes": 169,
+              "fails": 0
+            }
+          ]
+      },
+      {
+        "name": "5. Inscription",
+        "path": "::5. Inscription",
+        "id": "b9e002e301a43747d80a4131de67207a",
+        "groups": [],
+        "checks": [
+            {
+              "name": "Signup — 201",
+              "path": "::5. Inscription::Signup — 201",
+              "id": "1769bf25266f80432e8f53ab3173b05e",
+              "passes": 169,
+              "fails": 0
+            },
+            {
+              "name": "Signup — has token",
+              "path": "::5. Inscription::Signup — has token",
+              "id": "6c8d06973a4ae8b11919531c90fb6f1d",
+              "passes": 169,
+              "fails": 0
+            }
+          ]
+      },
+      {
+        "name": "6. Passer commande",
+        "path": "::6. Passer commande",
+        "id": "222095ad16af2b629b086bbb74d2ad00",
+        "groups": [],
+        "checks": [
+            {
+              "path": "::6. Passer commande::Commande — 201",
+              "id": "47a83e6f1ad2f11c8d4f50d893393663",
+              "passes": 169,
+              "fails": 0,
+              "name": "Commande — 201"
+            },
+            {
+              "path": "::6. Passer commande::Commande — < 1500ms",
+              "id": "2ebcbda2830a8224cbc2d0461da39036",
+              "passes": 169,
+              "fails": 0,
+              "name": "Commande — < 1500ms"
+            }
+          ]
+      },
+      {
+        "name": "7. Suivi commande",
+        "path": "::7. Suivi commande",
+        "id": "f822c75a54b6eec35891a62dca330758",
+        "groups": [],
+        "checks": [
+            {
+              "passes": 169,
+              "fails": 0,
+              "name": "Mes commandes — 200",
+              "path": "::7. Suivi commande::Mes commandes — 200",
+              "id": "13fae307d2faf5ca2d71d905d7065648"
+            },
+            {
+              "passes": 169,
+              "fails": 0,
+              "name": "Mes commandes — < 500ms",
+              "path": "::7. Suivi commande::Mes commandes — < 500ms",
+              "id": "f020813a38ba60acdbdb25a159eecc39"
+            },
+            {
+              "id": "f017766702dd373ccbf170d366d800af",
+              "passes": 169,
+              "fails": 0,
+              "name": "Détail commande — 200",
+              "path": "::7. Suivi commande::Détail commande — 200"
+            }
+          ]
+      }
+    ],
+    "checks": [],
+    "name": ""
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  },
+  "state": {
+    "isStdOutTTY": true,
+    "isStdErrTTY": true,
+    "testRunDurationMs": 152252.2765
+  }
+}

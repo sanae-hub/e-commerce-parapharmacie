@@ -1,7 +1,7 @@
 // tests/performance/config.js
 // Configuration partagée pour tous les tests de performance
 
-export const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+export const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:5000';
 
 // Seuils globaux acceptables pour une parapharmacie e-commerce
 export const THRESHOLDS = {

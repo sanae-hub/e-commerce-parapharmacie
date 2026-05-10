@@ -1,5 +1,7 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import Redis from 'ioredis';
 import jwt from 'jsonwebtoken';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
@@ -22,6 +24,28 @@ const io = new Server(httpServer, {
     credentials: true
   }
 });
+
+// ── Redis adapter Socket.io (optionnel — fallback si Redis absent) ─────────────
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const pubClient = new Redis(REDIS_URL, {
+  maxRetriesPerRequest: 1,
+  retryStrategy: (times) => times > 3 ? null : Math.min(times * 200, 1000),
+  lazyConnect: true,
+});
+const subClient = pubClient.duplicate();
+
+pubClient.on('error', () => {});
+subClient.on('error', () => {});
+
+// Connecter pub ET sub avant d'appliquer l'adapter
+Promise.all([pubClient.connect(), subClient.connect()])
+  .then(() => {
+    io.adapter(createAdapter(pubClient, subClient));
+    logger.info('Socket.io Redis adapter active');
+  })
+  .catch(() => {
+    logger.warn('Redis non disponible - Socket.io en mode single instance');
+  });
 
 setIo(io);
 

@@ -142,149 +142,61 @@ router.get('/export', async (req, res) => {
   }
 })
 
-// GET /products/search - Advanced search with categories, subcategories, brands and products
+// GET /products/search - Recherche paginée avec cache Redis
 router.get('/search', async (req, res) => {
   try {
     const { q = '', limit = 7 } = req.query
     const query = q.trim()
-    
-    if (query.length < 1) {
-      return res.json({ results: [], suggestion: null })
-    }
 
-    console.log('🔍 Search query:', query)
-    const normalizedQuery = normalize(query)
-    console.log('📝 Normalized query:', normalizedQuery)
+    if (query.length < 2) return res.json({ results: [], suggestion: null })
 
-    // Fetch all active products
-    const allProducts = await prisma.product.findMany({
-      where: {
-        active: true,
-        NOT: { category: { name: 'Promotions' } }
-      },
-      select: {
-        id: true, name: true, brand: true, price: true, oldPrice: true,
-        image: true, stock: true, barcode: true,
-        category: { select: { id: true, name: true } },
-        subcategory: { select: { id: true, title: true } }
-      }
-    })
+    // Cache Redis pour les recherches fréquentes
+    const cacheKey = CACHE_KEYS.PRODUCTS_SEARCH(query.toLowerCase(), limit);
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json(cached);
 
-    console.log('📦 Found', allProducts.length, 'products')
-
-    // Fetch all categories
-    const allCategories = await prisma.category.findMany({
-      where: { NOT: { name: 'Promotions' } },
-      select: { id: true, name: true }
-    })
-
-    console.log('📂 Found', allCategories.length, 'categories')
-
-    // Fetch all subcategories
-    const allSubcategories = await prisma.subcategory.findMany({
-      select: { id: true, title: true, categoryId: true }
-    })
-
-    console.log('📋 Found', allSubcategories.length, 'subcategories')
-
-    // Fetch all unique brands
-    const allBrands = await prisma.product.findMany({
-      where: { active: true, brand: { not: null } },
-      select: { brand: true },
-      distinct: ['brand']
-    })
-
-    console.log('🏷️ Found', allBrands.length, 'brands')
-
-    // Score and filter products
-    const scoredProducts = allProducts
-      .map(p => ({ ...p, _score: scoreProduct(query, p), _type: 'product' }))
-      .filter(p => p._score > 0)
-      .sort((a, b) => b._score - a._score)
-
-    console.log('✅ Matched products:', scoredProducts.length)
-    if (scoredProducts.length > 0) {
-      console.log('   Top match:', scoredProducts[0].name, 'score:', scoredProducts[0]._score)
-    }
-
-    // Score and filter categories
-    const scoredCategories = allCategories
-      .map(c => {
-        const match = fuzzyMatch(c.name, normalizedQuery)
-        let score = 0
-        if (match.match) {
-          score = match.score === 2 ? 150 : 100
-          if (normalize(c.name).startsWith(normalizedQuery)) score += 50
-        }
-        return { ...c, _score: score, _type: 'category' }
+    const [products, categories, subcategories] = await Promise.all([
+      prisma.product.findMany({
+        where: {
+          active: true,
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { brand: { contains: query, mode: 'insensitive' } },
+            { barcode: { contains: query, mode: 'insensitive' } },
+          ]
+        },
+        select: {
+          id: true, name: true, brand: true, price: true,
+          oldPrice: true, image: true, stock: true, barcode: true,
+          category: { select: { id: true, name: true } },
+        },
+        take: Math.ceil(parseInt(limit) * 0.6),
+        orderBy: { name: 'asc' }
+      }),
+      prisma.category.findMany({
+        where: {
+          NOT: { name: 'Promotions' },
+          name: { contains: query, mode: 'insensitive' }
+        },
+        select: { id: true, name: true },
+        take: 2
+      }),
+      prisma.subcategory.findMany({
+        where: { title: { contains: query, mode: 'insensitive' } },
+        select: { id: true, title: true, categoryId: true },
+        take: 2
       })
-      .filter(c => c._score > 0)
-      .sort((a, b) => b._score - a._score)
+    ]);
 
-    console.log('✅ Matched categories:', scoredCategories.length)
+    const results = [
+      ...products.map(p => ({ ...p, resultType: 'product' })),
+      ...categories.map(c => ({ ...c, resultType: 'category' })),
+      ...subcategories.map(({ title, ...sc }) => ({ ...sc, name: title, resultType: 'subcategory' })),
+    ];
 
-    // Score and filter subcategories - using fuzzyMatch like products
-    const scoredSubcategories = allSubcategories
-      .map(sc => {
-        const match = fuzzyMatch(sc.title, normalizedQuery)
-        let score = 0
-        if (match.match) {
-          score = match.score === 2 ? 120 : 80
-          if (normalize(sc.title).startsWith(normalizedQuery)) score += 40
-        }
-        return { ...sc, _score: score, _type: 'subcategory' }
-      })
-      .filter(sc => sc._score > 0)
-      .sort((a, b) => b._score - a._score)
-
-    console.log('✅ Matched subcategories:', scoredSubcategories.length)
-
-    // Score and filter brands
-    const scoredBrands = allBrands
-      .filter(b => b.brand) // Only non-null brands
-      .map(b => {
-        const bNorm = normalize(b.brand)
-        let score = 0
-        if (bNorm.includes(normalizedQuery)) score = 100
-        else if (bNorm.startsWith(normalizedQuery)) score = 80
-        else {
-          const dist = levenshtein(bNorm, normalizedQuery, 2)
-          if (dist <= 2) score = 40
-        }
-        return { name: b.brand, _score: score, _type: 'brand' }
-      })
-      .filter(b => b._score > 0)
-      .sort((a, b) => b._score - a._score)
-
-    console.log('✅ Matched brands:', scoredBrands.length)
-
-    // Combine all results with better distribution
-    // Give priority to: products > categories >= subcategories > brands
-    const results = []
-    const maxProducts = Math.ceil(limit * 0.5)      // 50% products
-    const maxCategories = Math.ceil(limit * 0.2)    // 20% categories
-    const maxSubcategories = Math.ceil(limit * 0.2) // 20% subcategories
-    const maxBrands = Math.ceil(limit * 0.1)        // 10% brands
-    
-    results.push(...scoredProducts.slice(0, maxProducts).map(({ _score, _type, ...p }) => ({ ...p, resultType: 'product' })))
-    results.push(...scoredCategories.slice(0, maxCategories).map(({ _score, _type, ...c }) => ({ ...c, resultType: 'category' })))
-    // Normalize subcategories: map 'title' to 'name' for consistent JSON
-    results.push(...scoredSubcategories.slice(0, maxSubcategories).map(({ _score, _type, title, ...sc }) => ({ 
-      ...sc, 
-      name: title,  // Rename title to name for consistency
-      resultType: 'subcategory'
-    })))
-    results.push(...scoredBrands.slice(0, maxBrands).map(({ _score, _type, ...b }) => ({ ...b, resultType: 'brand' })))
-
-    console.log('🎯 Distribution:', {
-      products: Math.min(scoredProducts.length, maxProducts),
-      categories: Math.min(scoredCategories.length,  maxCategories),
-      subcategories: Math.min(scoredSubcategories.length, maxSubcategories),
-      brands: Math.min(scoredBrands.length, maxBrands)
-    })
-    console.log('🎯 Total results returned:', results.length)
-
-    res.json({ results: results.slice(0, limit), suggestion: null })
+    const response = { results: results.slice(0, parseInt(limit)), suggestion: null };
+    await cacheSet(cacheKey, response, 300); // Cache 5 min
+    res.json(response);
   } catch (error) {
     console.error('❌ Search error:', error)
     res.status(500).json({ results: [], suggestion: null })
@@ -475,66 +387,39 @@ router.get('/', async (req, res) => {
       isNew: isProductNew(p.createdAt)
     }));
 
-    // Add supplier info if requested (for admin)
+    // Add supplier info if requested (for admin) — requêtes groupées (pas de N+1)
     if (includeSupplierInfo === 'true') {
       const productIds = productsWithNewFlag.map(p => p.id);
-      
-      // Get main supplier for each product (most recent purchase order)
-      const supplierInfo = await Promise.all(
-        productIds.map(async (productId) => {
-          // Get main supplier (most recent purchase order)
-          const recentPurchase = await prisma.purchaseOrderItem.findFirst({
-            where: { productId },
-            include: {
-              purchaseOrder: {
-                include: {
-                  supplier: { select: { name: true } }
-                }
-              }
-            },
-            orderBy: { createdAt: 'desc' }
-          });
-          
-          // Get last restock date (most recent received purchase order)
-          const lastRestock = await prisma.purchaseOrderItem.findFirst({
-            where: { 
-              productId,
-              purchaseOrder: { status: { in: ['RECEIVED', 'REÇU_TOTAL', 'REÇU_PARTIEL'] } }
-            },
-            include: {
-              purchaseOrder: { select: { receivedDate: true } }
-            },
-            orderBy: { updatedAt: 'desc' }
-          });
-          
-          // Get last sale date
-          const lastSale = await prisma.stockMovement.findFirst({
-            where: { 
-              productId,
-              type: 'SALE'
-            },
-            orderBy: { createdAt: 'desc' }
-          });
-          
-          return {
-            productId,
-            mainSupplier: recentPurchase?.purchaseOrder?.supplier?.name || null,
-            lastRestock: lastRestock?.purchaseOrder?.receivedDate || null,
-            lastSale: lastSale?.createdAt || null
-          };
+
+      const [recentPurchases, lastRestocks, lastSales] = await Promise.all([
+        prisma.purchaseOrderItem.findMany({
+          where: { productId: { in: productIds } },
+          include: { purchaseOrder: { include: { supplier: { select: { name: true } } } } },
+          orderBy: { createdAt: 'desc' },
+          distinct: ['productId']
+        }),
+        prisma.purchaseOrderItem.findMany({
+          where: {
+            productId: { in: productIds },
+            purchaseOrder: { status: { in: ['RECEIVED', 'REÇU_TOTAL', 'REÇU_PARTIEL'] } }
+          },
+          include: { purchaseOrder: { select: { receivedDate: true } } },
+          orderBy: { updatedAt: 'desc' },
+          distinct: ['productId']
+        }),
+        prisma.stockMovement.findMany({
+          where: { productId: { in: productIds }, type: 'SALE' },
+          orderBy: { createdAt: 'desc' },
+          distinct: ['productId']
         })
-      );
-      
-      // Merge supplier info with products
-      productsWithNewFlag = productsWithNewFlag.map(product => {
-        const info = supplierInfo.find(s => s.productId === product.id);
-        return {
-          ...product,
-          mainSupplier: info?.mainSupplier,
-          lastRestock: info?.lastRestock,
-          lastSale: info?.lastSale
-        };
-      });
+      ]);
+
+      productsWithNewFlag = productsWithNewFlag.map(product => ({
+        ...product,
+        mainSupplier: recentPurchases.find(p => p.productId === product.id)?.purchaseOrder?.supplier?.name || null,
+        lastRestock: lastRestocks.find(p => p.productId === product.id)?.purchaseOrder?.receivedDate || null,
+        lastSale: lastSales.find(p => p.productId === product.id)?.createdAt || null,
+      }));
     }
 
     // Response object

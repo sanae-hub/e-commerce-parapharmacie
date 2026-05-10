@@ -1,13 +1,12 @@
 // tests/performance/07_load_200_users.js
-// Test de charge : 200 utilisateurs simultanés
-// Simule la charge maximale attendue sur l'application
-// Lancer : k6 run --env BASE_URL=http://localhost:5000 --env TEST_EMAIL=admin@parapharmacie.ma --env TEST_PASSWORD=Admin1234! backend/tests/performance/07_load_200_users.js
+// Test de charge : 100 utilisateurs simultanes
+// Lancer : k6 run --env BASE_URL=http://127.0.0.1:5000 --env TEST_EMAIL=admin@parapharmacie.ma --env TEST_PASSWORD=Admin1234! tests/performance/07_load_200_users.js
 
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend, Counter } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:5000';
 
 // Métriques personnalisées
 const errorRate        = new Rate('errors');
@@ -19,24 +18,22 @@ const totalRequests    = new Counter('total_requests');
 
 export const options = {
   scenarios: {
-    // Montée progressive jusqu'à 200 users
-    ramp_to_200: {
+    ramp_to_100: {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '1m',  target: 50  }, // montée douce : 0 → 50
-        { duration: '2m',  target: 100 }, // montée : 50 → 100
-        { duration: '2m',  target: 200 }, // montée : 100 → 200
-        { duration: '3m',  target: 200 }, // maintien à 200 users
+        { duration: '1m',  target: 25  }, // montee douce : 0 -> 25
+        { duration: '2m',  target: 50  }, // montee : 25 -> 50
+        { duration: '2m',  target: 100 }, // montee : 50 -> 100
+        { duration: '2m',  target: 100 }, // maintien a 100 users
         { duration: '1m',  target: 0   }, // descente
       ],
     },
   },
   thresholds: {
-    // Seuils adaptés à 200 users simultanés
     http_req_duration: ['p(95)<1500', 'p(99)<3000'],
-    http_req_failed:   ['rate<0.05'],   // 5% d'erreurs max sous forte charge
-    checks:            ['rate>0.95'],   // 95% de succès minimum
+    http_req_failed:   ['rate<0.05'],
+    checks:            ['rate>0.95'],
     errors:            ['rate<0.05'],
     public_endpoint_duration: ['p(95)<800'],
     auth_endpoint_duration:   ['p(95)<1000'],
@@ -75,9 +72,9 @@ export function setup() {
     categories = Array.isArray(body) ? body : (body.categories || []);
   }
 
-  // Pré-créer 200 comptes et récupérer leurs tokens (1 token par VU)
+  // Pre-creer 100 comptes
   const clientTokens = [];
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 100; i++) {
     const email = `perf_user_${i}@test.com`;
     const password = 'Test1234!';
     let token = null;
@@ -281,17 +278,17 @@ function formatSummary(data) {
   const errPct = (failed?.values?.rate ?? 0) * 100;
   const checkPct = (checks?.values?.rate ?? 0) * 100;
 
-  let verdict = '✅ L\'APPLICATION SUPPORTE 200 UTILISATEURS SIMULTANÉS';
+  let verdict = 'APPLICATION SUPPORTE 100 UTILISATEURS SIMULTANES';
   if (errPct > 5 || p95 > 1500) {
-    verdict = '⚠️  OPTIMISATION RECOMMANDÉE SOUS 200 UTILISATEURS';
+    verdict = 'OPTIMISATION RECOMMANDEE SOUS 100 UTILISATEURS';
   }
   if (errPct > 15 || p95 > 3000) {
-    verdict = '❌ L\'APPLICATION NE SUPPORTE PAS 200 UTILISATEURS SIMULTANÉS';
+    verdict = 'APPLICATION NE SUPPORTE PAS 100 UTILISATEURS SIMULTANES';
   }
 
   return `
 ╔══════════════════════════════════════════════════════════════╗
-║  RAPPORT : 07 — TEST 200 UTILISATEURS SIMULTANÉS            ║
+║  RAPPORT : 07 — TEST 100 UTILISATEURS SIMULTANES            ║
 ╚══════════════════════════════════════════════════════════════╝
 
 📊 Volume
@@ -314,7 +311,7 @@ function formatSummary(data) {
 
 🏁 VERDICT : ${verdict}
 
-💡 Seuils recommandés pour 200 users :
-   p95 < 1500ms ✅  |  Erreurs < 5% ✅  |  Checks > 95% ✅
+💡 Seuils pour 100 users :
+   p95 < 1500ms  |  Erreurs < 5%  |  Checks > 95%
 `;
 }

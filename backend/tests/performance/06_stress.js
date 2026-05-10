@@ -7,7 +7,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:5000';
+const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:5000';
 
 const errorRate    = new Rate('error_rate');
 const responsetime = new Trend('response_time', true);
