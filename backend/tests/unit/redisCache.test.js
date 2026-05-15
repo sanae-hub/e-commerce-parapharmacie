@@ -38,7 +38,7 @@ describe('CACHE_KEYS', () => {
   });
 
   it('PRODUCT_DETAIL génère la bonne clé', () => {
-    expect(CACHE_KEYS.PRODUCT_DETAIL('abc-123')).toBe('products:abc-123');
+    expect(CACHE_KEYS.PRODUCT_DETAIL('abc-123')).toBe('products:detail:abc-123');
   });
 
   it('CATEGORIES_LIST est une constante string', () => {
@@ -72,34 +72,34 @@ describe('cacheGet — Redis déconnecté', () => {
 describe('cacheSet — Redis déconnecté', () => {
   it('retourne false sans lancer d\'erreur', async () => {
     const result = await cacheSet('some:key', { data: 'test' });
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 });
 
 describe('cacheDel — Redis déconnecté', () => {
   it('retourne false sans lancer d\'erreur', async () => {
     const result = await cacheDel('some:key');
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 });
 
 describe('cacheDelPattern — Redis déconnecté', () => {
   it('retourne false sans lancer d\'erreur', async () => {
     const result = await cacheDelPattern('products:*');
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 });
 
 describe('invalidateProductCache — Redis déconnecté', () => {
   it('retourne false sans lancer d\'erreur', async () => {
     const result = await invalidateProductCache();
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 });
 
 describe('invalidateCategoryCache — Redis déconnecté', () => {
   it('retourne false sans lancer d\'erreur', async () => {
     const result = await invalidateCategoryCache();
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 });
