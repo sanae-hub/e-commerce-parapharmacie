@@ -4,6 +4,7 @@ import multer from 'multer'
 import * as XLSX from 'xlsx'
 import { cloudinaryUpload } from '../utils/cloudinary.js'
 import { cacheGet, cacheSet, CACHE_KEYS, invalidateProductCache } from '../utils/redisCache.js'
+import { requirePin } from '../middleware/requirePin.js'
 import prisma from '../prismaClient.js'
 
 const router = express.Router()
@@ -1285,7 +1286,7 @@ router.get('/:productId/stock-status', async (req, res) => {
 // REMPLACEZ la route DELETE par celle-ci :
 
 // DELETE - Supprimer un produit (admin seulement)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requirePin, async (req, res) => {
   try {
     const { id } = req.params
     console.log('🔍 Tentative de suppression du produit:', id)

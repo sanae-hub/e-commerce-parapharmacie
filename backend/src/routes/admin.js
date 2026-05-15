@@ -4,9 +4,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { getIo } from '../io.js';
 import { verifyAdmin, verifyAdminOnly } from '../middleware/auth.js';
+import { requirePin } from '../middleware/requirePin.js';
 import { autoCheckEmployeePermission } from '../middleware/employeePermission.js';
 import employeePermissionsRouter from './employeePermissions.js';
-import { sendOrderStatusUpdate, sendOrderInvoice } from '../services/emailService.js';
+import { sendOrderStatusUpdate, sendOrderInvoice, sendEmployeePinEmail } from '../services/emailService.js';
 import notify from '../services/notificationService.js';
 import { cacheGet, cacheSet, cacheDel, CACHE_KEYS } from '../utils/redisCache.js';
 
@@ -2970,7 +2971,7 @@ router.put('/users/:id/status', verifyAdmin, autoCheckEmployeePermission, async 
 });
 
 // DELETE /admin/users/:id - Supprimer un utilisateur (soft delete en désactivant)
-router.delete('/users/:id', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
+router.delete('/users/:id', verifyAdmin, autoCheckEmployeePermission, requirePin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -3037,6 +3038,12 @@ router.post('/employees', verifyAdmin, autoCheckEmployeePermission, async (req, 
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Générer ou utiliser le PIN fourni par l'admin
+    const rawPin = req.body.pin && String(req.body.pin).trim().length > 0
+      ? String(req.body.pin).trim()
+      : String(Math.floor(100000 + Math.random() * 900000)); // 6 chiffres
+    const hashedPin = await bcrypt.hash(rawPin, 10);
+
     const employee = await prisma.employee.create({
       data: {
         firstName,
@@ -3044,6 +3051,7 @@ router.post('/employees', verifyAdmin, autoCheckEmployeePermission, async (req, 
         phone: phone || null,
         email,
         password: hashedPassword,
+        pin: hashedPin,
         isActive: true,
         salary: salary ? parseFloat(salary) : null
       },
@@ -3079,6 +3087,13 @@ router.post('/employees', verifyAdmin, autoCheckEmployeePermission, async (req, 
         }
       });
       createdPermissions[module] = { canView: permission.canView, canCreate: permission.canCreate, canEdit: permission.canEdit, canDelete: permission.canDelete };
+    }
+
+    // Envoyer le PIN par email à l'employé
+    try {
+      await sendEmployeePinEmail(employee.email, `${employee.firstName} ${employee.lastName}`, rawPin);
+    } catch (err) {
+      console.error('Erreur envoi PIN email:', err);
     }
 
     res.status(201).json({ 
@@ -3146,7 +3161,7 @@ router.put('/employees/:id', verifyAdmin, autoCheckEmployeePermission, async (re
 });
 
 // DELETE /admin/employees/:id - Désactiver un employé
-router.delete('/employees/:id', verifyAdmin, autoCheckEmployeePermission, async (req, res) => {
+router.delete('/employees/:id', verifyAdmin, autoCheckEmployeePermission, requirePin, async (req, res) => {
   try {
     const { id } = req.params;
     const employee = await prisma.employee.findUnique({ where: { id }, select: { email: true } });
@@ -3175,6 +3190,29 @@ router.get('/employees/:id/permissions', verifyAdmin, autoCheckEmployeePermissio
   } catch (error) {
     console.error('Get employee permissions error:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
+// POST /admin/employees/:id/verify-pin - Vérifier le PIN pour un employé
+router.post('/employees/:id/verify-pin', verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pin } = req.body;
+    if (!pin) return res.status(400).json({ message: 'PIN requis' });
+    if (req.userRole !== 'ADMIN' && req.userId !== id) {
+      return res.status(403).json({ message: 'Accès refusé. Vous ne pouvez vérifier que votre propre PIN.' });
+    }
+
+    const employee = await prisma.employee.findUnique({ where: { id }, select: { pin: true } });
+    if (!employee || !employee.pin) return res.status(400).json({ message: 'Aucun PIN configuré pour cet employé' });
+
+    const isValid = await bcrypt.compare(pin, employee.pin);
+    if (!isValid) return res.status(401).json({ message: 'Code PIN incorrect', valid: false });
+
+    res.json({ message: 'PIN valide', valid: true });
+  } catch (error) {
+    console.error('Verify PIN error:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -3973,6 +4011,88 @@ router.post('/stock/negative/generate-orders', verifyAdmin, autoCheckEmployeePer
   } catch (error) {
     console.error('Generate purchase orders error:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+});
+
+// ==================== CODE PIN EMPLOYE ====================
+
+// POST /admin/employees/:id/set-pin - Admin définit le PIN d'un employé
+router.post('/employees/:id/set-pin', verifyAdminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pin } = req.body;
+    if (!pin || pin.length < 4) return res.status(400).json({ message: 'PIN doit avoir au moins 4 chiffres' });
+    const employee = await prisma.employee.findUnique({ where: { id }, select: { email: true, firstName: true, lastName: true } });
+    if (!employee) return res.status(404).json({ message: 'Employé non trouvé' });
+    const hashedPin = await bcrypt.hash(pin, 10);
+    await prisma.employee.update({ where: { id }, data: { pin: hashedPin } });
+    // Envoyer le PIN par email
+    const { sendEmployeePinEmail } = await import('../services/emailService.js');
+    await sendEmployeePinEmail(employee.email, `${employee.firstName} ${employee.lastName}`, pin);
+    res.json({ message: 'Code PIN défini et envoyé par email à l\'employé' });
+  } catch (error) {
+    console.error('Set PIN error:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// POST /admin/employees/:id/verify-pin - Vérifier le PIN pour un employé
+router.post('/employees/:id/verify-pin', verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pin } = req.body;
+    if (!pin) return res.status(400).json({ message: 'PIN requis' });
+    if (req.userRole !== 'ADMIN' && req.userId !== id) {
+      return res.status(403).json({ message: 'Accès refusé. Vous ne pouvez vérifier que votre propre PIN.' });
+    }
+    const employee = await prisma.employee.findUnique({ where: { id }, select: { pin: true } });
+    if (!employee || !employee.pin) return res.status(400).json({ message: 'Aucun PIN configuré pour cet employé' });
+    const isValid = await bcrypt.compare(pin, employee.pin);
+    if (!isValid) return res.status(401).json({ message: 'Code PIN incorrect', valid: false });
+    res.json({ message: 'PIN valide', valid: true });
+  } catch (error) {
+    console.error('Verify PIN error:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// POST /admin/employees/forgot-password - Employé demande reset mot de passe
+router.post('/employees/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email requis' });
+    const employee = await prisma.employee.findUnique({ where: { email } });
+    if (!employee) return res.json({ message: 'Si cet email existe, un code a été envoyé' });
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    await prisma.employee.update({ where: { email }, data: { pinResetCode: resetCode, pinResetExpiry: expiry } });
+    const { sendEmployeePasswordResetCode } = await import('../services/emailService.js');
+    await sendEmployeePasswordResetCode(email, `${employee.firstName} ${employee.lastName}`, resetCode);
+    res.json({ message: 'Si cet email existe, un code a été envoyé' });
+  } catch (error) {
+    console.error('Employee forgot password error:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// POST /admin/employees/reset-password - Employé réinitialise son mot de passe
+router.post('/employees/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) return res.status(400).json({ message: 'Email, code et nouveau mot de passe requis' });
+    const employee = await prisma.employee.findFirst({
+      where: { email, pinResetCode: code, pinResetExpiry: { gt: new Date() } }
+    });
+    if (!employee) return res.status(400).json({ message: 'Code invalide ou expiré' });
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.employee.update({
+      where: { email },
+      data: { password: hashedPassword, pinResetCode: null, pinResetExpiry: null }
+    });
+    res.json({ message: 'Mot de passe réinitialisé avec succès' });
+  } catch (error) {
+    console.error('Employee reset password error:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 

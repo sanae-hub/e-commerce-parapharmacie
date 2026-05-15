@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import notify from '../services/notificationService.js';
 import { verifyAdmin } from '../middleware/auth.js';
+import { requirePin } from '../middleware/requirePin.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -765,7 +766,7 @@ router.post('/purchase-orders/:id/send', verifyAdmin, async (req, res) => {
 });
 
 // DELETE /api/admin/purchase-orders/:id - Supprimer un bon de commande
-router.delete('/purchase-orders/:id', verifyAdmin, async (req, res) => {
+router.delete('/purchase-orders/:id', verifyAdmin, requirePin, async (req, res) => {
   try {
     const { id } = req.params;
 
