@@ -18,7 +18,17 @@ export const AuthProviderNew = ({ children }) => {
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser)
-        // Si le profil stocké est incomplet (pas de phone/authProvider), fetch le profil complet
+
+        // Si admin/employé sans session active → déconnecter immédiatement
+        if (['ADMIN', 'EMPLOYE', 'PREPARATEUR', 'CAISSIER'].includes(parsedUser.role)
+            && !sessionStorage.getItem('admin_session')) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setInitializing(false)
+          return
+        }
+
+        // Si client avec profil incomplet → fetch profil complet
         if (parsedUser.role === 'CLIENT' && parsedUser.phone === undefined) {
           fetch(`${API}/user/profile`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(r => r.ok ? r.json() : null)
@@ -36,6 +46,7 @@ export const AuthProviderNew = ({ children }) => {
             .finally(() => setInitializing(false))
           return
         }
+
         setUser(parsedUser)
         setIsAuthenticated(true)
         useAuthStore.setState({ user: parsedUser, isAuthenticated: true })
@@ -123,7 +134,6 @@ export const AuthProviderNew = ({ children }) => {
       const data = await res.json()
       if (res.ok) {
         localStorage.setItem('token', data.token)
-        // Fetch full profile to get authProvider, phone, whatsapp
         const profileRes = await fetch(`${API}/user/profile`, { headers: { 'Authorization': `Bearer ${data.token}` } })
         const profile = profileRes.ok ? await profileRes.json() : data.user
         const fullUser = { ...data.user, ...profile }
@@ -162,6 +172,7 @@ export const AuthProviderNew = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    sessionStorage.removeItem('admin_session')
     setUser(null); setIsAuthenticated(false); setError(null)
     useAuthStore.setState({ user: null, isAuthenticated: false })
   }, [])
