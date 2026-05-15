@@ -49,7 +49,7 @@ export function setup() {
     `${BASE_URL}/api/admin/login`,
     JSON.stringify({
       email:    __ENV.TEST_EMAIL    || 'admin@parapharmacie.ma',
-      password: __ENV.TEST_PASSWORD || 'Admin1234!',
+      password: __ENV.TEST_PASSWORD || 'admin123',
     }),
     { headers }
   );
