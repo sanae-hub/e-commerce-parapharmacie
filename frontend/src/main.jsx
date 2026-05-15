@@ -16,13 +16,16 @@ const GOOGLE_CLIENT_ID = '1024523760942-q8q2qqeujam35kcdcvv09vk79d6lm0ho.apps.go
 // Pages à ne pas mémoriser (auth, pages transitoires)
 const SKIP_SAVE = ['/login', '/signup', '/forgot-password', '/reset-password', '/checkout/confirmation', '/admin']
 
-// Au démarrage : toujours nettoyer toute session
-// Personne n'est connecté au lancement
+// Au démarrage : nettoyer la session seulement si c'est un nouveau lancement
+// (pas un refresh de page) — utilise sessionStorage comme flag
 localStorage.removeItem('lastVisitedPath')
-localStorage.removeItem('token')
-localStorage.removeItem('user')
-localStorage.removeItem('adminToken')
-localStorage.removeItem('adminUser')
+if (!sessionStorage.getItem('app_started')) {
+  sessionStorage.setItem('app_started', '1')
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  localStorage.removeItem('adminToken')
+  localStorage.removeItem('adminUser')
+}
 
 // Sauvegarde la dernière page visitée à chaque changement de route
 const LastPageTracker = () => {
