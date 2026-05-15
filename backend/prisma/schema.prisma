@@ -53,14 +53,17 @@ model Employee {
   firstName        String
   lastName         String
   phone            String?
-  employeeId       String?   @unique // Numéro d'employé
-  department       String?   // Service/département
-  position         String?   // Poste
+  employeeId       String?   @unique
+  department       String?
+  position         String?
   salary           Float?
   hireDate         DateTime?
   isActive         Boolean   @default(true)
+  pin              String?   // Code PIN hashé pour opérations critiques
   resetToken       String?
   resetTokenExpiry DateTime?
+  pinResetCode     String?   // Code envoyé par email pour reset mot de passe
+  pinResetExpiry   DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

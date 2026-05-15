@@ -1,6 +1,5 @@
 {
   "options": {
-    "noColor": false,
     "summaryTrendStats": [
       "avg",
       "min",
@@ -9,75 +8,75 @@
       "p(90)",
       "p(95)"
     ],
-    "summaryTimeUnit": ""
+    "summaryTimeUnit": "",
+    "noColor": false
   },
   "state": {
     "isStdOutTTY": true,
     "isStdErrTTY": true,
-    "testRunDurationMs": 486618.7444
+    "testRunDurationMs": 484605.6387
   },
   "metrics": {
-    "http_req_connecting": {
+    "http_req_receiving": {
+      "contains": "time",
+      "values": {
+        "avg": 0.36429171480572886,
+        "min": 0,
+        "med": 0.1668,
+        "max": 34.0886,
+        "p(90)": 0.9724700000000001,
+        "p(95)": 1.0076349999999998
+      },
+      "type": "trend"
+    },
+    "successes": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "passes": 20406,
+        "fails": 0,
+        "rate": 1
+      }
+    },
+    "group_duration": {
       "type": "trend",
       "contains": "time",
       "values": {
-        "p(95)": 0,
-        "avg": 0.004043056831343105,
-        "min": 0,
-        "med": 0,
-        "max": 9.9868,
-        "p(90)": 0
-      }
-    },
-    "iterations": {
-      "type": "counter",
-      "contains": "default",
-      "values": {
-        "count": 13887,
-        "rate": 28.53774162999546
+        "p(95)": 1325.8985199999997,
+        "avg": 878.3105501793183,
+        "min": 506.2122,
+        "med": 1006.2557,
+        "max": 1465.4888,
+        "p(90)": 1313.33464
       }
     },
     "http_req_waiting": {
       "type": "trend",
       "contains": "time",
       "values": {
-        "avg": 13.450528120132558,
+        "max": 314.6494,
+        "p(90)": 13.878990000000002,
+        "p(95)": 23.9716,
+        "avg": 6.427492165862168,
         "min": 0,
-        "med": 4.0078,
-        "max": 2512.1355,
-        "p(90)": 23.681940000000015,
-        "p(95)": 48.07306999999999
+        "med": 3.53245
       }
     },
-    "total_requests": {
-      "type": "counter",
-      "contains": "default",
+    "iterations": {
       "values": {
-        "rate": 51.24340212324957,
-        "count": 24936
-      }
-    },
-    "checks": {
-      "type": "rate",
-      "contains": "default",
-      "values": {
-        "rate": 1,
-        "passes": 24936,
-        "fails": 0
+        "count": 14005,
+        "rate": 28.89978754182416
       },
-      "thresholds": {
-        "rate>0.95": {
-          "ok": true
-        }
-      }
+      "type": "counter",
+      "contains": "default"
     },
-    "errors": {
+    "http_req_failed": {
       "type": "rate",
       "contains": "default",
       "values": {
-        "fails": 20265,
-        "rate": 0,
-        "passes": 0
+        "rate": 0.000039566352773601326,
+        "passes": 1,
+        "fails": 25273
       },
       "thresholds": {
         "rate<0.05": {
@@ -85,85 +84,99 @@
         }
       }
     },
-    "http_req_sending": {
-      "type": "trend",
-      "contains": "time",
-      "values": {
-        "min": 0,
-        "med": 0,
-        "max": 84.1234,
-        "p(90)": 0,
-        "p(95)": 0,
-        "avg": 0.03194631974120375
-      }
-    },
-    "http_req_duration{expected_response:true}": {
-      "values": {
-        "med": 4.52885,
-        "max": 2512.1355,
-        "p(90)": 24.400089999999988,
-        "p(95)": 48.615379999999966,
-        "avg": 13.79353541417048,
-        "min": 0
-      },
-      "type": "trend",
-      "contains": "time"
-    },
-    "http_req_blocked": {
-      "contains": "time",
-      "values": {
-        "p(90)": 0,
-        "p(95)": 0,
-        "avg": 0.015498985582491314,
-        "min": 0,
-        "med": 0,
-        "max": 18.001
-      },
-      "type": "trend"
-    },
-    "data_sent": {
-      "type": "counter",
-      "contains": "data",
-      "values": {
-        "count": 3966376,
-        "rate": 8150.890292749685
-      }
-    },
-    "successes": {
-      "type": "rate",
-      "contains": "default",
-      "values": {
-        "rate": 1,
-        "passes": 20265,
-        "fails": 0
-      }
-    },
     "public_endpoint_duration": {
-      "type": "trend",
-      "contains": "time",
       "values": {
-        "p(90)": 20.816480000000098,
-        "p(95)": 45.10639499999999,
-        "avg": 11.944780281495206,
+        "p(95)": 18.546949999999963,
+        "avg": 5.710074773703975,
         "min": 0,
-        "med": 3.9457500000000003,
-        "max": 1391.1324
+        "med": 3.2116,
+        "max": 308.5265,
+        "p(90)": 11.642020000000002
       },
       "thresholds": {
         "p(95)<800": {
           "ok": true
         }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_tls_handshaking": {
+      "contains": "time",
+      "values": {
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "max": 0
+      },
+      "type": "trend"
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0,
+        "avg": 0.01865974519268814,
+        "min": 0,
+        "med": 0,
+        "max": 39.3409,
+        "p(90)": 0
       }
     },
     "data_received": {
       "type": "counter",
       "contains": "data",
       "values": {
-        "count": 96111839,
-        "rate": 197509.52898147338
+        "count": 96991286,
+        "rate": 200144.77392419166
+      }
+    },
+    "vus": {
+      "values": {
+        "value": 1,
+        "min": 0,
+        "max": 100
+      },
+      "type": "gauge",
+      "contains": "default"
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 24.552739999999996,
+        "avg": 6.798248059193589,
+        "min": 0,
+        "med": 3.9628,
+        "max": 308.5265,
+        "p(90)": 14.31236
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 2088.085024912528,
+        "min": 1506.9691,
+        "med": 2000.6817,
+        "max": 3214.2084,
+        "p(90)": 3010.7472,
+        "p(95)": 3024.259
       }
     },
     "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 6.810443625860554,
+        "min": 0,
+        "med": 3.9629000000000003,
+        "max": 315.029,
+        "p(90)": 14.313940000000002,
+        "p(95)": 24.559454999999975
+      },
       "thresholds": {
         "p(95)<1500": {
           "ok": true
@@ -171,16 +184,6 @@
         "p(99)<3000": {
           "ok": true
         }
-      },
-      "type": "trend",
-      "contains": "time",
-      "values": {
-        "avg": 13.810186968329425,
-        "min": 0,
-        "med": 4.5291,
-        "max": 2512.1355,
-        "p(90)": 24.41396,
-        "p(95)": 48.62991999999998
       }
     },
     "vus_max": {
@@ -192,42 +195,30 @@
         "max": 100
       }
     },
-    "auth_endpoint_duration": {
-      "type": "trend",
-      "contains": "time",
-      "values": {
-        "avg": 19.493749979533295,
-        "min": 3.5056,
-        "med": 7.0685,
-        "max": 1520.9567,
-        "p(90)": 26.719240000000006,
-        "p(95)": 59.79931000000006
-      },
+    "order_endpoint_duration": {
       "thresholds": {
-        "p(95)<1000": {
+        "p(95)<2000": {
           "ok": true
         }
-      }
-    },
-    "group_duration": {
+      },
       "type": "trend",
       "contains": "time",
       "values": {
-        "p(90)": 1327.8541500000001,
-        "p(95)": 1367.9404749999999,
-        "avg": 900.923544664572,
-        "min": 506.4435,
-        "med": 1007.11215,
-        "max": 3575.2479
+        "avg": 22.17145691937426,
+        "min": 8.7904,
+        "med": 16.0263,
+        "max": 160.1861,
+        "p(90)": 36.3257,
+        "p(95)": 56.3333
       }
     },
-    "http_req_failed": {
+    "errors": {
       "type": "rate",
       "contains": "default",
       "values": {
-        "rate": 0.000039937697192379885,
-        "passes": 1,
-        "fails": 25038
+        "rate": 0,
+        "passes": 0,
+        "fails": 20406
       },
       "thresholds": {
         "rate<0.05": {
@@ -235,493 +226,568 @@
         }
       }
     },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 39.1066,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.010525741869114503,
+        "min": 0,
+        "med": 0
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "passes": 25171,
+        "fails": 0,
+        "rate": 1
+      },
+      "thresholds": {
+        "rate>0.95": {
+          "ok": true
+        }
+      }
+    },
+    "auth_endpoint_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 168.8793,
+        "p(90)": 16.554450000000003,
+        "p(95)": 30.5291,
+        "avg": 10.28002311435522,
+        "min": 3.629,
+        "med": 6.67695
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      }
+    },
     "http_reqs": {
+      "contains": "default",
+      "values": {
+        "rate": 52.1537472568414,
+        "count": 25274
+      },
+      "type": "counter"
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 4006965,
+        "rate": 8268.506760980039
+      }
+    },
+    "total_requests": {
       "type": "counter",
       "contains": "default",
       "values": {
-        "count": 25039,
-        "rate": 51.455066801573864
+        "count": 25171,
+        "rate": 51.94120329991117
       }
     },
-    "iteration_duration": {
+    "http_req_connecting": {
       "type": "trend",
       "contains": "time",
       "values": {
-        "med": 2000.9374,
-        "max": 5598.3549,
-        "p(90)": 3015.63486,
-        "p(95)": 3031.67193,
-        "avg": 2106.206983020087,
-        "min": 1507.2536
-      }
-    },
-    "http_req_receiving": {
-      "type": "trend",
-      "contains": "time",
-      "values": {
+        "avg": 0.005290761256627365,
         "min": 0,
         "med": 0,
-        "max": 65.4412,
-        "p(90)": 0.9988,
-        "p(95)": 1.0039,
-        "avg": 0.3277125284556095
-      }
-    },
-    "vus": {
-      "type": "gauge",
-      "contains": "default",
-      "values": {
-        "value": 1,
-        "min": 0,
-        "max": 100
-      }
-    },
-    "http_req_tls_handshaking": {
-      "type": "trend",
-      "contains": "time",
-      "values": {
-        "avg": 0,
-        "min": 0,
-        "med": 0,
-        "max": 0,
+        "max": 39.1066,
         "p(90)": 0,
         "p(95)": 0
-      }
-    },
-    "order_endpoint_duration": {
-      "type": "trend",
-      "contains": "time",
-      "values": {
-        "avg": 42.806473511543146,
-        "min": 8.9752,
-        "med": 17.3287,
-        "max": 2512.1355,
-        "p(90)": 57.04932000000003,
-        "p(95)": 100.31746999999994
-      },
-      "thresholds": {
-        "p(95)<2000": {
-          "ok": true
-        }
       }
     }
   },
   "setup_data": {
-    "products": [
+    "adminToken": null,
+    "categories": [
       {
-        "benefits": [],
-        "oldPriceHT": null,
-        "brandId": "092693b7-97fe-4a19-9351-eb46f9ee4061",
-        "brandModel": {
-            "description": null,
-            "id": "092693b7-97fe-4a19-9351-eb46f9ee4061",
-            "logo": null,
-            "name": "Nivea",
-            "updatedAt": "2026-04-30T13:34:47.823Z",
-            "active": true,
-            "createdAt": "2026-04-30T13:34:47.823Z"
-          },
-        "composition": null,
-        "name": "Lait corporel nivea",
-        "oldPrice": null,
-        "priceTTC": 96,
-        "productImages": [],
-        "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-        "barcode": "5465465356564658",
-        "category": {
-              "subcategories": [
-                {
-                  "title": "Soins bio visage",
-                  "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                  "items": [
-                    {
-                      "id": "a7a62bae-d230-436d-9303-692ea526b083",
-                      "name": "Nettoyants bio"
-                    },
-                    {
-                      "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                      "name": "Crèmes bio"
-                    },
-                    {
-                      "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
-                      "name": "Sérums bio"
-                    },
-                    {
-                      "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
-                      "name": "Huiles visage bio"
-                    }
-                  ]
-                },
-                {
-                  "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-                  "items": [
-                    {
-                      "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
-                      "name": "Shampooings"
-                    },
-                    {
-                      "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
-                      "name": "Après-shampooings"
-                    },
-                    {
-                      "id": "efbecb59-36b7-4910-a312-a746ac99b758",
-                      "name": "Masques capillaires"
-                    }
-                  ],
-                  "title": "Produits Capillaires"
-                },
-                {
-                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                  "items": [
-                    {
-                      "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                      "name": "Nettoyants"
-                    },
-                    {
-                      "id": "76844027-9137-420b-83be-5e2169264b3f",
-                      "name": "Hydratants"
-                    },
-                    {
-                      "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
-                      "name": "Anti-âge"
-                    },
-                    {
-                      "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
-                      "name": "Soins ciblés"
-                    }
-                  ],
-                  "title": "Soins Visage"
-                },
-                {
-                  "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                  "items": [
-                    {
-                      "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
-                      "name": "Shampooings bio"
-                    },
-                    {
-                      "name": "Après-shampooings bio",
-                      "id": "d3e84038-d97c-481c-90da-618d36242001"
-                    },
-                    {
-                      "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
-                      "name": "Masques bio"
-                    },
-                    {
-                      "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
-                      "name": "Huiles capillaires bio"
-                    }
-                  ],
-                  "title": "Soins bio cheveux"
-                },
-                {
-                  "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-                  "items": [
-                    {
-                      "id": "39868bad-d8ad-4100-8666-51be35e60280",
-                      "name": "Laits corporels"
-                    },
-                    {
-                      "name": "Baumes",
-                      "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e"
-                    },
-                    {
-                      "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
-                      "name": "Gommages"
-                    }
-                  ],
-                  "title": "Soins Corps"
-                }
-              ],
-              "updatedAt": "2026-04-30T12:31:40.133Z",
-              "name": "Cosmétiques & Soin",
-              "createdAt": "2026-04-30T12:31:40.133Z",
-              "hasSubcategories": true,
-              "icon": "Sparkles",
-              "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-              "image": null,
-              "order": 1
-            },
-        "reviews": 0,
-        "sku": null,
-        "updatedAt": "2026-05-10T22:04:53.831Z",
-        "variants": [],
-        "images": [],
-        "price": 96,
-        "stock": -2332,
-        "taxRate": 20,
-        "brand": "Nivea",
-        "createdAt": "2026-04-30T13:34:47.824Z",
-        "expiryDate": "2029-03-02T00:30:20.000Z",
-        "stockAlert": 5,
-        "subcategoryItemId": "39868bad-d8ad-4100-8666-51be35e60280",
-        "description": "bien",
-        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFEC_tnO1-D03EeUMyGVyBSuds3fkrUhjQrQ&s",
-        "isNew": false,
-        "priceHT": 80,
-        "productVariants": [],
-        "subcategory": {
-                    "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-                    "image": null,
-                    "order": 2,
-                    "title": "Soins Corps",
-                    "updatedAt": "2026-04-30T12:31:40.326Z",
-                    "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-                    "createdAt": "2026-04-30T12:31:40.326Z",
-                    "icon": "Droplet"
-                  },
-        "usage": null,
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "rating": 0,
-        "subcategoryItem": {
-                    "createdAt": "2026-04-30T12:31:40.326Z",
-                    "id": "39868bad-d8ad-4100-8666-51be35e60280",
-                    "name": "Laits corporels",
-                    "order": 1,
-                    "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-                    "updatedAt": "2026-04-30T12:31:40.326Z"
-                  },
-        "active": true,
-        "id": "0c6b0ea9-65da-4e44-a52b-861df58fbdba",
-        "type": null
-      },
-      {
-        "subcategoryItem": {
-          "updatedAt": "2026-04-30T12:31:40.326Z",
-          "createdAt": "2026-04-30T12:31:40.326Z",
-          "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-          "name": "Nettoyants",
-          "order": 1,
-          "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "_count": {
+          "products": 7
         },
-        "description": "bien",
-        "name": "gel nettoyant ACM",
-        "subcategoryItemId": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-        "usage": null,
-        "image": "https://novapara.ma/cdn/shop/products/Acm-Sensitelial-Gel-Nettoyant-Surgras-200ml--nova-parapharmacie-maroc.jpg?v=1758700144",
-        "price": 144,
-        "reviews": 0,
-        "stockAlert": 2,
-        "type": null,
-        "variants": [],
-        "createdAt": "2026-04-30T13:34:47.809Z",
-        "isNew": false,
-        "priceHT": 120,
-        "priceTTC": 144,
-        "productImages": [],
-        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-        "updatedAt": "2026-05-10T22:05:14.087Z",
-        "barcode": "5433432654323567",
-        "composition": null,
-        "id": "fd23f6db-8cc5-43e3-a56b-1aa22e38126a",
-        "sku": null,
-        "subcategory": {
-              "updatedAt": "2026-04-30T12:31:40.326Z",
-              "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-              "createdAt": "2026-04-30T12:31:40.326Z",
-              "icon": "Sparkle",
-              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-              "image": null,
-              "order": 1,
-              "title": "Soins Visage"
-            },
-        "taxRate": 20,
-        "brand": "ACM",
-        "category": {
-              "createdAt": "2026-04-30T12:31:40.133Z",
-              "hasSubcategories": true,
-              "icon": "Sparkles",
-              "image": null,
-              "name": "Cosmétiques & Soin",
-              "order": 1,
-              "updatedAt": "2026-04-30T12:31:40.133Z",
-              "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-              "subcategories": [
-                {
-                  "title": "Soins bio visage",
-                  "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                  "items": [
-                    {
-                      "id": "a7a62bae-d230-436d-9303-692ea526b083",
-                      "name": "Nettoyants bio"
-                    },
-                    {
-                      "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                      "name": "Crèmes bio"
-                    },
-                    {
-                      "name": "Sérums bio",
-                      "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
-                    },
-                    {
-                      "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
-                      "name": "Huiles visage bio"
-                    }
-                  ]
-                },
-                {
-                  "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-                  "items": [
-                    {
-                      "name": "Shampooings",
-                      "id": "3723a9fd-d9ed-4272-959a-150bd903345b"
-                    },
-                    {
-                      "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
-                      "name": "Après-shampooings"
-                    },
-                    {
-                      "id": "efbecb59-36b7-4910-a312-a746ac99b758",
-                      "name": "Masques capillaires"
-                    }
-                  ],
-                  "title": "Produits Capillaires"
-                },
-                {
-                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                  "items": [
-                    {
-                      "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                      "name": "Nettoyants"
-                    },
-                    {
-                      "id": "76844027-9137-420b-83be-5e2169264b3f",
-                      "name": "Hydratants"
-                    },
-                    {
-                      "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
-                      "name": "Anti-âge"
-                    },
-                    {
-                      "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
-                      "name": "Soins ciblés"
-                    }
-                  ],
-                  "title": "Soins Visage"
-                },
-                {
-                  "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                  "items": [
-                    {
-                      "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
-                      "name": "Shampooings bio"
-                    },
-                    {
-                      "id": "d3e84038-d97c-481c-90da-618d36242001",
-                      "name": "Après-shampooings bio"
-                    },
-                    {
-                      "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
-                      "name": "Masques bio"
-                    },
-                    {
-                      "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
-                      "name": "Huiles capillaires bio"
-                    }
-                  ],
-                  "title": "Soins bio cheveux"
-                },
-                {
-                  "items": [
-                    {
-                      "id": "39868bad-d8ad-4100-8666-51be35e60280",
-                      "name": "Laits corporels"
-                    },
-                    {
-                      "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
-                      "name": "Baumes"
-                    },
-                    {
-                      "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
-                      "name": "Gommages"
-                    }
-                  ],
-                  "title": "Soins Corps",
-                  "id": "619120c9-81fe-422c-9e95-cea34c044f53"
-                }
-              ]
-            },
-        "expiryDate": "2030-02-07T00:30:20.000Z",
-        "oldPrice": null,
-        "stock": -1231,
-        "active": true,
-        "brandId": "636eae27-f895-494f-90bb-f2e316d511f4",
-        "brandModel": {
-              "active": true,
-              "createdAt": "2026-04-30T13:34:47.807Z",
-              "description": null,
-              "id": "636eae27-f895-494f-90bb-f2e316d511f4",
-              "logo": null,
-              "name": "ACM",
-              "updatedAt": "2026-04-30T13:34:47.807Z"
-            },
-        "oldPriceHT": null,
-        "productVariants": [],
-        "rating": 0,
-        "benefits": [],
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "images": []
-      },
-      {
-        "expiryDate": "2029-03-07T00:30:20.000Z",
-        "brandModel": {
-          "updatedAt": "2026-04-30T13:34:47.790Z",
-          "active": true,
-          "createdAt": "2026-04-30T13:34:47.790Z",
-          "description": null,
-          "id": "938130e8-dd97-4fd5-b17b-52c8b3f33936",
-          "logo": null,
-          "name": "cetaphil"
-        },
-        "description": "bien",
-        "variants": [],
-        "priceHT": 100,
-        "barcode": "6754545556765454",
-        "benefits": [],
-        "productImages": [],
-        "stock": -1204,
-        "name": "créme hydratante cetaphil",
-        "oldPrice": null,
-        "stockAlert": 2,
-        "subcategoryItem": {
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "icon": "Sparkles",
+        "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "image": null,
+        "name": "Cosmétiques & Soin",
+        "order": 1,
+        "subcategories": [
+          {
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "icon": "Sparkle",
+            "order": 1,
+            "title": "Soins Visage",
+            "updatedAt": "2026-04-30T12:31:40.326Z",
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+            "image": null,
+            "items": [
+              {
+                "name": "Nettoyants",
+                "order": 1,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
                 "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "0507f1d2-f33f-4327-8264-5ada225cecbd"
+              },
+              {
                 "createdAt": "2026-04-30T12:31:40.326Z",
                 "id": "76844027-9137-420b-83be-5e2169264b3f",
                 "name": "Hydratants",
                 "order": 2,
-                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z"
               },
-        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
-        "updatedAt": "2026-05-10T22:04:52.836Z",
-        "price": 120,
+              {
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                "name": "Anti-âge",
+                "order": 3,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                "name": "Soins ciblés",
+                "order": 4,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z"
+              }
+            ]
+          },
+          {
+            "title": "Soins Corps",
+            "updatedAt": "2026-04-30T12:31:40.326Z",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "icon": "Droplet",
+            "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+            "image": null,
+            "items": [
+              {
+                "order": 1,
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                "name": "Laits corporels"
+              },
+              {
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                "name": "Baumes",
+                "order": 2
+              },
+              {
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                "name": "Gommages",
+                "order": 3,
+                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "items": [
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                "name": "Shampooings",
+                "order": 1,
+                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                "name": "Après-shampooings",
+                "order": 2,
+                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                "name": "Masques capillaires",
+                "order": 3,
+                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              }
+            ],
+            "order": 3,
+            "title": "Produits Capillaires",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+            "image": null,
+            "updatedAt": "2026-04-30T12:31:40.327Z",
+            "createdAt": "2026-04-30T12:31:40.327Z",
+            "icon": "Wind"
+          },
+          {
+            "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+            "items": [
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                "name": "Shampooings bio",
+                "order": 1,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "d3e84038-d97c-481c-90da-618d36242001",
+                "name": "Après-shampooings bio",
+                "order": 2,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                "name": "Masques bio",
+                "order": 3,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.327Z",
+                "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                "name": "Huiles capillaires bio",
+                "order": 4,
+                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "updatedAt": "2026-04-30T12:31:40.327Z"
+              }
+            ],
+            "order": 4,
+            "title": "Soins bio cheveux",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "createdAt": "2026-04-30T12:31:40.327Z",
+            "icon": "Wind",
+            "image": null,
+            "updatedAt": "2026-04-30T12:31:40.327Z"
+          },
+          {
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "createdAt": "2026-04-30T12:31:40.328Z",
+            "image": null,
+            "items": [
+              {
+                "name": "Nettoyants bio",
+                "order": 1,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "updatedAt": "2026-04-30T12:31:40.328Z",
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "a7a62bae-d230-436d-9303-692ea526b083"
+              },
+              {
+                "updatedAt": "2026-04-30T12:31:40.328Z",
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                "name": "Crèmes bio",
+                "order": 2,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                "name": "Sérums bio",
+                "order": 3,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "updatedAt": "2026-04-30T12:31:40.328Z"
+              },
+              {
+                "createdAt": "2026-04-30T12:31:40.328Z",
+                "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                "name": "Huiles visage bio",
+                "order": 4,
+                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "updatedAt": "2026-04-30T12:31:40.328Z"
+              }
+            ],
+            "order": 5,
+            "title": "Soins bio visage",
+            "icon": "Sparkle",
+            "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+            "updatedAt": "2026-04-30T12:31:40.328Z"
+          }
+        ]
+      },
+      {
+        "_count": {
+          "products": 0
+        },
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "icon": "Droplets",
+        "id": "b7a26dcf-3607-488e-99b6-ce9cebf2eb25",
+        "name": "Hygiène & Corps",
+        "subcategories": [],
+        "image": null,
+        "order": 2,
+        "updatedAt": "2026-04-30T12:31:40.133Z"
+      },
+      {
+        "name": "Bébé & Maternité",
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "order": 3,
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "_count": {
+            "products": 0
+          },
+        "icon": "Baby",
+        "id": "ca89609b-f5fe-4010-8451-b72d5810d483",
+        "image": null
+      },
+      {
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "id": "b2b510d8-6d69-43aa-a8df-7c6c2b9d0385",
+        "name": "Complémentaires",
+        "subcategories": [],
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "_count": {
+            "products": 0
+          },
+        "hasSubcategories": true,
+        "icon": "Pill",
+        "image": null,
+        "order": 4
+      },
+      {
+        "subcategories": [],
+        "_count": {
+            "products": 0
+          },
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true,
+        "image": null,
+        "order": 5,
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "icon": "Sun",
+        "id": "b1091eae-ec44-4383-8cd5-ab66152c78a0",
+        "name": "Solaire & Protection"
+      },
+      {
+        "icon": "Stethoscope",
+        "order": 6,
+        "updatedAt": "2026-04-30T12:31:40.133Z",
+        "_count": {
+          "products": 0
+        },
+        "id": "80cd7a67-0fe6-4155-be1a-6e60e4be1a5e",
+        "image": null,
+        "name": "Orthopédique",
+        "subcategories": [],
+        "createdAt": "2026-04-30T12:31:40.133Z",
+        "hasSubcategories": true
+      }
+    ],
+    "clientTokens": [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmZGNkODZjLWIyZTktNDk4Zi1iZTU1LWE3MmFlOTEzYTk1ZiIsImVtYWlsIjoicGVyZl91c2VyXzBAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.0gI76jxyntK3kyZIfowixYw5dCVNocKHLAY_X235Y8Q",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ5NGE3YzhlLTc5NDItNGZmZC1hZDRiLTZjZjk0YTg1NDIzOCIsImVtYWlsIjoicGVyZl91c2VyXzFAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.8JbUJuYcNf2Z_rWVGm_RgSY1wCzC6ygFpAJZQpCPlg8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyODRmMzg3LTRjZjktNGYxNy1hMGEyLTllZmM5NDNjOGY5NSIsImVtYWlsIjoicGVyZl91c2VyXzJAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.OTzXu0H_dG_ttvVE7j_h8NqUpwCAdKQri_5KXjN0FaU",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIwNzQ0MGI3LWM3ZjAtNGFhZC04NDU4LTg0ZjA2ZDUxOWRkNiIsImVtYWlsIjoicGVyZl91c2VyXzNAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.LO1k6l-P8aj9ElVRc2Uls9K_YM9V_ND9Jy9yEg_VR7g",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhlNzE5MmNhLWJmMjMtNGRhMi04N2Y2LWJlZTU0ZDkxM2JmZSIsImVtYWlsIjoicGVyZl91c2VyXzRAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.lslypG4W4I_3PE7n3wYD5vdElOomo3ZrF3uWcHDuzsU",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwYjA0ZDdjLTk4M2YtNDQ1MC1hMDNmLTEwNGJjNGNlNDRjOCIsImVtYWlsIjoicGVyZl91c2VyXzVAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.IIP9NIW6sfsCeDSXTNdYOwczgDd3BmDCaQiUgQ8UxGM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NzU3YjE2LTQ1YzgtNDczNy05YWUxLTY0ZDk1MjczZTc3YiIsImVtYWlsIjoicGVyZl91c2VyXzZAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.QDIwTXsKn3bHbV_HgLek7XfpuBrcSauadNGItL6_QvU",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFjMGU2MDk5LWQ2ZDctNDRhYi04YTExLTNlM2U4MTI0ODA2OCIsImVtYWlsIjoicGVyZl91c2VyXzdAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.aQH6Esuj-muzeCdybNRagkNPxHlU2-I7FVrKsB5AyKc",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhlNzY1MmUxLWI3ZDQtNGJlNy1hMWNhLWY1OGQzNmQ0ZTc2OSIsImVtYWlsIjoicGVyZl91c2VyXzhAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.hxJQn_Z0GyNAuY14MZqFLyNeADd9BbKJN-ZIdJWRVUY",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjAwN2I0LWRlMjUtNGRiNC04NGY5LTFjN2Y0MDg5NTBhZCIsImVtYWlsIjoicGVyZl91c2VyXzlAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODQ3Nzg1LCJleHAiOjE3Nzk0NTI1ODV9.KZeO8H8m2C46gOFnuxrU8BzmdZ_1--ztQsOWJn4le8k",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmUwMmI1LTVmMDEtNGQ5ZS1iYWRjLTM4YTg0MjFiM2U4YyIsImVtYWlsIjoicGVyZl91c2VyXzEwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.PUFWimW6__wN7ngtRn6q2ZXLMCeCcYLI0i0kaF-B6Gw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI5ZGIxODFlLWM3YWYtNDFjMS04MzU1LWI2OWM3NmU3MTk4OSIsImVtYWlsIjoicGVyZl91c2VyXzExQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.t-Q7mp1WzjSoSzSM3otq84fGbeaH3GmAJI0JEGTqBkI",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzOTczM2Q4LWJiY2MtNDc5MC1iNDE5LTg1NzYwNTUxYTc4YSIsImVtYWlsIjoicGVyZl91c2VyXzEyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.XP-d9UviNzz13-nG7wI0KBzNuVH3fwB1Vbfou2Lel1g",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNjIxNmVlLTJlNTYtNGMyYS1hOTU3LTAxZDM4Y2RmMzQ3OCIsImVtYWlsIjoicGVyZl91c2VyXzEzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.z7nG0mPkf8jsSTISEURAUhOwZLWkqY7dnYuh8Jugaao",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc5OTdjNDA3LWM1YzAtNDgyNS04MjFiLWFhNjQ2MDkyZDgyYiIsImVtYWlsIjoicGVyZl91c2VyXzE0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.aghnNgvz5CXOb6DMdjc_APVVKsrn7vdK5c2K7q2f88c",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJlY2NiZGQ0LThlY2EtNDZlOS1iYjQyLWUxMjYwZWZlMzUxNyIsImVtYWlsIjoicGVyZl91c2VyXzE1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.FTj5z8ENTMMXsyDBiu-cllDDrAhlcG-DKbRGEcjQpyM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ4MGNjNzkyLTQxODctNGEwYy04YmJhLTgzOWJiZmQ4ODNiNCIsImVtYWlsIjoicGVyZl91c2VyXzE2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.0BJBpA44WnXBZalkBdb0xbZ2oZhU-l2sZFb3in_3A4Y",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcxNWY4NGQzLTZkNWEtNDEyNC1iZTlhLTU3MTRmMzE0NmU2NiIsImVtYWlsIjoicGVyZl91c2VyXzE3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.0niKLlLAtp0CYUXJLl0Vdlg9FhRheJuojz_R6g0VgkI",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkYjM0YTc3LWE0MGMtNDRiOC04NTgyLTY4YmRlYWIyZGI5MSIsImVtYWlsIjoicGVyZl91c2VyXzE4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.yzxsChc9a6wkatPHieTrbNdLuuOzSM86DQUGkPliOGc",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiOGM4ZTVkLTlmMmItNDliYS05NjhmLWM0OTgyZjlmMTMwZSIsImVtYWlsIjoicGVyZl91c2VyXzE5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.uB6lzbXlPc_bf7TP-a6xt4vYk1UO5wqwuhyq7TSudQk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNzc2M2E1LTc3NzEtNDhlYy1iYTYwLTA5MjI2NTVkYzA0YiIsImVtYWlsIjoicGVyZl91c2VyXzIwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.-Q9Ni8YwrvxYUbv_MWGc1PEGdGtHIATxy4pVFhxMLBQ",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMyMzY1OWUzLTRmNTItNDI1Ni04M2I0LWI4Nzc3YWYxODVlZCIsImVtYWlsIjoicGVyZl91c2VyXzIxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.S9Shm6znPxF83-Htlf8E8R1yfQxYmsEdAid5GZ9oSLA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdmZjM4NWU1LTAyZDQtNGFiYi04NGNmLWI1NDc3N2IxMDYzYSIsImVtYWlsIjoicGVyZl91c2VyXzIyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NSwiZXhwIjoxNzc5NDUyNTg1fQ.TYSsRU-No7GhAwCPA_y66zAplGIaLFWd9fETDdggk0o",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNlZmFkYTlhLTUwMTctNDY2Ni05MGRiLTYzMTY1NmZlNDhmOCIsImVtYWlsIjoicGVyZl91c2VyXzIzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.WWcodfWLkvE63zi0FhuJ0UQj1VjlYwcFyHDHlkkClOk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBlZWJkMTVjLTIxODgtNDhjYS05ZWY2LWZmZjZiYjFkZGRmNSIsImVtYWlsIjoicGVyZl91c2VyXzI0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.11R02P5H6oMRo6uz6WE0B7BX5lnSdboSkQFHYezxRyI",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU4MTg2NDE1LTFlYjEtNGVlMC04ZTVkLTZlYTllOTNmZDhmOCIsImVtYWlsIjoicGVyZl91c2VyXzI1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.nREmPzjy8pjcgDAWqZ5hacg_K5d8Ml4v5rgB37xdWes",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAyMjYzODJmLTQ4MmYtNGU1Zi1iNGZhLTVlMWU4Yzc3OWI2NCIsImVtYWlsIjoicGVyZl91c2VyXzI2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.yxSYc20xsJ2li5lhFQU_gobpe0SiJjIVQZJS2Rb-nLU",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIxNTNlMWU3LTM4OTYtNDJhMS05NjViLTE1NmI1NWIzMGU2ZCIsImVtYWlsIjoicGVyZl91c2VyXzI3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.LcrrQIP0LbPRWvLyF8Ryy5aF3SgctSQjy1kG7K0ylRI",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzOTU0YmVlLWM3NmQtNGJmNC04ODhlLTU0YmEyNWFhMzJkZCIsImVtYWlsIjoicGVyZl91c2VyXzI4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.OSSgNw6elgOfZAx17juVMYC0La3Fv3TiL4nWd8vc4e0",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjMmE1YmIyLTk5NjEtNDQ3NS05YjQzLTM4YmMxNDhhNmMwMyIsImVtYWlsIjoicGVyZl91c2VyXzI5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.2AQXFURlk34ZOcE1e8hWPiamfFj8zI9oxW5g3a1206I",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViODZiMjkxLWU1NzctNDEyZi04NDdiLTc0MzE0ZTZhZDRhZiIsImVtYWlsIjoicGVyZl91c2VyXzMwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.5_W9X8RB1pRcVoQdqFprE7aA9QKQlgh3-DcAE8XraZM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE5NDIxYmQwLWRjMTMtNGZiZC04MDk2LTU5OWI2ZjAzNDNhOSIsImVtYWlsIjoicGVyZl91c2VyXzMxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.boMmdkWQLrwKd9VOBcyUi5fybv6XIw-ePxLXY0bXER4",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3OGY1NTZiLWFmNGItNDE5Yi04ZGQyLTdmNjhjODJhZDUzNiIsImVtYWlsIjoicGVyZl91c2VyXzMyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.Liyto4vC7XBVdx4eonB-x-leDaIRerXmX7ZBVijRvvM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ1ZjYzZDM0LTM4Y2EtNDQ2MS1hYzEwLTY5NTUyYWRhNDIzNyIsImVtYWlsIjoicGVyZl91c2VyXzMzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.p8wJEM1F04oxxKvmU7lICb8-PyZ3D42e0NDP8BNm9Zs",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNDVjMDgyLTkyZGItNDg2Yi04MmQxLTcwNzg3YzVjODJjMyIsImVtYWlsIjoicGVyZl91c2VyXzM0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.SR8A5xmQ81RoigZhscfXcFu5aefz1JZHlXUCuFga4iA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRkMmUyNmRkLWNlZmYtNDMyYS04YzVkLTk2M2FiMGE3MjdiOCIsImVtYWlsIjoicGVyZl91c2VyXzM1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.ERoJcSUa8Q49spzB5wRMZytAr7ciIsLEhsH5gtFnh8E",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ1MWRhYTA0LTVmNmEtNGVhOS1iZWQyLWFlMGVlM2NiNmQzNiIsImVtYWlsIjoicGVyZl91c2VyXzM2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.y98TFou6ef1apGnkyjUy3sqHC_43B26hauanXwA8ZZw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwNGJmMjliLWFiYmMtNGFlYi05OTY4LWRiMDI0ZWYzNTYwZSIsImVtYWlsIjoicGVyZl91c2VyXzM3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.tgmOIpBSJLNdS-iTMDGpzMh9SiKi-cMQcu9ysNr-Glk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzNDMzYjhjLWZiOTktNDNmOS1hNTBjLWNhMjk4YmJlZDlmNiIsImVtYWlsIjoicGVyZl91c2VyXzM4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.d34Esbfrng3To7-hMV5Xg2LWcL2W1j3rSxjshPgyJx4",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjODhlYWUxLWJiZWYtNGZhNS05MjhkLTM4ZGNhZGY4NDJjNCIsImVtYWlsIjoicGVyZl91c2VyXzM5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.prz2c3yd4PX0p5hSPbR6t2VuO64JFWDKfJmk56862Oc",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjljMTk2MGI1LTNiYTMtNDI1ZC1hMGVjLWViOWNmY2RiOTNlMyIsImVtYWlsIjoicGVyZl91c2VyXzQwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.99USFiItyIGJfsaBMMJbqEcfVdlnW8bk90W6bx-CD68",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgwYjQwN2E4LTYzZDgtNGZkOC04ODE0LWI3ZDFhYzc0YWI3MyIsImVtYWlsIjoicGVyZl91c2VyXzQxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.Wvjj91zdEZF59GXDT7zU8Krj1Jik11EdmZLSAd0aw10",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdlOTdhMjZhLTZlMGUtNDEyOC04ZWQ4LTlkNzViYWZjZjc2ZSIsImVtYWlsIjoicGVyZl91c2VyXzQyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.SCCAUNfb1zxdYdclKq_wqHUC4mr-26fXJ1de_SSVZy8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNmNjUxMmQwLWE3ZTUtNGY2ZC04N2ZmLThiZjY1M2ZkYTA5YiIsImVtYWlsIjoicGVyZl91c2VyXzQzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.Mqc3Ap-pP9YoWMc1frkQZB1QUCJhC0prOM9cC38rPS8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgyNzk3NDc3LTJmYzEtNDEwMi1hM2ZhLTU2MDlkNGY0Y2ZiZCIsImVtYWlsIjoicGVyZl91c2VyXzQ0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.lrFetZMy1gAFdzooKcFYk85R6737VPsLe9152fPY6DE",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OGY3NWU0LTI1OTktNGRjZC04MGU1LTNmYjE5ZmZkNDQwOSIsImVtYWlsIjoicGVyZl91c2VyXzQ1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.5zKz-9BltDTm-M0-AaHoJ9XkS1cSgmFcBVA1Iso0C5U",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1MzIxNDQwLTcwNzAtNDQzMi1iMDM5LTE4MzEyNGM5YmM4NyIsImVtYWlsIjoicGVyZl91c2VyXzQ2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.PMylWdKgd4AhoKxHIm8aFLzTvgZePoKiAyPRNjBTJbA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc0MjZhNDljLTk2MDUtNDEwYS1hZWRkLTZmODI3NTY0OGE3OCIsImVtYWlsIjoicGVyZl91c2VyXzQ3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.s70ta_RlwrfhHza7i69lvEN_UZXQPpmwuJ4hlLuVGhM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE2ZDVlOTQ1LTQwNjAtNDI2OC1hM2I5LTdhN2JhZjQyYjYwYiIsImVtYWlsIjoicGVyZl91c2VyXzQ4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.xKAQmtTdvPzaHcGPWau-drRE6ar85WRuQy3ucmTbIbA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI4ZGM4OGQwLTYzZDMtNDYyYi04MWExLTBjMDUwMDk5YWQyMSIsImVtYWlsIjoicGVyZl91c2VyXzQ5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.fUtfsRxx9udkAF2qcbzBSG_a_9uQClICQiV-2TgctTk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM3NDQ0ODM4LWZlMjgtNDA4Ny1hOTA4LWY1ZDgwMjE4YTMyMiIsImVtYWlsIjoicGVyZl91c2VyXzUwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.2sCJl3x2hDaFUAV_3mLzHZXkYpI0M6IRQx49Wyu9IP0",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzOGE5M2VkLTRmMDUtNDYxZi1iMmI2LWYwODcwM2IwOTAzOCIsImVtYWlsIjoicGVyZl91c2VyXzUxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.fy23nLbuL9PcTToJTjfrua9qA8UyUBQYI62H1AjEmiI",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVhYTEyZDA0LTk0NDItNDYwMi04MTI2LTdkZjg4MGViZmQyNiIsImVtYWlsIjoicGVyZl91c2VyXzUyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.-30mh4bIK49euV8pkkfBR_AnAIWJQo1lg5jhrtCYNFE",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkYjkwYWI4LTc0OGItNGE0NS04MzI5LTc5MzUyMTRiYzlhMSIsImVtYWlsIjoicGVyZl91c2VyXzUzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.lrq_17KBjnRblSMzQIh2sctRHeu-Y4vuVxJozwn5y68",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM0ODI1YjQ2LWY5NGQtNDE1ZC05MWJiLTNmMTQ5MWFjZGIwZSIsImVtYWlsIjoicGVyZl91c2VyXzU0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.fVOd3S5cb394otngkpS7g_HC9vBZ9fcTXhalXgkzhAA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ1NDFiOTA2LWE4NDItNGU0NC05OWU0LTc5MTk2ZjcyY2NkNiIsImVtYWlsIjoicGVyZl91c2VyXzU1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.NWK2Fv3q7pBBX3t_a5NRc5umpiOWlqUQBmDOVp_21Ok",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZhODA2ZmFmLTA1MTQtNGY2Ny1iNjE2LTQ3NzVlMTUxYmIyMyIsImVtYWlsIjoicGVyZl91c2VyXzU2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.0EQAjlEJ3Z0EfTeUsuoYYIpxaDIYH-AGwpL_bhau3yo",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFlYzEyYWZjLWI3ZGYtNDUwYS1iMDEwLTc0ZjI3MTNmZTc4NSIsImVtYWlsIjoicGVyZl91c2VyXzU3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NiwiZXhwIjoxNzc5NDUyNTg2fQ.Cl2mU3f3_LVIvxnZs1yzW4UsUc_efk3-iJfb0gmGwuM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY3MmZkY2FhLTVlZmMtNDgwNy1hM2FmLTE1MWZkZGI4OWI3ZSIsImVtYWlsIjoicGVyZl91c2VyXzU4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.WWLOZQC9vB4Jb8kp0Rv2beq58OFrM1_6kv2KhCArflM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImEyNDFlMWMxLWQ5ZTEtNDM4My1iMzJjLWYwZjQ1ODIyMmExMyIsImVtYWlsIjoicGVyZl91c2VyXzU5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.Bs9oQT2m7EzG8GIG13JJ-PVNaZZBagU5bfBOTKCetUE",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkMjg4MzFmLTQyY2UtNDM4Yi05NWJlLTcyZTQ0ZTAzMjkyNiIsImVtYWlsIjoicGVyZl91c2VyXzYwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.BtVQ6Sh6QEaRIJln2zt9z-gzsgmcUZenRMRvtbyHK8Q",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNiMWM2MzQ4LWM4MGQtNGQyMC05MWJjLTg1ZWNmNWNhMTFlOSIsImVtYWlsIjoicGVyZl91c2VyXzYxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.tybmSb3FBizpmCTUIv3ezHEanfwrLAtFGSnSAnVyZMc",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhkMjgyMDQ5LWFkNDYtNGJjOC1iODhmLWZlNTk2MzI3MjYyNyIsImVtYWlsIjoicGVyZl91c2VyXzYyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.ruWUH5GWaXYFM9h3rOBcalzBDT9-GwExSC4CdZKiVf4",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE5M2ViNDg1LTU4YTItNGY3ZS05NDVkLWVjYjg5OGNlN2Q2OSIsImVtYWlsIjoicGVyZl91c2VyXzYzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.mR2jjrWEY0Zo1JenSEIxUhRSBnpky8MEXOWqHcXKq9o",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjY2MwMzRkLTg2NGItNDc4Yi05NGU3LTA3Nzg1MTE2YjBmMyIsImVtYWlsIjoicGVyZl91c2VyXzY0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.g80fY5gpm7W2yNqHPJe9qi3v55gqxxz7qTyeHT7eLmg",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMwZjNhMjZhLTcwZTAtNGRhMC04ZDI4LTFjZTVlNzlmYmZkOSIsImVtYWlsIjoicGVyZl91c2VyXzY1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.CcxEUYMTJGQQcKtn_zB1YdtdD5-kSQzNAqw1T6z5yp4",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE0MDA1ODY3LTZmMmUtNDBlMy04ODBkLThmNWU2ZjMyYzhmOCIsImVtYWlsIjoicGVyZl91c2VyXzY2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.SCiWFM6cLx__9OXS24q64ImXQUFYB6w9srIdiEg9GTs",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2NWM2OWJiLWZlYzYtNGVmYS04ZTRlLWJmZDBjNWIwZjNmNiIsImVtYWlsIjoicGVyZl91c2VyXzY3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.F302LaX4AONocH1uoBfOgkOV7vCqScSCVfmJILG313w",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU0ZDlmMjkzLTVmZTMtNDI2Yi1hZWMzLTE5MTIzYTVkNzY2OSIsImVtYWlsIjoicGVyZl91c2VyXzY4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.qjwVKUmu4aWXDUicIrS8Yd5G8ZKSMUMztgNRzrljLMM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBkOWQxNjJmLWQ3MzgtNGM0NS05NmE2LTE4MmI5MDNkOGZlNCIsImVtYWlsIjoicGVyZl91c2VyXzY5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.X3fwZ6qHCtA2rmaXtc2c1Rne-GwspmYqNN8yNi391ng",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwMmZkNGU1LThhOTktNDZjMS05NTFmLWE5ZWNlM2VmYmY1YiIsImVtYWlsIjoicGVyZl91c2VyXzcwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.Ji7XqzFGMUMWSY5dVVydifWXD214EoKr78GbNb4gX9U",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjYmRiNGFhLTdiN2EtNDg1Zi05Yjc0LTE4NGZiYjA5OGVhOSIsImVtYWlsIjoicGVyZl91c2VyXzcxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.lVqMgKi0QrvK26ThKUPmOAw0arMSoxkAAyoGi5uKnmw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE3ODBlZjk0LTM0MzAtNGRkYS04NjQ3LTBmMTE3YTE5ZDU2NyIsImVtYWlsIjoicGVyZl91c2VyXzcyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.x833eB3KrIs2p5Bw4fDbEL1MwPkremeG9xtiOHKpKwc",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBkMTk3Mzk0LTE4YTMtNDgwZS05YTk1LTg2ZWY1YzhkMzJlMCIsImVtYWlsIjoicGVyZl91c2VyXzczQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.eUjbxp3WnNPfAhdfFb-d75N-oqZThOJPc1_tPg0yTVo",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ODM0MGRkLTE5MTUtNDAwNS05MTVkLTk0ZGQxMThhNjQxNSIsImVtYWlsIjoicGVyZl91c2VyXzc0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.QpumoLz1ECiKkXcnQhYuCx-qrR8z60Qj8gmypaG9QsE",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhNjVjZTRkLTk2ODEtNDVlMC04ZDMzLTRhMTU4MmIzNWJjNyIsImVtYWlsIjoicGVyZl91c2VyXzc1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.zvhgXnDxbWEwyZhjI3GDEL2fWQ9s4fyPgANmnPFugnM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI5N2JlYmMwLWM0MDgtNGQ5MS1hODRlLWE3NjVhNDZmYjE3YiIsImVtYWlsIjoicGVyZl91c2VyXzc2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.pXu8zKyve-lQSNi98b_yqFDNy0Mzvz6HsvOiX3ehY-c",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk2ZjgzNmExLTg4OTUtNDQ1Ny1hMWY3LTc4NWEzZDNlY2NlNiIsImVtYWlsIjoicGVyZl91c2VyXzc3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.R8905KnlIRakzJXxXstkGyY9DV5ZtCoYM2_jjsKDAlA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0ZjJkMzIzLWQ1ZGEtNDhkMy04OWI0LTJhMmIzZjc3NjQzYyIsImVtYWlsIjoicGVyZl91c2VyXzc4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.9cW4411TywX-KAvHRNQqHysZ6QY9mq4AKJ1Hs-2baXg",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdjZTVkZmQxLTU4YTYtNGQ4NS1iNDRkLWMxNzlkNWNiMzc0YyIsImVtYWlsIjoicGVyZl91c2VyXzc5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.SUtH6lhg3X5g2zuegS8Dib6rgtQ2rp_I_IhoTW0ZDpk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI0Yjk5NTE5LTkwNDgtNDEzMS1iYmE1LTM1MTI3NGQzZTBhYyIsImVtYWlsIjoicGVyZl91c2VyXzgwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.Hzuw1xM4SysIXgMPhXSRkL9GBJACJPh9SYfFl8-xArE",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4YzhjN2ExLTBiYmQtNDU2MC04NGY1LTg1ZjZjOTc1YTE3NyIsImVtYWlsIjoicGVyZl91c2VyXzgxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.aS_YO2DA7LzPvqhVeZvZVHHYdH783FLrRI8AIbk_2sY",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJjZTkzMzRiLWY5OTctNGI3YS04OTI5LWYyYWMwNDIxMDdjZSIsImVtYWlsIjoicGVyZl91c2VyXzgyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.qAAzmA_0ZcsXmVRq2O4wFPCIbssoxlHOmHGwd98FfMw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzZjk3MWY1LTlkNTYtNGY2NC1hMDIwLWQxMGY0ZTdkNjU5YSIsImVtYWlsIjoicGVyZl91c2VyXzgzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.e6p64xY0OBdMx3l7oa21MPAd-eq5jl1fTEH3rmC6gXU",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwZmE5YzIxLTkzMDgtNDRmZC1iMDg3LTFkNGZhY2Q3ZjM1NCIsImVtYWlsIjoicGVyZl91c2VyXzg0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.fBJoJMSDHMTkI52jsXwvUl8Vi2sF3prVrSMr26ICOqA",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjliY2E3YTQ0LTQyMzktNDM1NS1iOWU2LWRjNTBmZWNhMmY4NCIsImVtYWlsIjoicGVyZl91c2VyXzg1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.ZQ7fYXItEMEn5m8KmGFdxLmkcc2ziYayN3H6-yCIbpg",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ0NWJhODQ4LWRkZjEtNGNlOC04NmYyLTI3ZDRlOWI1NmVjNiIsImVtYWlsIjoicGVyZl91c2VyXzg2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.Aij1JmDKBg_qC6eJu0m1eOjowQU0uqYsFMJhawVEedk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE4NTI1ZDMwLTE0NWEtNDM4MS05N2YyLTA5NWM2MmRjNmE4YSIsImVtYWlsIjoicGVyZl91c2VyXzg3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.Or-1YwOvFJRaDe9tsg5Q03nd8n0X8qLjTZPiIrpmibs",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZhMmM1YmM1LWM3YmQtNDBlOC04YjFlLWQ0ZDg5YTBiYmE4ZCIsImVtYWlsIjoicGVyZl91c2VyXzg4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.s4wVuqfEkEWtpjlX779Vvp6ZlFLsP0R5gCJJLtxQZjg",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkN2Y4ZjczLWMxN2ItNGI1My05N2Y2LWUzNTcwNjYzOGM3YyIsImVtYWlsIjoicGVyZl91c2VyXzg5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.LOMOUR3Ql_ctj-PqB3bhQwfQuI8j3igeona5YcjK_T0",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE4ZjVhMmEwLWMyODYtNDdhNS1hYzdjLTU2YjRkNzQ5NTY0MiIsImVtYWlsIjoicGVyZl91c2VyXzkwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.aiqBMYle5ht_NdpHWBtDk361KLpbbHdTLdKleLoVEBk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM4MmUzNjM1LTBmMTEtNDM4MC05M2JlLTM2Y2JiZTU1OTI1NCIsImVtYWlsIjoicGVyZl91c2VyXzkxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.dXMwz7E4RO6GWn5aHFdj7liEUXRBG5GDF-VxeafG5cM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5ZTM0ZjQ3LTkwZTYtNDdkNy04MDdmLWNiZDg5ZjQxYzlmNyIsImVtYWlsIjoicGVyZl91c2VyXzkyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4NywiZXhwIjoxNzc5NDUyNTg3fQ.Tnj0c7P2SJCILWWgPlX75-lsHsukhGQQIf9KU9q5NxM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2ZTIyN2QxLTQ1YjAtNDk5My1hYTNmLTZhZjM1MTk4NDQxOCIsImVtYWlsIjoicGVyZl91c2VyXzkzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ.2tQRyET37zDCax-GCxhlRN1l_EsB5R19G-b1H8VV4yw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJkMDZmODk5LWIyNGItNGY5ZC1iNzZjLWZkMTVjNTk4YjhkMCIsImVtYWlsIjoicGVyZl91c2VyXzk0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ.1gJXIRhgwI7sGWjZYblhuUPX4Qfy6x7PWRp3ioEF6ns",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNlOGM5YWE0LTRjOTYtNDU2ZC1iYzczLTFlMzcyMDMyYzM3NSIsImVtYWlsIjoicGVyZl91c2VyXzk1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ.IWsQi7riQPasYThE7m5JFRxkMKuydOG7_iifWn1UYG8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk0NWQzMDE2LWJlMGMtNGQ5NC05MjIzLWExOTg5ZTE4MGRhZiIsImVtYWlsIjoicGVyZl91c2VyXzk2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ.HrUPo2UbYa8ORTBqCpba61ImZrKPqbfjIbzdIJKYNsI",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3ZDNlMmMzLTZjMTAtNGNmMS05M2RkLTNkN2U0NGE3MGM2ZCIsImVtYWlsIjoicGVyZl91c2VyXzk3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ.0a7RuX9honDCZs7T9rqNhPhhGDTpkuTmwki_p2bqDAQ",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJjNTMwOGVhLTY1YjktNGJhNi1iY2IyLTI2ZWIyOTNmYmU5ZCIsImVtYWlsIjoicGVyZl91c2VyXzk4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ._GndlmVb28Q1z_8TSEEuC-4io3oLDAlYWyNXVxgrX-U",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjOGFmYTY2LWJlY2YtNDMzYS1iMTZlLTg5MDZlZDE5MmZkNyIsImVtYWlsIjoicGVyZl91c2VyXzk5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODg0Nzc4OCwiZXhwIjoxNzc5NDUyNTg4fQ.xyNC9TXvNuBir5XqEMVZl1lD_DWlZc96nnre6ab8YTI"
+    ],
+    "products": [
+      {
+        "stockAlert": 5,
+        "subcategoryItemId": "39868bad-d8ad-4100-8666-51be35e60280",
+        "barcode": "5465465356564658",
+        "brandId": "092693b7-97fe-4a19-9351-eb46f9ee4061",
         "productVariants": [],
+        "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+        "subcategoryItem": {
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "id": "39868bad-d8ad-4100-8666-51be35e60280",
+            "name": "Laits corporels",
+            "order": 1,
+            "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+            "updatedAt": "2026-04-30T12:31:40.326Z"
+          },
+        "priceTTC": 96,
+        "stock": -2444,
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "composition": null,
+        "createdAt": "2026-04-30T13:34:47.824Z",
+        "isNew": false,
+        "subcategory": {
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "icon": "Droplet",
+            "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+            "image": null,
+            "order": 2,
+            "title": "Soins Corps",
+            "updatedAt": "2026-04-30T12:31:40.326Z",
+            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
+          },
+        "expiryDate": "2029-03-02T00:30:20.000Z",
+        "productImages": [],
+        "usage": null,
+        "images": [],
+        "reviews": 0,
+        "taxRate": 20,
+        "benefits": [],
+        "brand": "Nivea",
+        "brandModel": {
+                  "active": true,
+                  "createdAt": "2026-04-30T13:34:47.823Z",
+                  "description": null,
+                  "id": "092693b7-97fe-4a19-9351-eb46f9ee4061",
+                  "logo": null,
+                  "name": "Nivea",
+                  "updatedAt": "2026-04-30T13:34:47.823Z"
+                },
+        "description": "bien",
+        "oldPriceHT": null,
+        "price": 96,
+        "priceHT": 80,
         "rating": 0,
-        "image": "https://www.paratypic.ma/1496-large_default/cetaphil-creme-hydratante-visage-et-corps-50-g.jpg",
         "category": {
+                  "icon": "Sparkles",
+                  "image": null,
+                  "name": "Cosmétiques & Soin",
+                  "order": 1,
+                  "createdAt": "2026-04-30T12:31:40.133Z",
+                  "hasSubcategories": true,
+                  "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
                   "subcategories": [
                     {
+                      "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
                       "items": [
                         {
-                          "name": "Nettoyants bio",
-                          "id": "a7a62bae-d230-436d-9303-692ea526b083"
+                          "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                          "name": "Nettoyants bio"
                         },
                         {
                           "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
                           "name": "Crèmes bio"
                         },
                         {
-                          "name": "Sérums bio",
-                          "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
+                          "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                          "name": "Sérums bio"
                         },
                         {
                           "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
                           "name": "Huiles visage bio"
                         }
                       ],
-                      "title": "Soins bio visage",
-                      "id": "c41800f7-1c37-46ed-9d10-68cb249180eb"
+                      "title": "Soins bio visage"
                     },
                     {
+                      "title": "Produits Capillaires",
                       "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
                       "items": [
                         {
@@ -736,15 +802,14 @@
                           "id": "efbecb59-36b7-4910-a312-a746ac99b758",
                           "name": "Masques capillaires"
                         }
-                      ],
-                      "title": "Produits Capillaires"
+                      ]
                     },
                     {
                       "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
                       "items": [
                         {
-                          "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                          "name": "Nettoyants"
+                          "name": "Nettoyants",
+                          "id": "0507f1d2-f33f-4327-8264-5ada225cecbd"
                         },
                         {
                           "id": "76844027-9137-420b-83be-5e2169264b3f",
@@ -802,274 +867,753 @@
                       "title": "Soins Corps"
                     }
                   ],
-                  "updatedAt": "2026-04-30T12:31:40.133Z",
-                  "createdAt": "2026-04-30T12:31:40.133Z",
-                  "hasSubcategories": true,
-                  "icon": "Sparkles",
-                  "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-                  "image": null,
-                  "name": "Cosmétiques & Soin",
-                  "order": 1
+                  "updatedAt": "2026-04-30T12:31:40.133Z"
                 },
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "createdAt": "2026-04-30T13:34:47.792Z",
-        "isNew": false,
-        "active": true,
-        "brandId": "938130e8-dd97-4fd5-b17b-52c8b3f33936",
-        "id": "99b301e0-0459-40c6-a472-a4ff97fd35bd",
+        "id": "0c6b0ea9-65da-4e44-a52b-861df58fbdba",
+        "name": "Lait corporel nivea",
+        "oldPrice": null,
+        "updatedAt": "2026-05-15T08:12:30.000Z",
         "sku": null,
-        "subcategory": {
-                  "title": "Soins Visage",
-                  "updatedAt": "2026-04-30T12:31:40.326Z",
-                  "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-                  "createdAt": "2026-04-30T12:31:40.326Z",
-                  "icon": "Sparkle",
-                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                  "image": null,
-                  "order": 1
-                },
-        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-        "taxRate": 20,
-        "usage": null,
-        "composition": null,
-        "images": [],
-        "oldPriceHT": null,
-        "reviews": 0,
         "type": null,
-        "brand": "cetaphil",
-        "priceTTC": 120
+        "variants": [],
+        "active": true,
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFEC_tnO1-D03EeUMyGVyBSuds3fkrUhjQrQ&s"
       },
       {
-        "id": "5f81b54f-1ddf-40a3-b4b9-7d0fd3b07517",
-        "oldPriceHT": null,
+        "subcategoryItem": {
+          "name": "Nettoyants",
+          "order": 1,
+          "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+          "updatedAt": "2026-04-30T12:31:40.326Z",
+          "createdAt": "2026-04-30T12:31:40.326Z",
+          "id": "0507f1d2-f33f-4327-8264-5ada225cecbd"
+        },
+        "subcategoryItemId": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+        "taxRate": 20,
+        "benefits": [],
+        "stockAlert": 2,
+        "updatedAt": "2026-05-15T08:12:25.761Z",
+        "category": {
+            "name": "Cosmétiques & Soin",
+            "order": 1,
+            "subcategories": [
+              {
+                "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "items": [
+                  {
+                    "id": "a7a62bae-d230-436d-9303-692ea526b083",
+                    "name": "Nettoyants bio"
+                  },
+                  {
+                    "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                    "name": "Crèmes bio"
+                  },
+                  {
+                    "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                    "name": "Sérums bio"
+                  },
+                  {
+                    "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                    "name": "Huiles visage bio"
+                  }
+                ],
+                "title": "Soins bio visage"
+              },
+              {
+                "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                "items": [
+                  {
+                    "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                    "name": "Shampooings"
+                  },
+                  {
+                    "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                    "name": "Après-shampooings"
+                  },
+                  {
+                    "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                    "name": "Masques capillaires"
+                  }
+                ],
+                "title": "Produits Capillaires"
+              },
+              {
+                "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "items": [
+                  {
+                    "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                    "name": "Nettoyants"
+                  },
+                  {
+                    "name": "Hydratants",
+                    "id": "76844027-9137-420b-83be-5e2169264b3f"
+                  },
+                  {
+                    "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                    "name": "Anti-âge"
+                  },
+                  {
+                    "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                    "name": "Soins ciblés"
+                  }
+                ],
+                "title": "Soins Visage"
+              },
+              {
+                "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "items": [
+                  {
+                    "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                    "name": "Shampooings bio"
+                  },
+                  {
+                    "name": "Après-shampooings bio",
+                    "id": "d3e84038-d97c-481c-90da-618d36242001"
+                  },
+                  {
+                    "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                    "name": "Masques bio"
+                  },
+                  {
+                    "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                    "name": "Huiles capillaires bio"
+                  }
+                ],
+                "title": "Soins bio cheveux"
+              },
+              {
+                "items": [
+                  {
+                    "name": "Laits corporels",
+                    "id": "39868bad-d8ad-4100-8666-51be35e60280"
+                  },
+                  {
+                    "name": "Baumes",
+                    "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e"
+                  },
+                  {
+                    "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                    "name": "Gommages"
+                  }
+                ],
+                "title": "Soins Corps",
+                "id": "619120c9-81fe-422c-9e95-cea34c044f53"
+              }
+            ],
+            "updatedAt": "2026-04-30T12:31:40.133Z",
+            "createdAt": "2026-04-30T12:31:40.133Z",
+            "hasSubcategories": true,
+            "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "image": null,
+            "icon": "Sparkles"
+          },
+        "price": 144,
+        "variants": [],
+        "stock": -1347,
+        "sku": null,
+        "active": true,
+        "composition": null,
+        "id": "fd23f6db-8cc5-43e3-a56b-1aa22e38126a",
+        "oldPrice": null,
+        "barcode": "5433432654323567",
+        "brandId": "636eae27-f895-494f-90bb-f2e316d511f4",
+        "createdAt": "2026-04-30T13:34:47.809Z",
         "subcategory": {
+              "icon": "Sparkle",
+              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "image": null,
+              "order": 1,
+              "title": "Soins Visage",
+              "updatedAt": "2026-04-30T12:31:40.326Z",
+              "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+              "createdAt": "2026-04-30T12:31:40.326Z"
+            },
+        "type": null,
+        "expiryDate": "2030-02-07T00:30:20.000Z",
+        "reviews": 0,
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+        "description": "bien",
+        "images": [],
+        "name": "gel nettoyant ACM",
+        "productImages": [],
+        "usage": null,
+        "rating": 0,
+        "brand": "ACM",
+        "brandModel": {
+                  "updatedAt": "2026-04-30T13:34:47.807Z",
+                  "active": true,
+                  "createdAt": "2026-04-30T13:34:47.807Z",
+                  "description": null,
+                  "id": "636eae27-f895-494f-90bb-f2e316d511f4",
+                  "logo": null,
+                  "name": "ACM"
+                },
+        "image": "https://novapara.ma/cdn/shop/products/Acm-Sensitelial-Gel-Nettoyant-Surgras-200ml--nova-parapharmacie-maroc.jpg?v=1758700144",
+        "isNew": false,
+        "priceHT": 120,
+        "productVariants": [],
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "oldPriceHT": null,
+        "priceTTC": 144
+      },
+      {
+        "createdAt": "2026-04-30T13:34:47.792Z",
+        "stockAlert": 2,
+        "barcode": "6754545556765454",
+        "benefits": [],
+        "composition": null,
+        "oldPrice": null,
+        "stock": -1323,
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "oldPriceHT": null,
+        "rating": 0,
+        "reviews": 0,
+        "brand": "cetaphil",
+        "brandId": "938130e8-dd97-4fd5-b17b-52c8b3f33936",
+        "images": [],
+        "priceHT": 100,
+        "productVariants": [],
+        "sku": null,
+        "subcategory": {
+                "icon": "Sparkle",
+                "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "image": null,
+                "order": 1,
+                "title": "Soins Visage",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                "createdAt": "2026-04-30T12:31:40.326Z"
+              },
+        "updatedAt": "2026-05-15T08:12:28.564Z",
+        "expiryDate": "2029-03-07T00:30:20.000Z",
+        "id": "99b301e0-0459-40c6-a472-a4ff97fd35bd",
+        "image": "https://www.paratypic.ma/1496-large_default/cetaphil-creme-hydratante-visage-et-corps-50-g.jpg",
+        "priceTTC": 120,
+        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
+        "usage": null,
+        "brandModel": {
+                "updatedAt": "2026-04-30T13:34:47.790Z",
+                "active": true,
+                "createdAt": "2026-04-30T13:34:47.790Z",
+                "description": null,
+                "id": "938130e8-dd97-4fd5-b17b-52c8b3f33936",
+                "logo": null,
+                "name": "cetaphil"
+              },
+        "category": {
+                "updatedAt": "2026-04-30T12:31:40.133Z",
+                "createdAt": "2026-04-30T12:31:40.133Z",
+                "hasSubcategories": true,
+                "icon": "Sparkles",
+                "image": null,
+                "subcategories": [
+                  {
+                    "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                    "items": [
+                      {
+                        "name": "Nettoyants bio",
+                        "id": "a7a62bae-d230-436d-9303-692ea526b083"
+                      },
+                      {
+                        "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                        "name": "Crèmes bio"
+                      },
+                      {
+                        "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                        "name": "Sérums bio"
+                      },
+                      {
+                        "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                        "name": "Huiles visage bio"
+                      }
+                    ],
+                    "title": "Soins bio visage"
+                  },
+                  {
+                    "title": "Produits Capillaires",
+                    "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                    "items": [
+                      {
+                        "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                        "name": "Shampooings"
+                      },
+                      {
+                        "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                        "name": "Après-shampooings"
+                      },
+                      {
+                        "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                        "name": "Masques capillaires"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                    "items": [
+                      {
+                        "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                        "name": "Nettoyants"
+                      },
+                      {
+                        "id": "76844027-9137-420b-83be-5e2169264b3f",
+                        "name": "Hydratants"
+                      },
+                      {
+                        "name": "Anti-âge",
+                        "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d"
+                      },
+                      {
+                        "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                        "name": "Soins ciblés"
+                      }
+                    ],
+                    "title": "Soins Visage"
+                  },
+                  {
+                    "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                    "items": [
+                      {
+                        "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                        "name": "Shampooings bio"
+                      },
+                      {
+                        "id": "d3e84038-d97c-481c-90da-618d36242001",
+                        "name": "Après-shampooings bio"
+                      },
+                      {
+                        "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                        "name": "Masques bio"
+                      },
+                      {
+                        "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                        "name": "Huiles capillaires bio"
+                      }
+                    ],
+                    "title": "Soins bio cheveux"
+                  },
+                  {
+                    "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                    "items": [
+                      {
+                        "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                        "name": "Laits corporels"
+                      },
+                      {
+                        "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                        "name": "Baumes"
+                      },
+                      {
+                        "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                        "name": "Gommages"
+                      }
+                    ],
+                    "title": "Soins Corps"
+                  }
+                ],
+                "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                "name": "Cosmétiques & Soin",
+                "order": 1
+              },
+        "name": "créme hydratante cetaphil",
+        "price": 120,
+        "type": null,
+        "active": true,
+        "description": "bien",
+        "isNew": false,
+        "subcategoryItem": {
+                "name": "Hydratants",
+                "order": 2,
+                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "updatedAt": "2026-04-30T12:31:40.326Z",
+                "createdAt": "2026-04-30T12:31:40.326Z",
+                "id": "76844027-9137-420b-83be-5e2169264b3f"
+              },
+        "taxRate": 20,
+        "productImages": [],
+        "variants": []
+      },
+      {
+        "brandId": "5b201061-2de0-4436-a755-3a70930754d0",
+        "description": "bien",
+        "subcategory": {
+          "image": null,
+          "order": 1,
+          "title": "Soins Visage",
           "updatedAt": "2026-04-30T12:31:40.326Z",
           "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
           "createdAt": "2026-04-30T12:31:40.326Z",
           "icon": "Sparkle",
-          "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-          "image": null,
-          "order": 1,
-          "title": "Soins Visage"
+          "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
         },
-        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-        "rating": 0,
         "images": [],
-        "priceTTC": 156,
+        "rating": 0,
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
         "subcategoryItem": {
-            "updatedAt": "2026-04-30T12:31:40.326Z",
-            "createdAt": "2026-04-30T12:31:40.326Z",
-            "id": "76844027-9137-420b-83be-5e2169264b3f",
             "name": "Hydratants",
             "order": 2,
-            "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
+            "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+            "updatedAt": "2026-04-30T12:31:40.326Z",
+            "createdAt": "2026-04-30T12:31:40.326Z",
+            "id": "76844027-9137-420b-83be-5e2169264b3f"
           },
-        "variants": [],
-        "brand": "Caudalie",
+        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
+        "type": null,
         "priceHT": 130,
-        "stockAlert": 6,
-        "expiryDate": "2028-08-03T00:30:20.000Z",
+        "composition": null,
         "image": "https://m1.quebecormedia.com/emp/emp/cre_me_exfoliante747c5624-1de9-4cf0-bb5c-5add09be560f_ORIGINAL.jpg?impolicy=crop-resize&x=0&y=0&w=1400&h=1400&width=925",
         "isNew": false,
-        "reviews": 0,
-        "stock": -1157,
-        "brandModel": {
-              "logo": null,
-              "name": "Caudalie",
-              "updatedAt": "2026-04-30T13:34:47.774Z",
-              "active": true,
-              "createdAt": "2026-04-30T13:34:47.774Z",
-              "description": null,
-              "id": "5b201061-2de0-4436-a755-3a70930754d0"
-            },
-        "category": {
-              "hasSubcategories": true,
-              "icon": "Sparkles",
-              "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-              "name": "Cosmétiques & Soin",
-              "subcategories": [
-                {
-                  "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                  "items": [
-                    {
-                      "id": "a7a62bae-d230-436d-9303-692ea526b083",
-                      "name": "Nettoyants bio"
-                    },
-                    {
-                      "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                      "name": "Crèmes bio"
-                    },
-                    {
-                      "name": "Sérums bio",
-                      "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
-                    },
-                    {
-                      "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
-                      "name": "Huiles visage bio"
-                    }
-                  ],
-                  "title": "Soins bio visage"
-                },
-                {
-                  "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-                  "items": [
-                    {
-                      "name": "Shampooings",
-                      "id": "3723a9fd-d9ed-4272-959a-150bd903345b"
-                    },
-                    {
-                      "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
-                      "name": "Après-shampooings"
-                    },
-                    {
-                      "id": "efbecb59-36b7-4910-a312-a746ac99b758",
-                      "name": "Masques capillaires"
-                    }
-                  ],
-                  "title": "Produits Capillaires"
-                },
-                {
-                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                  "items": [
-                    {
-                      "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                      "name": "Nettoyants"
-                    },
-                    {
-                      "name": "Hydratants",
-                      "id": "76844027-9137-420b-83be-5e2169264b3f"
-                    },
-                    {
-                      "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
-                      "name": "Anti-âge"
-                    },
-                    {
-                      "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
-                      "name": "Soins ciblés"
-                    }
-                  ],
-                  "title": "Soins Visage"
-                },
-                {
-                  "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                  "items": [
-                    {
-                      "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
-                      "name": "Shampooings bio"
-                    },
-                    {
-                      "id": "d3e84038-d97c-481c-90da-618d36242001",
-                      "name": "Après-shampooings bio"
-                    },
-                    {
-                      "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
-                      "name": "Masques bio"
-                    },
-                    {
-                      "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
-                      "name": "Huiles capillaires bio"
-                    }
-                  ],
-                  "title": "Soins bio cheveux"
-                },
-                {
-                  "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-                  "items": [
-                    {
-                      "name": "Laits corporels",
-                      "id": "39868bad-d8ad-4100-8666-51be35e60280"
-                    },
-                    {
-                      "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
-                      "name": "Baumes"
-                    },
-                    {
-                      "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
-                      "name": "Gommages"
-                    }
-                  ],
-                  "title": "Soins Corps"
-                }
-              ],
-              "image": null,
-              "order": 1,
-              "updatedAt": "2026-04-30T12:31:40.133Z",
-              "createdAt": "2026-04-30T12:31:40.133Z"
-            },
         "name": "gommage visage caudalie",
-        "productImages": [],
-        "barcode": "6775454555656656",
-        "benefits": [],
-        "composition": null,
-        "oldPrice": null,
-        "price": 156,
-        "type": null,
-        "usage": null,
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "createdAt": "2026-04-30T13:34:47.775Z",
-        "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
-        "taxRate": 20,
-        "updatedAt": "2026-05-10T22:04:58.751Z",
-        "productVariants": [],
-        "sku": null,
         "active": true,
-        "brandId": "5b201061-2de0-4436-a755-3a70930754d0",
-        "description": "bien"
+        "price": 156,
+        "sku": null,
+        "stock": -1259,
+        "stockAlert": 6,
+        "taxRate": 20,
+        "benefits": [],
+        "updatedAt": "2026-05-15T08:12:24.362Z",
+        "brand": "Caudalie",
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "expiryDate": "2028-08-03T00:30:20.000Z",
+        "id": "5f81b54f-1ddf-40a3-b4b9-7d0fd3b07517",
+        "productVariants": [],
+        "usage": null,
+        "reviews": 0,
+        "category": {
+                "createdAt": "2026-04-30T12:31:40.133Z",
+                "hasSubcategories": true,
+                "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                "name": "Cosmétiques & Soin",
+                "order": 1,
+                "subcategories": [
+                  {
+                    "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                    "items": [
+                      {
+                        "name": "Nettoyants bio",
+                        "id": "a7a62bae-d230-436d-9303-692ea526b083"
+                      },
+                      {
+                        "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
+                        "name": "Crèmes bio"
+                      },
+                      {
+                        "name": "Sérums bio",
+                        "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
+                      },
+                      {
+                        "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                        "name": "Huiles visage bio"
+                      }
+                    ],
+                    "title": "Soins bio visage"
+                  },
+                  {
+                    "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
+                    "items": [
+                      {
+                        "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                        "name": "Shampooings"
+                      },
+                      {
+                        "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                        "name": "Après-shampooings"
+                      },
+                      {
+                        "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                        "name": "Masques capillaires"
+                      }
+                    ],
+                    "title": "Produits Capillaires"
+                  },
+                  {
+                    "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                    "items": [
+                      {
+                        "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                        "name": "Nettoyants"
+                      },
+                      {
+                        "id": "76844027-9137-420b-83be-5e2169264b3f",
+                        "name": "Hydratants"
+                      },
+                      {
+                        "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                        "name": "Anti-âge"
+                      },
+                      {
+                        "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                        "name": "Soins ciblés"
+                      }
+                    ],
+                    "title": "Soins Visage"
+                  },
+                  {
+                    "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                    "items": [
+                      {
+                        "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                        "name": "Shampooings bio"
+                      },
+                      {
+                        "id": "d3e84038-d97c-481c-90da-618d36242001",
+                        "name": "Après-shampooings bio"
+                      },
+                      {
+                        "name": "Masques bio",
+                        "id": "4d0b8986-b884-4b5e-956a-aaf970e61918"
+                      },
+                      {
+                        "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                        "name": "Huiles capillaires bio"
+                      }
+                    ],
+                    "title": "Soins bio cheveux"
+                  },
+                  {
+                    "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                    "items": [
+                      {
+                        "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                        "name": "Laits corporels"
+                      },
+                      {
+                        "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                        "name": "Baumes"
+                      },
+                      {
+                        "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                        "name": "Gommages"
+                      }
+                    ],
+                    "title": "Soins Corps"
+                  }
+                ],
+                "icon": "Sparkles",
+                "image": null,
+                "updatedAt": "2026-04-30T12:31:40.133Z"
+              },
+        "createdAt": "2026-04-30T13:34:47.775Z",
+        "oldPrice": null,
+        "oldPriceHT": null,
+        "variants": [],
+        "barcode": "6775454555656656",
+        "brandModel": {
+                  "id": "5b201061-2de0-4436-a755-3a70930754d0",
+                  "logo": null,
+                  "name": "Caudalie",
+                  "updatedAt": "2026-04-30T13:34:47.774Z",
+                  "active": true,
+                  "createdAt": "2026-04-30T13:34:47.774Z",
+                  "description": null
+                },
+        "priceTTC": 156,
+        "productImages": []
       },
       {
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "description": "bien",
-        "name": "créme hydratante ceraVe",
-        "price": 108,
-        "rating": 0,
-        "sku": null,
-        "images": [],
-        "oldPrice": null,
-        "productImages": [],
-        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-        "brandId": "24a3f95e-00c3-41f8-8971-7be60a291c0e",
-        "expiryDate": "2027-05-12T00:30:20.000Z",
-        "priceHT": 90,
-        "subcategoryItem": {
-              "order": 2,
-              "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-              "updatedAt": "2026-04-30T12:31:40.326Z",
-              "createdAt": "2026-04-30T12:31:40.326Z",
-              "id": "76844027-9137-420b-83be-5e2169264b3f",
-              "name": "Hydratants"
-            },
-        "active": true,
-        "updatedAt": "2026-05-10T22:05:02.951Z",
-        "variants": [],
-        "brandModel": {
-                "description": null,
-                "id": "24a3f95e-00c3-41f8-8971-7be60a291c0e",
-                "logo": null,
-                "name": "Cerave",
-                "updatedAt": "2026-04-30T13:34:47.757Z",
-                "active": true,
-                "createdAt": "2026-04-30T13:34:47.757Z"
-              },
-        "priceTTC": 108,
+        "benefits": [],
         "productVariants": [],
-        "stock": -1167,
+        "sku": null,
+        "stockAlert": 1,
         "subcategory": {
-                  "createdAt": "2026-04-30T12:31:40.326Z",
-                  "icon": "Sparkle",
-                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                  "image": null,
-                  "order": 1,
-                  "title": "Soins Visage",
-                  "updatedAt": "2026-04-30T12:31:40.326Z",
-                  "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
-                },
+              "createdAt": "2026-04-30T12:31:40.326Z",
+              "icon": "Sparkle",
+              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+              "image": null,
+              "order": 1,
+              "title": "Soins Visage",
+              "updatedAt": "2026-04-30T12:31:40.326Z",
+              "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
+            },
+        "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
         "subcategoryItemId": "76844027-9137-420b-83be-5e2169264b3f",
+        "createdAt": "2026-04-30T13:34:47.759Z",
+        "isNew": false,
+        "oldPriceHT": null,
+        "taxRate": 20,
+        "variants": [],
+        "name": "créme hydratante ceraVe",
+        "productImages": [],
+        "stock": -1298,
+        "updatedAt": "2026-05-15T08:12:39.077Z",
+        "active": true,
         "barcode": "7534588543567889",
+        "composition": null,
+        "description": "bien",
+        "image": "https://www.zinabel.ma/9422-large_default/creme-hydratante-cerave-177ml.jpg",
+        "oldPrice": null,
+        "priceTTC": 108,
+        "usage": null,
+        "id": "b0134c8d-5e5f-4b6e-9665-9c7990338d05",
+        "priceHT": 90,
+        "rating": 0,
+        "reviews": 0,
+        "subcategoryItem": {
+                  "name": "Hydratants",
+                  "order": 2,
+                  "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                  "updatedAt": "2026-04-30T12:31:40.326Z",
+                  "createdAt": "2026-04-30T12:31:40.326Z",
+                  "id": "76844027-9137-420b-83be-5e2169264b3f"
+                },
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "expiryDate": "2027-05-12T00:30:20.000Z",
+        "images": [],
+        "type": null,
+        "brandId": "24a3f95e-00c3-41f8-8971-7be60a291c0e",
         "category": {
-                  "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                    "createdAt": "2026-04-30T12:31:40.133Z",
+                    "icon": "Sparkles",
+                    "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                    "subcategories": [
+                      {
+                        "title": "Soins bio visage",
+                        "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                        "items": [
+                          {
+                            "name": "Nettoyants bio",
+                            "id": "a7a62bae-d230-436d-9303-692ea526b083"
+                          },
+                          {
+                            "name": "Crèmes bio",
+                            "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860"
+                          },
+                          {
+                            "name": "Sérums bio",
+                            "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
+                          },
+                          {
+                            "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                            "name": "Huiles visage bio"
+                          }
+                        ]
+                      },
+                      {
+                        "items": [
+                          {
+                            "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                            "name": "Shampooings"
+                          },
+                          {
+                            "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                            "name": "Après-shampooings"
+                          },
+                          {
+                            "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                            "name": "Masques capillaires"
+                          }
+                        ],
+                        "title": "Produits Capillaires",
+                        "id": "193a2235-95c2-418f-b945-d45aa19ce2f5"
+                      },
+                      {
+                        "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                        "items": [
+                          {
+                            "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                            "name": "Nettoyants"
+                          },
+                          {
+                            "id": "76844027-9137-420b-83be-5e2169264b3f",
+                            "name": "Hydratants"
+                          },
+                          {
+                            "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                            "name": "Anti-âge"
+                          },
+                          {
+                            "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                            "name": "Soins ciblés"
+                          }
+                        ],
+                        "title": "Soins Visage"
+                      },
+                      {
+                        "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                        "items": [
+                          {
+                            "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                            "name": "Shampooings bio"
+                          },
+                          {
+                            "id": "d3e84038-d97c-481c-90da-618d36242001",
+                            "name": "Après-shampooings bio"
+                          },
+                          {
+                            "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                            "name": "Masques bio"
+                          },
+                          {
+                            "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                            "name": "Huiles capillaires bio"
+                          }
+                        ],
+                        "title": "Soins bio cheveux"
+                      },
+                      {
+                        "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                        "items": [
+                          {
+                            "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                            "name": "Laits corporels"
+                          },
+                          {
+                            "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                            "name": "Baumes"
+                          },
+                          {
+                            "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                            "name": "Gommages"
+                          }
+                        ],
+                        "title": "Soins Corps"
+                      }
+                    ],
+                    "hasSubcategories": true,
+                    "image": null,
+                    "name": "Cosmétiques & Soin",
+                    "order": 1,
+                    "updatedAt": "2026-04-30T12:31:40.133Z"
+                  },
+        "price": 108,
+        "brand": "Cerave",
+        "brandModel": {
+                    "logo": null,
+                    "name": "Cerave",
+                    "updatedAt": "2026-04-30T13:34:47.757Z",
+                    "active": true,
+                    "createdAt": "2026-04-30T13:34:47.757Z",
+                    "description": null,
+                    "id": "24a3f95e-00c3-41f8-8971-7be60a291c0e"
+                  }
+      },
+      {
+        "image": "https://coinpara.ma/11468-large_default/eucerin-baume-levre-calmant-10-ml.jpg",
+        "benefits": [],
+        "images": [],
+        "priceHT": 45,
+        "productImages": [],
+        "type": null,
+        "productVariants": [],
+        "rating": 0,
+        "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
+        "active": true,
+        "composition": null,
+        "expiryDate": "2028-05-05T00:30:20.000Z",
+        "id": "c6073b62-277b-442c-9f7e-f3deab54285a",
+        "name": "baume à lèvres",
+        "stockAlert": 5,
+        "taxRate": 20,
+        "updatedAt": "2026-05-15T08:12:18.657Z",
+        "brandId": "17e6a2e4-4f49-44b2-9581-5517a909b3e0",
+        "oldPrice": null,
+        "oldPriceHT": null,
+        "subcategoryItemId": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+        "brand": "Euciren",
+        "category": {
+                  "hasSubcategories": true,
                   "image": null,
                   "name": "Cosmétiques & Soin",
-                  "icon": "Sparkles",
                   "order": 1,
                   "subcategories": [
                     {
@@ -1080,12 +1624,12 @@
                           "name": "Nettoyants bio"
                         },
                         {
-                          "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                          "name": "Crèmes bio"
+                          "name": "Crèmes bio",
+                          "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860"
                         },
                         {
-                          "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
-                          "name": "Sérums bio"
+                          "name": "Sérums bio",
+                          "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
                         },
                         {
                           "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
@@ -1128,14 +1672,13 @@
                           "name": "Anti-âge"
                         },
                         {
-                          "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
-                          "name": "Soins ciblés"
+                          "name": "Soins ciblés",
+                          "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac"
                         }
                       ],
                       "title": "Soins Visage"
                     },
                     {
-                      "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
                       "items": [
                         {
                           "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
@@ -1154,10 +1697,10 @@
                           "name": "Huiles capillaires bio"
                         }
                       ],
-                      "title": "Soins bio cheveux"
+                      "title": "Soins bio cheveux",
+                      "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a"
                     },
                     {
-                      "id": "619120c9-81fe-422c-9e95-cea34c044f53",
                       "items": [
                         {
                           "id": "39868bad-d8ad-4100-8666-51be35e60280",
@@ -1172,847 +1715,327 @@
                           "name": "Gommages"
                         }
                       ],
-                      "title": "Soins Corps"
+                      "title": "Soins Corps",
+                      "id": "619120c9-81fe-422c-9e95-cea34c044f53"
                     }
                   ],
                   "updatedAt": "2026-04-30T12:31:40.133Z",
                   "createdAt": "2026-04-30T12:31:40.133Z",
-                  "hasSubcategories": true
+                  "icon": "Sparkles",
+                  "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
                 },
-        "composition": null,
-        "brand": "Cerave",
-        "id": "b0134c8d-5e5f-4b6e-9665-9c7990338d05",
-        "reviews": 0,
-        "stockAlert": 1,
-        "taxRate": 20,
-        "type": null,
-        "usage": null,
-        "createdAt": "2026-04-30T13:34:47.759Z",
-        "image": "https://www.zinabel.ma/9422-large_default/creme-hydratante-cerave-177ml.jpg",
-        "isNew": false,
-        "oldPriceHT": null,
-        "benefits": []
-      },
-      {
-        "reviews": 0,
-        "subcategory": {
-          "title": "Soins Corps",
-          "updatedAt": "2026-04-30T12:31:40.326Z",
-          "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-          "createdAt": "2026-04-30T12:31:40.326Z",
-          "icon": "Droplet",
-          "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-          "image": null,
-          "order": 2
-        },
-        "barcode": "7465874675675643",
-        "category": {
-          "image": null,
-          "name": "Cosmétiques & Soin",
-          "order": 1,
-          "updatedAt": "2026-04-30T12:31:40.133Z",
-          "createdAt": "2026-04-30T12:31:40.133Z",
-          "hasSubcategories": true,
-          "subcategories": [
-            {
-              "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-              "items": [
-                {
-                  "id": "a7a62bae-d230-436d-9303-692ea526b083",
-                  "name": "Nettoyants bio"
-                },
-                {
-                  "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                  "name": "Crèmes bio"
-                },
-                {
-                  "name": "Sérums bio",
-                  "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
-                },
-                {
-                  "name": "Huiles visage bio",
-                  "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb"
-                }
-              ],
-              "title": "Soins bio visage"
-            },
-            {
-              "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-              "items": [
-                {
-                  "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
-                  "name": "Shampooings"
-                },
-                {
-                  "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
-                  "name": "Après-shampooings"
-                },
-                {
-                  "name": "Masques capillaires",
-                  "id": "efbecb59-36b7-4910-a312-a746ac99b758"
-                }
-              ],
-              "title": "Produits Capillaires"
-            },
-            {
-              "title": "Soins Visage",
-              "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-              "items": [
-                {
-                  "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                  "name": "Nettoyants"
-                },
-                {
-                  "id": "76844027-9137-420b-83be-5e2169264b3f",
-                  "name": "Hydratants"
-                },
-                {
-                  "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
-                  "name": "Anti-âge"
-                },
-                {
-                  "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
-                  "name": "Soins ciblés"
-                }
-              ]
-            },
-            {
-              "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-              "items": [
-                {
-                  "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
-                  "name": "Shampooings bio"
-                },
-                {
-                  "id": "d3e84038-d97c-481c-90da-618d36242001",
-                  "name": "Après-shampooings bio"
-                },
-                {
-                  "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
-                  "name": "Masques bio"
-                },
-                {
-                  "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
-                  "name": "Huiles capillaires bio"
-                }
-              ],
-              "title": "Soins bio cheveux"
-            },
-            {
-              "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-              "items": [
-                {
-                  "id": "39868bad-d8ad-4100-8666-51be35e60280",
-                  "name": "Laits corporels"
-                },
-                {
-                  "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
-                  "name": "Baumes"
-                },
-                {
-                  "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
-                  "name": "Gommages"
-                }
-              ],
-              "title": "Soins Corps"
-            }
-          ],
-          "icon": "Sparkles",
-          "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d"
-        },
-        "priceHT": 45,
-        "priceTTC": 54,
-        "sku": null,
-        "stockAlert": 5,
-        "usage": null,
-        "benefits": [],
-        "price": 54,
-        "productVariants": [],
-        "brandId": "17e6a2e4-4f49-44b2-9581-5517a909b3e0",
-        "image": "https://coinpara.ma/11468-large_default/eucerin-baume-levre-calmant-10-ml.jpg",
-        "images": [],
-        "type": null,
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "oldPrice": null,
-        "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-        "updatedAt": "2026-05-10T22:05:05.018Z",
         "variants": [],
-        "stock": -1136,
-        "rating": 0,
-        "active": true,
-        "expiryDate": "2028-05-05T00:30:20.000Z",
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "createdAt": "2026-04-30T13:34:47.742Z",
         "isNew": false,
-        "oldPriceHT": null,
-        "productImages": [],
+        "priceTTC": 54,
+        "reviews": 0,
         "subcategoryItem": {
+                    "createdAt": "2026-04-30T12:31:40.326Z",
+                    "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
                     "name": "Baumes",
                     "order": 2,
                     "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-                    "updatedAt": "2026-04-30T12:31:40.326Z",
-                    "createdAt": "2026-04-30T12:31:40.326Z",
-                    "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e"
+                    "updatedAt": "2026-04-30T12:31:40.326Z"
                   },
-        "subcategoryItemId": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
-        "brand": "Euciren",
+        "usage": null,
         "brandModel": {
-                    "active": true,
-                    "createdAt": "2026-04-30T13:34:47.741Z",
-                    "description": null,
                     "id": "17e6a2e4-4f49-44b2-9581-5517a909b3e0",
                     "logo": null,
                     "name": "Euciren",
-                    "updatedAt": "2026-04-30T13:34:47.741Z"
+                    "updatedAt": "2026-04-30T13:34:47.741Z",
+                    "active": true,
+                    "createdAt": "2026-04-30T13:34:47.741Z",
+                    "description": null
                   },
-        "composition": null,
+        "sku": null,
+        "subcategory": {
+                    "image": null,
+                    "order": 2,
+                    "title": "Soins Corps",
+                    "updatedAt": "2026-04-30T12:31:40.326Z",
+                    "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+                    "createdAt": "2026-04-30T12:31:40.326Z",
+                    "icon": "Droplet",
+                    "id": "619120c9-81fe-422c-9e95-cea34c044f53"
+                  },
+        "barcode": "7465874675675643",
         "description": "bien",
-        "id": "c6073b62-277b-442c-9f7e-f3deab54285a",
-        "taxRate": 20,
-        "createdAt": "2026-04-30T13:34:47.742Z",
-        "name": "baume à lèvres"
+        "price": 54,
+        "stock": -1260
       },
       {
+        "createdAt": "2026-04-30T13:34:47.701Z",
         "productVariants": [
           {
-            "updatedAt": "2026-04-30T13:34:47.707Z",
-            "variantType": null,
             "variantValue": null,
-            "variantValueId": null,
-            "barcode": "775834758745656473",
             "expiryDate": "2029-11-29T23:00:00.000Z",
-            "id": "caeefa1c-a924-4fb2-9366-3f4bb873396d",
             "stock": 85,
-            "value": "50ml",
-            "active": true,
-            "createdAt": "2026-04-30T13:34:47.707Z",
-            "variantTypeId": null,
             "type": "volume",
+            "variantType": null,
+            "barcode": "775834758745656473",
             "description": null,
+            "id": "caeefa1c-a924-4fb2-9366-3f4bb873396d",
+            "priceTTC": 19.2,
+            "updatedAt": "2026-04-30T13:34:47.707Z",
+            "variantValueId": null,
+            "createdAt": "2026-04-30T13:34:47.707Z",
             "image": "https://cdn.pixabay.com/photo/2015/04/19/08/32/flower-729510_1280.jpg",
-            "priceHT": 16,
-            "productId": "015ab818-850e-47ad-92a2-8ebe4adb8992",
             "priceAdjustment": 0,
-            "priceTTC": 19.2
+            "productId": "015ab818-850e-47ad-92a2-8ebe4adb8992",
+            "active": true,
+            "priceHT": 16,
+            "value": "50ml",
+            "variantTypeId": null
           },
           {
+            "priceAdjustment": 0,
+            "priceHT": 14,
+            "productId": "015ab818-850e-47ad-92a2-8ebe4adb8992",
+            "variantType": null,
+            "variantValue": null,
+            "image": "https://cdn.pixabay.com/photo/2015/04/19/08/32/flower-729510_1280.jpg",
+            "priceTTC": 16.8,
+            "stock": 90,
+            "active": true,
+            "expiryDate": "2029-04-06T23:00:00.000Z",
+            "type": "volume",
+            "updatedAt": "2026-04-30T13:34:47.707Z",
+            "variantValueId": null,
             "barcode": "56435673465736",
             "description": null,
-            "stock": 90,
-            "updatedAt": "2026-04-30T13:34:47.707Z",
-            "variantType": null,
-            "variantValueId": null,
-            "expiryDate": "2029-04-06T23:00:00.000Z",
-            "id": "91dad9f3-8df1-40d9-abbb-a24def1e5c2f",
-            "priceAdjustment": 0,
-            "priceTTC": 16.8,
-            "type": "volume",
             "value": "80ml",
-            "createdAt": "2026-04-30T13:34:47.707Z",
-            "productId": "015ab818-850e-47ad-92a2-8ebe4adb8992",
             "variantTypeId": null,
-            "variantValue": null,
-            "active": true,
-            "image": "https://cdn.pixabay.com/photo/2015/04/19/08/32/flower-729510_1280.jpg",
-            "priceHT": 14
+            "createdAt": "2026-04-30T13:34:47.707Z",
+            "id": "91dad9f3-8df1-40d9-abbb-a24def1e5c2f"
           }
         ],
-        "rating": 0,
-        "description": "un excellent gel nettoyant pour la peau sèche",
-        "name": "gel nettoyant ceraVe",
-        "stockAlert": 1,
-        "subcategoryItem": {
-          "createdAt": "2026-04-30T12:31:40.326Z",
-          "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-          "name": "Nettoyants",
-          "order": 1,
-          "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-          "updatedAt": "2026-04-30T12:31:40.326Z"
-        },
-        "usage": null,
-        "isNew": false,
-        "active": true,
-        "barcode": "7468234577897867",
-        "brandId": "c73f743d-8d1f-4608-8b59-279a86b10deb",
-        "brandModel": {
-          "createdAt": "2026-04-30T13:34:47.696Z",
-          "description": null,
-          "id": "c73f743d-8d1f-4608-8b59-279a86b10deb",
-          "logo": null,
-          "name": "ceraVe",
-          "updatedAt": "2026-04-30T13:34:47.696Z",
-          "active": true
-        },
-        "priceHT": 110,
-        "subcategoryItemId": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-        "variants": [],
-        "brand": "ceraVe",
-        "composition": null,
-        "createdAt": "2026-04-30T13:34:47.701Z",
-        "taxRate": 20,
-        "images": [],
-        "oldPriceHT": null,
-        "priceTTC": 132,
-        "reviews": 0,
-        "sku": null,
-        "type": null,
-        "category": {
-              "image": null,
-              "subcategories": [
-                {
-                  "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                  "items": [
-                    {
-                      "id": "a7a62bae-d230-436d-9303-692ea526b083",
-                      "name": "Nettoyants bio"
-                    },
-                    {
-                      "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                      "name": "Crèmes bio"
-                    },
-                    {
-                      "name": "Sérums bio",
-                      "id": "2c336ed7-6fcf-4aac-960c-5387c9754434"
-                    },
-                    {
-                      "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
-                      "name": "Huiles visage bio"
-                    }
-                  ],
-                  "title": "Soins bio visage"
-                },
-                {
-                  "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-                  "items": [
-                    {
-                      "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
-                      "name": "Shampooings"
-                    },
-                    {
-                      "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
-                      "name": "Après-shampooings"
-                    },
-                    {
-                      "id": "efbecb59-36b7-4910-a312-a746ac99b758",
-                      "name": "Masques capillaires"
-                    }
-                  ],
-                  "title": "Produits Capillaires"
-                },
-                {
-                  "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                  "items": [
-                    {
-                      "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                      "name": "Nettoyants"
-                    },
-                    {
-                      "id": "76844027-9137-420b-83be-5e2169264b3f",
-                      "name": "Hydratants"
-                    },
-                    {
-                      "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
-                      "name": "Anti-âge"
-                    },
-                    {
-                      "name": "Soins ciblés",
-                      "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac"
-                    }
-                  ],
-                  "title": "Soins Visage"
-                },
-                {
-                  "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                  "items": [
-                    {
-                      "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
-                      "name": "Shampooings bio"
-                    },
-                    {
-                      "id": "d3e84038-d97c-481c-90da-618d36242001",
-                      "name": "Après-shampooings bio"
-                    },
-                    {
-                      "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
-                      "name": "Masques bio"
-                    },
-                    {
-                      "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
-                      "name": "Huiles capillaires bio"
-                    }
-                  ],
-                  "title": "Soins bio cheveux"
-                },
-                {
-                  "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-                  "items": [
-                    {
-                      "id": "39868bad-d8ad-4100-8666-51be35e60280",
-                      "name": "Laits corporels"
-                    },
-                    {
-                      "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
-                      "name": "Baumes"
-                    },
-                    {
-                      "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
-                      "name": "Gommages"
-                    }
-                  ],
-                  "title": "Soins Corps"
-                }
-              ],
-              "icon": "Sparkles",
-              "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-              "name": "Cosmétiques & Soin",
-              "order": 1,
-              "updatedAt": "2026-04-30T12:31:40.133Z",
-              "createdAt": "2026-04-30T12:31:40.133Z",
-              "hasSubcategories": true
-            },
-        "expiryDate": "2027-03-12T00:30:20.000Z",
-        "productImages": [],
-        "updatedAt": "2026-05-10T22:05:05.757Z",
-        "stock": -1180,
-        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "id": "015ab818-850e-47ad-92a2-8ebe4adb8992",
-        "image": "https://paralagloire.ma/wp-content/uploads/2021/12/CERAVE-SA-GEL-NETTOYANT-ANTI-RUGOSITES-236-ML.jpg",
+        "stock": -1299,
         "subcategory": {
-                "image": null,
-                "order": 1,
-                "title": "Soins Visage",
-                "updatedAt": "2026-04-30T12:31:40.326Z",
-                "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-                "createdAt": "2026-04-30T12:31:40.326Z",
-                "icon": "Sparkle",
-                "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
-              },
+          "title": "Soins Visage",
+          "updatedAt": "2026-04-30T12:31:40.326Z",
+          "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+          "createdAt": "2026-04-30T12:31:40.326Z",
+          "icon": "Sparkle",
+          "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+          "image": null,
+          "order": 1
+        },
+        "active": true,
+        "brand": "ceraVe",
+        "brandId": "c73f743d-8d1f-4608-8b59-279a86b10deb",
+        "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "image": "https://paralagloire.ma/wp-content/uploads/2021/12/CERAVE-SA-GEL-NETTOYANT-ANTI-RUGOSITES-236-ML.jpg",
+        "oldPriceHT": null,
         "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
         "benefits": [],
-        "oldPrice": null,
-        "price": 132
-      }
-    ],
-    "adminToken": null,
-    "categories": [
-      {
-        "name": "Cosmétiques & Soin",
-        "order": 1,
-        "subcategories": [
-          {
-            "items": [
-              {
-                "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
-                "name": "Nettoyants",
-                "order": 1,
-                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                "updatedAt": "2026-04-30T12:31:40.326Z",
-                "createdAt": "2026-04-30T12:31:40.326Z"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.326Z",
-                "id": "76844027-9137-420b-83be-5e2169264b3f",
-                "name": "Hydratants",
-                "order": 2,
-                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                "updatedAt": "2026-04-30T12:31:40.326Z"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.326Z",
-                "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
-                "name": "Anti-âge",
-                "order": 3,
-                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                "updatedAt": "2026-04-30T12:31:40.326Z"
-              },
-              {
-                "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
-                "name": "Soins ciblés",
-                "order": 4,
-                "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
-                "updatedAt": "2026-04-30T12:31:40.326Z",
-                "createdAt": "2026-04-30T12:31:40.326Z"
-              }
-            ],
-            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-            "createdAt": "2026-04-30T12:31:40.326Z",
-            "icon": "Sparkle",
-            "image": null,
+        "category": {
             "order": 1,
-            "title": "Soins Visage",
-            "updatedAt": "2026-04-30T12:31:40.326Z",
-            "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
+            "createdAt": "2026-04-30T12:31:40.133Z",
+            "hasSubcategories": true,
+            "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+            "subcategories": [
+              {
+                "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
+                "items": [
+                  {
+                    "name": "Nettoyants bio",
+                    "id": "a7a62bae-d230-436d-9303-692ea526b083"
+                  },
+                  {
+                    "name": "Crèmes bio",
+                    "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860"
+                  },
+                  {
+                    "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
+                    "name": "Sérums bio"
+                  },
+                  {
+                    "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
+                    "name": "Huiles visage bio"
+                  }
+                ],
+                "title": "Soins bio visage"
+              },
+              {
+                "items": [
+                  {
+                    "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
+                    "name": "Shampooings"
+                  },
+                  {
+                    "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
+                    "name": "Après-shampooings"
+                  },
+                  {
+                    "id": "efbecb59-36b7-4910-a312-a746ac99b758",
+                    "name": "Masques capillaires"
+                  }
+                ],
+                "title": "Produits Capillaires",
+                "id": "193a2235-95c2-418f-b945-d45aa19ce2f5"
+              },
+              {
+                "id": "24f8d516-e924-4cf5-97b6-cb50d36f9d95",
+                "items": [
+                  {
+                    "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+                    "name": "Nettoyants"
+                  },
+                  {
+                    "id": "76844027-9137-420b-83be-5e2169264b3f",
+                    "name": "Hydratants"
+                  },
+                  {
+                    "id": "5c968409-de0b-4ec4-a97d-ebcae939f89d",
+                    "name": "Anti-âge"
+                  },
+                  {
+                    "id": "843fa658-94bc-4a20-8343-ab36cc31b7ac",
+                    "name": "Soins ciblés"
+                  }
+                ],
+                "title": "Soins Visage"
+              },
+              {
+                "title": "Soins bio cheveux",
+                "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
+                "items": [
+                  {
+                    "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
+                    "name": "Shampooings bio"
+                  },
+                  {
+                    "id": "d3e84038-d97c-481c-90da-618d36242001",
+                    "name": "Après-shampooings bio"
+                  },
+                  {
+                    "id": "4d0b8986-b884-4b5e-956a-aaf970e61918",
+                    "name": "Masques bio"
+                  },
+                  {
+                    "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
+                    "name": "Huiles capillaires bio"
+                  }
+                ]
+              },
+              {
+                "id": "619120c9-81fe-422c-9e95-cea34c044f53",
+                "items": [
+                  {
+                    "id": "39868bad-d8ad-4100-8666-51be35e60280",
+                    "name": "Laits corporels"
+                  },
+                  {
+                    "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
+                    "name": "Baumes"
+                  },
+                  {
+                    "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
+                    "name": "Gommages"
+                  }
+                ],
+                "title": "Soins Corps"
+              }
+            ],
+            "updatedAt": "2026-04-30T12:31:40.133Z",
+            "icon": "Sparkles",
+            "image": null,
+            "name": "Cosmétiques & Soin"
           },
-          {
-            "title": "Soins Corps",
-            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
+        "price": 132,
+        "rating": 0,
+        "reviews": 0,
+        "sku": null,
+        "subcategoryItem": {
+            "updatedAt": "2026-04-30T12:31:40.326Z",
             "createdAt": "2026-04-30T12:31:40.326Z",
-            "updatedAt": "2026-04-30T12:31:40.326Z",
-            "icon": "Droplet",
-            "id": "619120c9-81fe-422c-9e95-cea34c044f53",
-            "image": null,
-            "items": [
-              {
-                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-                "updatedAt": "2026-04-30T12:31:40.326Z",
-                "createdAt": "2026-04-30T12:31:40.326Z",
-                "id": "39868bad-d8ad-4100-8666-51be35e60280",
-                "name": "Laits corporels",
-                "order": 1
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.326Z",
-                "id": "1c9d196b-3896-48f5-a298-d4c51ac35d1e",
-                "name": "Baumes",
-                "order": 2,
-                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-                "updatedAt": "2026-04-30T12:31:40.326Z"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.326Z",
-                "id": "a7a45e3c-0f8a-4ae5-99ef-a40b9179a69f",
-                "name": "Gommages",
-                "order": 3,
-                "subcategoryId": "619120c9-81fe-422c-9e95-cea34c044f53",
-                "updatedAt": "2026-04-30T12:31:40.326Z"
-              }
-            ],
-            "order": 2
+            "id": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+            "name": "Nettoyants",
+            "order": 1,
+            "subcategoryId": "24f8d516-e924-4cf5-97b6-cb50d36f9d95"
           },
-          {
-            "id": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-            "image": null,
-            "items": [
-              {
-                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-                "updatedAt": "2026-04-30T12:31:40.327Z",
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "3723a9fd-d9ed-4272-959a-150bd903345b",
-                "name": "Shampooings",
-                "order": 1
-              },
-              {
-                "updatedAt": "2026-04-30T12:31:40.327Z",
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "9723ebf4-b3ac-4b14-b864-40284ca752a5",
-                "name": "Après-shampooings",
-                "order": 2,
-                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5"
-              },
-              {
-                "subcategoryId": "193a2235-95c2-418f-b945-d45aa19ce2f5",
-                "updatedAt": "2026-04-30T12:31:40.327Z",
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "efbecb59-36b7-4910-a312-a746ac99b758",
-                "name": "Masques capillaires",
-                "order": 3
-              }
-            ],
-            "order": 3,
-            "title": "Produits Capillaires",
-            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-            "createdAt": "2026-04-30T12:31:40.327Z",
-            "icon": "Wind",
-            "updatedAt": "2026-04-30T12:31:40.327Z"
-          },
-          {
-            "items": [
-              {
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "6eac6654-5d8f-45fd-ad23-3f530523c8bf",
-                "name": "Shampooings bio",
-                "order": 1,
-                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                "updatedAt": "2026-04-30T12:31:40.327Z"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "d3e84038-d97c-481c-90da-618d36242001",
-                "name": "Après-shampooings bio",
-                "order": 2,
-                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                "updatedAt": "2026-04-30T12:31:40.327Z"
-              },
-              {
-                "name": "Masques bio",
-                "order": 3,
-                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                "updatedAt": "2026-04-30T12:31:40.327Z",
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "4d0b8986-b884-4b5e-956a-aaf970e61918"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.327Z",
-                "id": "ca9e7632-a21c-409e-83d1-68d971fd1678",
-                "name": "Huiles capillaires bio",
-                "order": 4,
-                "subcategoryId": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-                "updatedAt": "2026-04-30T12:31:40.327Z"
-              }
-            ],
-            "updatedAt": "2026-04-30T12:31:40.327Z",
-            "icon": "Wind",
-            "id": "3fe0fc07-f605-4dd6-a3ce-de2a4047180a",
-            "order": 4,
-            "title": "Soins bio cheveux",
-            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-            "createdAt": "2026-04-30T12:31:40.327Z",
-            "image": null
-          },
-          {
-            "categoryId": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-            "createdAt": "2026-04-30T12:31:40.328Z",
-            "items": [
-              {
-                "id": "a7a62bae-d230-436d-9303-692ea526b083",
-                "name": "Nettoyants bio",
-                "order": 1,
-                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                "updatedAt": "2026-04-30T12:31:40.328Z",
-                "createdAt": "2026-04-30T12:31:40.328Z"
-              },
-              {
-                "updatedAt": "2026-04-30T12:31:40.328Z",
-                "createdAt": "2026-04-30T12:31:40.328Z",
-                "id": "1712a0bd-c93a-455e-8cfe-41cd074a3860",
-                "name": "Crèmes bio",
-                "order": 2,
-                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.328Z",
-                "id": "2c336ed7-6fcf-4aac-960c-5387c9754434",
-                "name": "Sérums bio",
-                "order": 3,
-                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                "updatedAt": "2026-04-30T12:31:40.328Z"
-              },
-              {
-                "createdAt": "2026-04-30T12:31:40.328Z",
-                "id": "ef2e6038-20f6-4e89-a2b6-4a636c9e6ecb",
-                "name": "Huiles visage bio",
-                "order": 4,
-                "subcategoryId": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-                "updatedAt": "2026-04-30T12:31:40.328Z"
-              }
-            ],
-            "order": 5,
-            "updatedAt": "2026-04-30T12:31:40.328Z",
-            "icon": "Sparkle",
-            "id": "c41800f7-1c37-46ed-9d10-68cb249180eb",
-            "image": null,
-            "title": "Soins bio visage"
-          }
-        ],
-        "hasSubcategories": true,
-        "id": "30ce4047-de28-475a-b7b8-3fd7cee4088d",
-        "updatedAt": "2026-04-30T12:31:40.133Z",
-        "_count": {
-          "products": 7
-        },
-        "createdAt": "2026-04-30T12:31:40.133Z",
-        "icon": "Sparkles",
-        "image": null
-      },
-      {
-        "icon": "Droplets",
-        "id": "b7a26dcf-3607-488e-99b6-ce9cebf2eb25",
-        "image": null,
-        "name": "Hygiène & Corps",
-        "subcategories": [],
-        "_count": {
-            "products": 0
-          },
-        "createdAt": "2026-04-30T12:31:40.133Z",
-        "hasSubcategories": true,
-        "order": 2,
-        "updatedAt": "2026-04-30T12:31:40.133Z"
-      },
-      {
-        "_count": {
-          "products": 0
-        },
-        "hasSubcategories": true,
-        "icon": "Baby",
-        "id": "ca89609b-f5fe-4010-8451-b72d5810d483",
-        "image": null,
-        "name": "Bébé & Maternité",
-        "subcategories": [],
-        "updatedAt": "2026-04-30T12:31:40.133Z",
-        "createdAt": "2026-04-30T12:31:40.133Z",
-        "order": 3
-      },
-      {
-        "name": "Complémentaires",
-        "_count": {
-          "products": 0
-        },
-        "hasSubcategories": true,
-        "icon": "Pill",
-        "id": "b2b510d8-6d69-43aa-a8df-7c6c2b9d0385",
-        "order": 4,
-        "subcategories": [],
-        "updatedAt": "2026-04-30T12:31:40.133Z",
-        "createdAt": "2026-04-30T12:31:40.133Z",
-        "image": null
-      },
-      {
-        "updatedAt": "2026-04-30T12:31:40.133Z",
-        "_count": {
-          "products": 0
-        },
-        "createdAt": "2026-04-30T12:31:40.133Z",
-        "icon": "Sun",
-        "id": "b1091eae-ec44-4383-8cd5-ab66152c78a0",
-        "image": null,
-        "name": "Solaire & Protection",
-        "subcategories": [],
-        "hasSubcategories": true,
-        "order": 5
-      },
-      {
-        "subcategories": [],
-        "_count": {
-            "products": 0
-          },
-        "icon": "Stethoscope",
-        "id": "80cd7a67-0fe6-4155-be1a-6e60e4be1a5e",
-        "image": null,
-        "updatedAt": "2026-04-30T12:31:40.133Z",
-        "createdAt": "2026-04-30T12:31:40.133Z",
-        "hasSubcategories": true,
-        "name": "Orthopédique",
-        "order": 6
+        "composition": null,
+        "images": [],
+        "oldPrice": null,
+        "variants": [],
+        "barcode": "7468234577897867",
+        "description": "un excellent gel nettoyant pour la peau sèche",
+        "id": "015ab818-850e-47ad-92a2-8ebe4adb8992",
+        "stockAlert": 1,
+        "name": "gel nettoyant ceraVe",
+        "productImages": [],
+        "subcategoryItemId": "0507f1d2-f33f-4327-8264-5ada225cecbd",
+        "type": null,
+        "expiryDate": "2027-03-12T00:30:20.000Z",
+        "isNew": false,
+        "priceHT": 110,
+        "priceTTC": 132,
+        "taxRate": 20,
+        "updatedAt": "2026-05-15T08:12:33.407Z",
+        "usage": null,
+        "brandModel": {
+                  "logo": null,
+                  "name": "ceraVe",
+                  "updatedAt": "2026-04-30T13:34:47.696Z",
+                  "active": true,
+                  "createdAt": "2026-04-30T13:34:47.696Z",
+                  "description": null,
+                  "id": "c73f743d-8d1f-4608-8b59-279a86b10deb"
+                }
       }
-    ],
-    "clientTokens": [
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmZGNkODZjLWIyZTktNDk4Zi1iZTU1LWE3MmFlOTEzYTk1ZiIsImVtYWlsIjoicGVyZl91c2VyXzBAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.1NLRgPcebvxxuxb8oI-5KGMryICCxcr4iZvftboIuKM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ5NGE3YzhlLTc5NDItNGZmZC1hZDRiLTZjZjk0YTg1NDIzOCIsImVtYWlsIjoicGVyZl91c2VyXzFAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.dnVXpo8iO1NBotGgffe1bcLFbldRteHYYblSupe8L00",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyODRmMzg3LTRjZjktNGYxNy1hMGEyLTllZmM5NDNjOGY5NSIsImVtYWlsIjoicGVyZl91c2VyXzJAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.RJEVg5KFUUT82lGGKpRMQpsqGmXxqnJJ-vgSeOSxvww",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIwNzQ0MGI3LWM3ZjAtNGFhZC04NDU4LTg0ZjA2ZDUxOWRkNiIsImVtYWlsIjoicGVyZl91c2VyXzNAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.vK49aQ3wg3Q6wIlBzU9hN62BmJ7s_OqLSHY_sAABS8Y",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhlNzE5MmNhLWJmMjMtNGRhMi04N2Y2LWJlZTU0ZDkxM2JmZSIsImVtYWlsIjoicGVyZl91c2VyXzRAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.vCK_CoDBsslX6TCrdKvjBO9T1iO1br3hmA1wXyYlL6k",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwYjA0ZDdjLTk4M2YtNDQ1MC1hMDNmLTEwNGJjNGNlNDRjOCIsImVtYWlsIjoicGVyZl91c2VyXzVAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.FU4DBHy_C04nQs0b1QQT5JzO_T9lQz3O5yFFloDXZzU",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NzU3YjE2LTQ1YzgtNDczNy05YWUxLTY0ZDk1MjczZTc3YiIsImVtYWlsIjoicGVyZl91c2VyXzZAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.2VWHddyzP8nbvsfN6a4dS3neJ6HtdAxdBwoHstoQPBw",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFjMGU2MDk5LWQ2ZDctNDRhYi04YTExLTNlM2U4MTI0ODA2OCIsImVtYWlsIjoicGVyZl91c2VyXzdAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.eMWsTIZBb9zHxLyJRSEC4koAeK4peeOS_qalDHLY62k",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhlNzY1MmUxLWI3ZDQtNGJlNy1hMWNhLWY1OGQzNmQ0ZTc2OSIsImVtYWlsIjoicGVyZl91c2VyXzhAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.Uxru8NHQ4NLTB7cwelWbAeaKlWq9zPO1lw28qTMSO0A",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjAwN2I0LWRlMjUtNGRiNC04NGY5LTFjN2Y0MDg5NTBhZCIsImVtYWlsIjoicGVyZl91c2VyXzlAdGVzdC5jb20iLCJyb2xlIjoiQ0xJRU5UIiwiaWF0IjoxNzc4ODMyMjc1LCJleHAiOjE3Nzk0MzcwNzV9.QvGvFtFndvspxJ5bppNS-CJvximoL68nYqPOE9VZRzA",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE1ZmUwMmI1LTVmMDEtNGQ5ZS1iYWRjLTM4YTg0MjFiM2U4YyIsImVtYWlsIjoicGVyZl91c2VyXzEwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.lCvGv4yQRGzM_Ot-v0fvU6oUBuRbmwTC1RP71dBBxlM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI5ZGIxODFlLWM3YWYtNDFjMS04MzU1LWI2OWM3NmU3MTk4OSIsImVtYWlsIjoicGVyZl91c2VyXzExQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.GLCDzd6jqyk6LNQZn2pL9zrPin269RrZ64kZG3O79dQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzOTczM2Q4LWJiY2MtNDc5MC1iNDE5LTg1NzYwNTUxYTc4YSIsImVtYWlsIjoicGVyZl91c2VyXzEyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.mJfHVNqrRpB9Eltw7-SXBnoZTbs4hurS2FT3yTOX8EY",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNjIxNmVlLTJlNTYtNGMyYS1hOTU3LTAxZDM4Y2RmMzQ3OCIsImVtYWlsIjoicGVyZl91c2VyXzEzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.aX1prWOAmKhNwfoJZdVsTj-iSCtzIRFPhEO-RAF0gAU",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc5OTdjNDA3LWM1YzAtNDgyNS04MjFiLWFhNjQ2MDkyZDgyYiIsImVtYWlsIjoicGVyZl91c2VyXzE0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.1UoOLmfKgUxCYYCUMyNgEIkB-sCE72Zc_MTXs_htemM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJlY2NiZGQ0LThlY2EtNDZlOS1iYjQyLWUxMjYwZWZlMzUxNyIsImVtYWlsIjoicGVyZl91c2VyXzE1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.0pIxYKeyBd35dliOgfdGI-td3u1rjPfKOAO_B31DuVI",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ4MGNjNzkyLTQxODctNGEwYy04YmJhLTgzOWJiZmQ4ODNiNCIsImVtYWlsIjoicGVyZl91c2VyXzE2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.JsYIx1axxeGDbk4X66VSgGISpqcGp-KoUsUqJqbXI8I",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcxNWY4NGQzLTZkNWEtNDEyNC1iZTlhLTU3MTRmMzE0NmU2NiIsImVtYWlsIjoicGVyZl91c2VyXzE3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.KzRtZIKA6lgE-chRsARa70U99A4kS3XORhWzzhNoZvw",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkYjM0YTc3LWE0MGMtNDRiOC04NTgyLTY4YmRlYWIyZGI5MSIsImVtYWlsIjoicGVyZl91c2VyXzE4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.JoqLZVe4KKDDFuMfGYuOgJUI_SioMw3wokpAtPR4G74",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiOGM4ZTVkLTlmMmItNDliYS05NjhmLWM0OTgyZjlmMTMwZSIsImVtYWlsIjoicGVyZl91c2VyXzE5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.eH5Hl8P6USuEKhs5mjdRz9xIz8GhzrHFpyCQ4668i0c",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNzc2M2E1LTc3NzEtNDhlYy1iYTYwLTA5MjI2NTVkYzA0YiIsImVtYWlsIjoicGVyZl91c2VyXzIwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.B8ooFg68G3x93xGuNycP-9Q4Xko2jhdNKo4vgf4_abs",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMyMzY1OWUzLTRmNTItNDI1Ni04M2I0LWI4Nzc3YWYxODVlZCIsImVtYWlsIjoicGVyZl91c2VyXzIxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.v3ZBhEMl5wkdynLJfLgD8a9Yx5ZFiXtnlv1VdY50e-w",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdmZjM4NWU1LTAyZDQtNGFiYi04NGNmLWI1NDc3N2IxMDYzYSIsImVtYWlsIjoicGVyZl91c2VyXzIyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.v15_nzMloDtjq2usnPHaxt7tV3HG5dwaaBeEuo_4m4s",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNlZmFkYTlhLTUwMTctNDY2Ni05MGRiLTYzMTY1NmZlNDhmOCIsImVtYWlsIjoicGVyZl91c2VyXzIzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.tKmtTQkxhCGvSdZUD3B_kZUlajQ96AoU-Wf1D189-g0",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBlZWJkMTVjLTIxODgtNDhjYS05ZWY2LWZmZjZiYjFkZGRmNSIsImVtYWlsIjoicGVyZl91c2VyXzI0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NSwiZXhwIjoxNzc5NDM3MDc1fQ.04gLCjgzF1c7S2JdyAmGf3NYL_wuuLuVpPfl1QAQgjI",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU4MTg2NDE1LTFlYjEtNGVlMC04ZTVkLTZlYTllOTNmZDhmOCIsImVtYWlsIjoicGVyZl91c2VyXzI1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.ci_iu0X4IhoPY6jWJj2C5xb4lM_Vr1bNASRjvrOrlQc",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAyMjYzODJmLTQ4MmYtNGU1Zi1iNGZhLTVlMWU4Yzc3OWI2NCIsImVtYWlsIjoicGVyZl91c2VyXzI2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.N7U4hlp5i60S3NmPTg8DqkglVw42gBMxfm9ifblDbV4",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIxNTNlMWU3LTM4OTYtNDJhMS05NjViLTE1NmI1NWIzMGU2ZCIsImVtYWlsIjoicGVyZl91c2VyXzI3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.GCHIFuW55Ipw3TGGx3cJL34GwuzuzqCAu1U8Sxm8NWQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzOTU0YmVlLWM3NmQtNGJmNC04ODhlLTU0YmEyNWFhMzJkZCIsImVtYWlsIjoicGVyZl91c2VyXzI4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.6JmVA-_3879X5waAwMsQl2lSyxs4UN84eLtfOoamvw4",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjMmE1YmIyLTk5NjEtNDQ3NS05YjQzLTM4YmMxNDhhNmMwMyIsImVtYWlsIjoicGVyZl91c2VyXzI5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.2IeREX9uyLolY0MkySuhrxy-V5DGLmA-DUeTLyufwQk",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViODZiMjkxLWU1NzctNDEyZi04NDdiLTc0MzE0ZTZhZDRhZiIsImVtYWlsIjoicGVyZl91c2VyXzMwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.9vbTp3f_SLe1nFVmi8jmDuQOFhaj5UY1MHY1BMQNusI",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE5NDIxYmQwLWRjMTMtNGZiZC04MDk2LTU5OWI2ZjAzNDNhOSIsImVtYWlsIjoicGVyZl91c2VyXzMxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.g45Kher1y5aWD_XBhg6XsE4yqDuKi3FLOgfFVZ2FIpQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3OGY1NTZiLWFmNGItNDE5Yi04ZGQyLTdmNjhjODJhZDUzNiIsImVtYWlsIjoicGVyZl91c2VyXzMyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.dF2Ba2t8TIUb_UCs42stq0cAkRjmNke9epw2b-dRQho",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ1ZjYzZDM0LTM4Y2EtNDQ2MS1hYzEwLTY5NTUyYWRhNDIzNyIsImVtYWlsIjoicGVyZl91c2VyXzMzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.YNZuW3BWUoWsjBb5epkEqN6C9BnFoxEjmdxO0bN7C2k",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNDVjMDgyLTkyZGItNDg2Yi04MmQxLTcwNzg3YzVjODJjMyIsImVtYWlsIjoicGVyZl91c2VyXzM0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ._lIzme6gzzyuZMzpRLMM94tJUcSlXHR4sjVT0Bxy1WM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRkMmUyNmRkLWNlZmYtNDMyYS04YzVkLTk2M2FiMGE3MjdiOCIsImVtYWlsIjoicGVyZl91c2VyXzM1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.C26V8JTq3J8oEMeEdT_1YQiHTxMDIFD7G3ExNCkZ3ns",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ1MWRhYTA0LTVmNmEtNGVhOS1iZWQyLWFlMGVlM2NiNmQzNiIsImVtYWlsIjoicGVyZl91c2VyXzM2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.AwKeUzQOmh1Vtq6UVHyHF4QOi_1wvyxAHrg4MEiExrQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwNGJmMjliLWFiYmMtNGFlYi05OTY4LWRiMDI0ZWYzNTYwZSIsImVtYWlsIjoicGVyZl91c2VyXzM3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.mYdHhV1lznEPhNQ-YjwKuFbjOmhnT6SBGafI_TM9BhM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzNDMzYjhjLWZiOTktNDNmOS1hNTBjLWNhMjk4YmJlZDlmNiIsImVtYWlsIjoicGVyZl91c2VyXzM4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.CXod_IulBXL5QQ_cHBDKOBSaNbpy7CloCvcxOnTbhIA",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjODhlYWUxLWJiZWYtNGZhNS05MjhkLTM4ZGNhZGY4NDJjNCIsImVtYWlsIjoicGVyZl91c2VyXzM5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.AUQyvyNyuh3oywSjWDXuc0RJ96VETZ0RggJqMDstOR0",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjljMTk2MGI1LTNiYTMtNDI1ZC1hMGVjLWViOWNmY2RiOTNlMyIsImVtYWlsIjoicGVyZl91c2VyXzQwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.ZlzuuhGrcM8B5gPEfGwwfK1CXOZxiF6noelX46lIurQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgwYjQwN2E4LTYzZDgtNGZkOC04ODE0LWI3ZDFhYzc0YWI3MyIsImVtYWlsIjoicGVyZl91c2VyXzQxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.UA89sWc3StBxHrNouMb8GlGm6skiEAe1BuAVer_L95E",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdlOTdhMjZhLTZlMGUtNDEyOC04ZWQ4LTlkNzViYWZjZjc2ZSIsImVtYWlsIjoicGVyZl91c2VyXzQyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.hGNmgpY_JKXcMO1H_GUoSWOYDfT_NQ9XmrTrMK0qIcI",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNmNjUxMmQwLWE3ZTUtNGY2ZC04N2ZmLThiZjY1M2ZkYTA5YiIsImVtYWlsIjoicGVyZl91c2VyXzQzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.c_4tycR71pYNm65Bf7DPeRxwA1rR5SE2_Rf66MBdmFY",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgyNzk3NDc3LTJmYzEtNDEwMi1hM2ZhLTU2MDlkNGY0Y2ZiZCIsImVtYWlsIjoicGVyZl91c2VyXzQ0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.MCPtzuhk5OLdtfFPCWasnr7jxS3sVgjhc-hIFQVSWrw",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OGY3NWU0LTI1OTktNGRjZC04MGU1LTNmYjE5ZmZkNDQwOSIsImVtYWlsIjoicGVyZl91c2VyXzQ1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.Rbx_XxTLwR-QARyEsOmWLDMMiwIKgOOdXWwzTcBKlVA",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1MzIxNDQwLTcwNzAtNDQzMi1iMDM5LTE4MzEyNGM5YmM4NyIsImVtYWlsIjoicGVyZl91c2VyXzQ2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.-UlNNTNMwsEpirz7T5LHmNRb34QpuBQpTKSB7cNiT2c",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc0MjZhNDljLTk2MDUtNDEwYS1hZWRkLTZmODI3NTY0OGE3OCIsImVtYWlsIjoicGVyZl91c2VyXzQ3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.kh6mXatcnhbdLw7InadFKGt5W87ld69Ug5ADlrxh9YI",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE2ZDVlOTQ1LTQwNjAtNDI2OC1hM2I5LTdhN2JhZjQyYjYwYiIsImVtYWlsIjoicGVyZl91c2VyXzQ4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.tFBZMEHCS-sU9UGpRn3WXbCg4FvRoPavZRJwOr35YqE",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI4ZGM4OGQwLTYzZDMtNDYyYi04MWExLTBjMDUwMDk5YWQyMSIsImVtYWlsIjoicGVyZl91c2VyXzQ5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.TUGPg1Um72nXN7Ia9oslxLdMib1Usp4fDeFvwSSscsg",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM3NDQ0ODM4LWZlMjgtNDA4Ny1hOTA4LWY1ZDgwMjE4YTMyMiIsImVtYWlsIjoicGVyZl91c2VyXzUwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.m_hBt-ra2dceIFsbZ2tb-cmHUi7j5BcyzkPc2U1PWmQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzOGE5M2VkLTRmMDUtNDYxZi1iMmI2LWYwODcwM2IwOTAzOCIsImVtYWlsIjoicGVyZl91c2VyXzUxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.YpafqQm4hzWV74isqfZaN8Oj50uiKvFoBEjhkNFbY3Q",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVhYTEyZDA0LTk0NDItNDYwMi04MTI2LTdkZjg4MGViZmQyNiIsImVtYWlsIjoicGVyZl91c2VyXzUyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.wFNtkv1ZSlivwCaM9oTcB8X5OZ5FB6Wab2bMayDYzeY",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkYjkwYWI4LTc0OGItNGE0NS04MzI5LTc5MzUyMTRiYzlhMSIsImVtYWlsIjoicGVyZl91c2VyXzUzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.1oAkKivy9enuBoeeJKoWAu06JB8CKYcbF6B2dt9uJbg",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM0ODI1YjQ2LWY5NGQtNDE1ZC05MWJiLTNmMTQ5MWFjZGIwZSIsImVtYWlsIjoicGVyZl91c2VyXzU0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.SkG1fHkFpeNPlpUtIG30LyaLmEngryQNQIhrqzzwMuw",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ1NDFiOTA2LWE4NDItNGU0NC05OWU0LTc5MTk2ZjcyY2NkNiIsImVtYWlsIjoicGVyZl91c2VyXzU1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NiwiZXhwIjoxNzc5NDM3MDc2fQ.2Lqh_fBYFCLx-_8M1cRK4y6b2N4z6Y93SAP-amJzDY0",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZhODA2ZmFmLTA1MTQtNGY2Ny1iNjE2LTQ3NzVlMTUxYmIyMyIsImVtYWlsIjoicGVyZl91c2VyXzU2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.KUOngD3qDm4ZGVJFitOB367hQD8QXjoLpueZNUkYZ5w",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFlYzEyYWZjLWI3ZGYtNDUwYS1iMDEwLTc0ZjI3MTNmZTc4NSIsImVtYWlsIjoicGVyZl91c2VyXzU3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.ePVsKWrjIwvsZSWBxATpiZvJBonJ8Ptz-cJuXDqoF7s",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY3MmZkY2FhLTVlZmMtNDgwNy1hM2FmLTE1MWZkZGI4OWI3ZSIsImVtYWlsIjoicGVyZl91c2VyXzU4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.CKctaZCiSrL8GETzH2oNEgx1fA6eXqiPqbArx-oN07Y",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImEyNDFlMWMxLWQ5ZTEtNDM4My1iMzJjLWYwZjQ1ODIyMmExMyIsImVtYWlsIjoicGVyZl91c2VyXzU5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Kbdb52bgrtr-ptcXdxUHo1TJzcA6TMCZqNEJfwbVzNs",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkMjg4MzFmLTQyY2UtNDM4Yi05NWJlLTcyZTQ0ZTAzMjkyNiIsImVtYWlsIjoicGVyZl91c2VyXzYwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.ChHGkOZKdzLMfTkdR7VBzF3Q6-bIsImxYWEq61WdZbk",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNiMWM2MzQ4LWM4MGQtNGQyMC05MWJjLTg1ZWNmNWNhMTFlOSIsImVtYWlsIjoicGVyZl91c2VyXzYxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Fi_1mG3k3Fwz_s3m0ybULPFkof6MSEKWG-XYztKO9aw",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhkMjgyMDQ5LWFkNDYtNGJjOC1iODhmLWZlNTk2MzI3MjYyNyIsImVtYWlsIjoicGVyZl91c2VyXzYyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ._HWDAUfhUDfQwcnljBqrj6CHANPnJnlXuWssNy2SNsQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE5M2ViNDg1LTU4YTItNGY3ZS05NDVkLWVjYjg5OGNlN2Q2OSIsImVtYWlsIjoicGVyZl91c2VyXzYzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.HSO7g0WztYNyNWXxUOssS7snU2SUxA2SG5cXOmLp4Bo",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjY2MwMzRkLTg2NGItNDc4Yi05NGU3LTA3Nzg1MTE2YjBmMyIsImVtYWlsIjoicGVyZl91c2VyXzY0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.mK-d_WpglM9WQbDn5lgoW3ZMnuz-TQUI403B_YrKsbE",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMwZjNhMjZhLTcwZTAtNGRhMC04ZDI4LTFjZTVlNzlmYmZkOSIsImVtYWlsIjoicGVyZl91c2VyXzY1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.VaglrhT2HRUPObWZB9g88jrbm2adsNoNQvkuWyS9Gzg",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE0MDA1ODY3LTZmMmUtNDBlMy04ODBkLThmNWU2ZjMyYzhmOCIsImVtYWlsIjoicGVyZl91c2VyXzY2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.5LqCR7Kh3xGTt-xm2f5tpRLE_Q7r9KWjHzmfLb1BohQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2NWM2OWJiLWZlYzYtNGVmYS04ZTRlLWJmZDBjNWIwZjNmNiIsImVtYWlsIjoicGVyZl91c2VyXzY3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Gs2UotuC9Acc3HIjBV3r2GOHJS29r25X1TxhDrY4Uog",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU0ZDlmMjkzLTVmZTMtNDI2Yi1hZWMzLTE5MTIzYTVkNzY2OSIsImVtYWlsIjoicGVyZl91c2VyXzY4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.85xVFBW2l_BezKb3i6qO6Sl10c8JprtxV30d1iuUDc4",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBkOWQxNjJmLWQ3MzgtNGM0NS05NmE2LTE4MmI5MDNkOGZlNCIsImVtYWlsIjoicGVyZl91c2VyXzY5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Z35tTo-nHih8mPvEa1uhXow_D-48-0L00Z70_hiYFBc",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwMmZkNGU1LThhOTktNDZjMS05NTFmLWE5ZWNlM2VmYmY1YiIsImVtYWlsIjoicGVyZl91c2VyXzcwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.ew3YcLtZwYlo6wK7L0eRqTF6ZFYs_NBF0s0C4NSHVdM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjYmRiNGFhLTdiN2EtNDg1Zi05Yjc0LTE4NGZiYjA5OGVhOSIsImVtYWlsIjoicGVyZl91c2VyXzcxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.i7U33ULtsKAKRJXh6cKqC_dkHvb2ihZs8-zd4AuZ_u0",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE3ODBlZjk0LTM0MzAtNGRkYS04NjQ3LTBmMTE3YTE5ZDU2NyIsImVtYWlsIjoicGVyZl91c2VyXzcyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.xoraHcvO8C-uOhS0ipHOnKR3bs-9bIbKukCcjy2EH5w",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBkMTk3Mzk0LTE4YTMtNDgwZS05YTk1LTg2ZWY1YzhkMzJlMCIsImVtYWlsIjoicGVyZl91c2VyXzczQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Dgx5ddM7N1oDz93LJ2DyLEeWMm3Jio-JOdiCFTnncW0",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ODM0MGRkLTE5MTUtNDAwNS05MTVkLTk0ZGQxMThhNjQxNSIsImVtYWlsIjoicGVyZl91c2VyXzc0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.iwhv4IIRLULgElLiqeLDbixC-2uiVBxgZPHqplvsi4s",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhNjVjZTRkLTk2ODEtNDVlMC04ZDMzLTRhMTU4MmIzNWJjNyIsImVtYWlsIjoicGVyZl91c2VyXzc1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.S6RJJ72WjSXVZQykS6wIpmNVcnabXcukrW_wHBRaE2E",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI5N2JlYmMwLWM0MDgtNGQ5MS1hODRlLWE3NjVhNDZmYjE3YiIsImVtYWlsIjoicGVyZl91c2VyXzc2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.qvETLXKQLpHJiVsWpbcX6I-3GvKC8WWinXP9fg_DZt8",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk2ZjgzNmExLTg4OTUtNDQ1Ny1hMWY3LTc4NWEzZDNlY2NlNiIsImVtYWlsIjoicGVyZl91c2VyXzc3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Yro8l2M35OacMmfhhJU36Dki3aLAjCgyaVN_edwBTZY",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ0ZjJkMzIzLWQ1ZGEtNDhkMy04OWI0LTJhMmIzZjc3NjQzYyIsImVtYWlsIjoicGVyZl91c2VyXzc4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.MHbpIT2__CLhEQDXdnGPJCKwbe5n2WrzGos6cchyodQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdjZTVkZmQxLTU4YTYtNGQ4NS1iNDRkLWMxNzlkNWNiMzc0YyIsImVtYWlsIjoicGVyZl91c2VyXzc5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.sd_lFTbMPlf3aS8H5SLUwgVfsB9aMMIX7SW1hlYG84Q",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI0Yjk5NTE5LTkwNDgtNDEzMS1iYmE1LTM1MTI3NGQzZTBhYyIsImVtYWlsIjoicGVyZl91c2VyXzgwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.2YrHU5lrWG6vgSyy3Q-grq2yjm0qXSNrHf3wiUHVFlY",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4YzhjN2ExLTBiYmQtNDU2MC04NGY1LTg1ZjZjOTc1YTE3NyIsImVtYWlsIjoicGVyZl91c2VyXzgxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.Ius3NI3BDZh-vJnBI23lYCp8wcigE0AqdyExx7urfSg",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJjZTkzMzRiLWY5OTctNGI3YS04OTI5LWYyYWMwNDIxMDdjZSIsImVtYWlsIjoicGVyZl91c2VyXzgyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.gaBYLYAHvuQlddH1wn34L_ecAIqz7Cdnz4Qhkgf9l2M",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQzZjk3MWY1LTlkNTYtNGY2NC1hMDIwLWQxMGY0ZTdkNjU5YSIsImVtYWlsIjoicGVyZl91c2VyXzgzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3NywiZXhwIjoxNzc5NDM3MDc3fQ.YAzKpyjEPtqIBBTSavquSqqIrBcJIZsEDOHNe_WTfkI",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwZmE5YzIxLTkzMDgtNDRmZC1iMDg3LTFkNGZhY2Q3ZjM1NCIsImVtYWlsIjoicGVyZl91c2VyXzg0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.1e23rh-V9LIJ3b8fQOZaoBkFLdyvBYqUHGOJk9FzxLY",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjliY2E3YTQ0LTQyMzktNDM1NS1iOWU2LWRjNTBmZWNhMmY4NCIsImVtYWlsIjoicGVyZl91c2VyXzg1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.sDRIst6ffPSV6Lm0IInwTqZfErTdVHYhOdWsc-vp_wo",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ0NWJhODQ4LWRkZjEtNGNlOC04NmYyLTI3ZDRlOWI1NmVjNiIsImVtYWlsIjoicGVyZl91c2VyXzg2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.NREiCuaiKjHUvFFG-VQ4N59bUC3FVcMD9SJuXMykt-w",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE4NTI1ZDMwLTE0NWEtNDM4MS05N2YyLTA5NWM2MmRjNmE4YSIsImVtYWlsIjoicGVyZl91c2VyXzg3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.Xfb88BfvxMFBf91Qwjn_nvg42HrCMQyub4DM95y8Rh4",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZhMmM1YmM1LWM3YmQtNDBlOC04YjFlLWQ0ZDg5YTBiYmE4ZCIsImVtYWlsIjoicGVyZl91c2VyXzg4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.w0S5uNuD2HFB8ZGrEp-VyPQ4K4jkilrQECMbdrz_gmA",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkN2Y4ZjczLWMxN2ItNGI1My05N2Y2LWUzNTcwNjYzOGM3YyIsImVtYWlsIjoicGVyZl91c2VyXzg5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.qmlfdjwMHmt8OpYhzwRnyrLdpyUCrrWvr-WbaAkrj9c",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE4ZjVhMmEwLWMyODYtNDdhNS1hYzdjLTU2YjRkNzQ5NTY0MiIsImVtYWlsIjoicGVyZl91c2VyXzkwQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.FzVEr49jzQ6KiuvRG0IvsUfQaj4-bjTDzU2k4j6F7YQ",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM4MmUzNjM1LTBmMTEtNDM4MC05M2JlLTM2Y2JiZTU1OTI1NCIsImVtYWlsIjoicGVyZl91c2VyXzkxQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.LE_D5LKzckYc5uidqdVHrRUgjTNBgjHKxI0TRTyXLJU",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5ZTM0ZjQ3LTkwZTYtNDdkNy04MDdmLWNiZDg5ZjQxYzlmNyIsImVtYWlsIjoicGVyZl91c2VyXzkyQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.rGHpD0lhjESOd6LS_cFvDQe-UGxfwL_lkjI8H0zvnZM",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2ZTIyN2QxLTQ1YjAtNDk5My1hYTNmLTZhZjM1MTk4NDQxOCIsImVtYWlsIjoicGVyZl91c2VyXzkzQHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ._m6p1_smTphnNjhfeRlGHTKcPnCtP9LUG1mGDrfCZEU",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJkMDZmODk5LWIyNGItNGY5ZC1iNzZjLWZkMTVjNTk4YjhkMCIsImVtYWlsIjoicGVyZl91c2VyXzk0QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.sMQKxOkUkPt-KL4XcaG2NjX7j3up4u9tsGb9i9FI-ik",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNlOGM5YWE0LTRjOTYtNDU2ZC1iYzczLTFlMzcyMDMyYzM3NSIsImVtYWlsIjoicGVyZl91c2VyXzk1QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.44B5pU6oEvKZoVAbmf2948wTGI_H_fj-WE_x8x70G8o",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk0NWQzMDE2LWJlMGMtNGQ5NC05MjIzLWExOTg5ZTE4MGRhZiIsImVtYWlsIjoicGVyZl91c2VyXzk2QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.UvEMG4c-_XLYyyoSRXbARRIk2fpf_rNGarWE3nRtCNs",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3ZDNlMmMzLTZjMTAtNGNmMS05M2RkLTNkN2U0NGE3MGM2ZCIsImVtYWlsIjoicGVyZl91c2VyXzk3QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.eWRvCEZ39f-Fg5kf7_jXOPhXfA6pRFWM9TxLVrHKqbA",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJjNTMwOGVhLTY1YjktNGJhNi1iY2IyLTI2ZWIyOTNmYmU5ZCIsImVtYWlsIjoicGVyZl91c2VyXzk4QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.XinSWM6hQrkQ8A3L29skJNXxLkAsSsgPJ9hi4WRLxl0",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJjOGFmYTY2LWJlY2YtNDMzYS1iMTZlLTg5MDZlZDE5MmZkNyIsImVtYWlsIjoicGVyZl91c2VyXzk5QHRlc3QuY29tIiwicm9sZSI6IkNMSUVOVCIsImlhdCI6MTc3ODgzMjI3OCwiZXhwIjoxNzc5NDM3MDc4fQ.e7VAOY367Xjt5EX4FXCseOUJmienDiRYtmu0WKTuFNA"
     ]
   },
   "root_group": {
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
     "groups": [
       {
+        "name": "client",
         "path": "::client",
         "id": "678983d93506a1985d6220af371ffb07",
         "groups": [],
         "checks": [
             {
-              "passes": 2443,
-              "fails": 0,
-              "name": "auth check 200",
               "path": "::client::auth check 200",
-              "id": "9f08fd3e39b2b430b3561c3923ee65af"
+              "id": "9f08fd3e39b2b430b3561c3923ee65af",
+              "passes": 2466,
+              "fails": 0,
+              "name": "auth check 200"
             },
             {
-              "passes": 823,
-              "fails": 0,
               "name": "order created 201",
               "path": "::client::order created 201",
-              "id": "82c0f6195e571abaca2fe6d34835ea9f"
+              "id": "82c0f6195e571abaca2fe6d34835ea9f",
+              "passes": 831,
+              "fails": 0
             }
-          ],
-        "name": "client"
+          ]
       },
       {
-        "name": "visiteur",
-        "path": "::visiteur",
+        "path": "::recherche",
+        "id": "6a82a779fbb2734d77ef98f22a7b1368",
+        "groups": [],
+        "checks": [
+            {
+              "passes": 4765,
+              "fails": 0,
+              "name": "filter by cat 200",
+              "path": "::recherche::filter by cat 200",
+              "id": "1f42d278ff2054c89172d7ef3e06a596"
+            },
+            {
+              "name": "search 200",
+              "path": "::recherche::search 200",
+              "id": "34b477632a8da3b641c308412e7e6ca2",
+              "passes": 4765,
+              "fails": 0
+            }
+          ],
+        "name": "recherche"
+      },
+      {
         "id": "31aab98ebc3c90b5d67201a1f6f899cd",
         "groups": [],
         "checks": [
@@ -2020,58 +2043,35 @@
               "name": "promotions 200",
               "path": "::visiteur::promotions 200",
               "id": "b63e18a9b5a7760f1a5edc539a1e1547",
-              "passes": 3082,
+              "passes": 3086,
               "fails": 0
             },
             {
               "name": "categories 200",
               "path": "::visiteur::categories 200",
               "id": "57705a8948b4167eb3103778b5d93c84",
-              "passes": 3082,
+              "passes": 3086,
               "fails": 0
             },
             {
-              "passes": 3082,
-              "fails": 0,
               "name": "products list 200",
               "path": "::visiteur::products list 200",
-              "id": "e56815aa121e31d29b1f11a7c325830c"
+              "id": "e56815aa121e31d29b1f11a7c325830c",
+              "passes": 3086,
+              "fails": 0
             },
             {
+              "passes": 3086,
+              "fails": 0,
               "name": "product detail 200",
               "path": "::visiteur::product detail 200",
-              "id": "52b3f03e2fffc646f12e143761a79f59",
-              "passes": 3082,
-              "fails": 0
+              "id": "52b3f03e2fffc646f12e143761a79f59"
             }
-          ]
-      },
-      {
-        "name": "recherche",
-        "path": "::recherche",
-        "id": "6a82a779fbb2734d77ef98f22a7b1368",
-        "groups": [],
-        "checks": [
-            {
-              "name": "filter by cat 200",
-              "path": "::recherche::filter by cat 200",
-              "id": "1f42d278ff2054c89172d7ef3e06a596",
-              "passes": 4671,
-              "fails": 0
-            },
-            {
-              "name": "search 200",
-              "path": "::recherche::search 200",
-              "id": "34b477632a8da3b641c308412e7e6ca2",
-              "passes": 4671,
-              "fails": 0
-            }
-          ]
+          ],
+        "name": "visiteur",
+        "path": "::visiteur"
       }
     ],
-    "checks": [],
-    "name": "",
-    "path": "",
-    "id": "d41d8cd98f00b204e9800998ecf8427e"
+    "checks": []
   }
 }

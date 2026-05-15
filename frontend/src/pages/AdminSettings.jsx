@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Settings,
   Percent,
@@ -12,6 +12,8 @@ import {
   RefreshCw,
   ArrowLeft,
 } from 'lucide-react'
+
+import { Shield, Activity } from 'lucide-react'
 
 import api from '../api/axios'
 import adminApi from '../api/adminAxios'
@@ -39,6 +41,14 @@ const AdminSettings = () => {
   const navigate = useNavigate()
   const [tab, setTab] = useState('general')
   const [loading, setLoading] = useState(true)
+  const location = useLocation()
+
+  const [auditLogs, setAuditLogs] = useState([])
+
+  const systemRoles = [
+    { value: 'ADMIN', label: 'Administrateur' },
+    { value: 'EMPLOYE', label: 'Employé' }
+  ]
 
   // GENERAL
   const [tvaPercent, setTvaPercent] = useState(20)
@@ -165,8 +175,26 @@ const AdminSettings = () => {
   }
 
   useEffect(() => {
+    // If URL contains ?tab=..., activate it
+    const params = new URLSearchParams(location.search)
+    const requested = params.get('tab')
+    if (requested) setTab(requested)
+
     refreshAll().catch(console.error)
   }, [])
+
+  useEffect(() => {
+    if (tab === 'audit') fetchAuditLogs().catch(console.error)
+  }, [tab])
+
+  const fetchAuditLogs = async () => {
+    try {
+      const { data } = await adminApi.get('/audit-logs', { params: { limit: 100 } })
+      setAuditLogs(data.logs || [])
+    } catch (err) {
+      console.error('Erreur audit logs', err)
+    }
+  }
 
   if (loading) {
     return (
@@ -221,6 +249,12 @@ const AdminSettings = () => {
               <TabButton active={tab === 'delivery'} icon={Truck} onClick={() => setTab('delivery')}>
                 Livraison
               </TabButton>
+                <TabButton active={tab === 'roles'} icon={Shield} onClick={() => setTab('roles')}>
+                  Rôles du Système
+                </TabButton>
+                <TabButton active={tab === 'audit'} icon={Activity} onClick={() => setTab('audit')}>
+                  Journal d'Activité
+                </TabButton>
             </div>
           </div>
         </header>
@@ -420,6 +454,44 @@ const AdminSettings = () => {
                <br />
                Les créneaux horaires sont gérés dans le module <a href="/admin/time-slots" className="text-sky-700 hover:underline">Click & Collect</a>.
              </div>
+          </div>
+        )}
+
+        {tab === 'roles' && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+              <h2 className="font-bold text-gray-900 mb-1">Rôles du Système</h2>
+              <p className="text-sm text-gray-500 mb-4">Gestion des rôles et permissions. (Fonctionnalité déplacée depuis la gestion des utilisateurs)</p>
+              <div className="space-y-2">
+                {systemRoles.map(r => (
+                  <div key={r.value} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-semibold">{r.label}</p>
+                      <p className="text-xs text-gray-500">Clé: {r.value}</p>
+                    </div>
+                    <div className="text-sm text-gray-500">Gérer permissions</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab === 'audit' && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+              <h2 className="font-bold text-gray-900 mb-1">Journal d'Activité</h2>
+              <p className="text-sm text-gray-500 mb-4">Liste des actions et événements audités.</p>
+              <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                {auditLogs.length === 0 && <p className="text-sm text-gray-500">Aucun enregistrement.</p>}
+                {auditLogs.map((a) => (
+                  <div key={a.id} className="p-3 border rounded-lg">
+                    <div className="text-sm text-gray-700">{a.action}</div>
+                    <div className="text-xs text-gray-500">{new Date(a.createdAt).toLocaleString('fr-FR')}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

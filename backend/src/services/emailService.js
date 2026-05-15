@@ -801,6 +801,74 @@ export const sendAccountDeletionCode = async (userEmail, userName, deleteCode) =
   }
 };
 
+// Envoyer le code PIN à l'employé lors de la création de compte
+export const sendEmployeePinEmail = async (userEmail, userName, pin) => {
+  try {
+    const transporter = getTransporter();
+    const mailOptions = {
+      from: `"Parapharmacie" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: '🔐 Votre code PIN - Parapharmacie',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #0369a1;">🔐 Votre code PIN d'opérations</h2>
+          <p>Bonjour ${userName},</p>
+          <p>Votre compte employé a été créé. Voici votre code PIN pour les opérations critiques :</p>
+          <div style="background: linear-gradient(135deg, #0369a1, #0ea5e9); padding: 30px; border-radius: 12px; margin: 20px 0; text-align: center;">
+            <p style="color: white; font-size: 14px; margin-bottom: 10px;">Votre code PIN</p>
+            <p style="color: white; font-size: 36px; font-weight: bold; letter-spacing: 8px; margin: 10px 0;">${pin}</p>
+          </div>
+          <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <p><strong>⚠️ Important :</strong></p>
+            <ul>
+              <li>Ce code est requis pour toute opération critique (suppression, etc.)</li>
+              <li>Ne partagez jamais ce code</li>
+              <li>Conservez-le en lieu sûr</li>
+            </ul>
+          </div>
+          <p style="color: #666; font-size: 14px;">L'équipe Parapharmacie</p>
+        </div>
+      `
+    };
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    logger.error('Erreur envoi PIN employé:', { message: error.message });
+    return false;
+  }
+};
+
+// Envoyer le code de réinitialisation de mot de passe employé
+export const sendEmployeePasswordResetCode = async (userEmail, userName, code) => {
+  try {
+    const transporter = getTransporter();
+    const mailOptions = {
+      from: `"Parapharmacie" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: '🔑 Code de réinitialisation - Parapharmacie',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #0369a1;">🔑 Réinitialisation de mot de passe</h2>
+          <p>Bonjour ${userName},</p>
+          <p>Voici votre code de vérification pour réinitialiser votre mot de passe :</p>
+          <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 30px; border-radius: 12px; margin: 20px 0; text-align: center;">
+            <p style="color: white; font-size: 14px; margin-bottom: 10px;">Code de vérification</p>
+            <p style="color: white; font-size: 36px; font-weight: bold; letter-spacing: 8px; margin: 10px 0;">${code}</p>
+            <p style="color: white; font-size: 12px;">Valable 15 minutes</p>
+          </div>
+          <p style="color: #666; font-size: 14px;">Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+          <p style="color: #666; font-size: 14px;">L'équipe Parapharmacie</p>
+        </div>
+      `
+    };
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    logger.error('Erreur envoi code reset employé:', { message: error.message });
+    return false;
+  }
+};
+
 export default {
   sendOrderConfirmation,
   sendOrderStatusUpdate,

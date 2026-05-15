@@ -49,7 +49,7 @@ const AdminUsers = () => {
   // Gestion des employés
   const [employees, setEmployees] = useState([]);
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
-  const [newEmployee, setNewEmployee] = useState({ firstName: '', lastName: '', phone: '', email: '', password: '' });
+  const [newEmployee, setNewEmployee] = useState({ firstName: '', lastName: '', phone: '', email: '', password: '', pin: '' });
   const [creatingEmployee, setCreatingEmployee] = useState(false);
   const [employeeError, setEmployeeError] = useState('');
   const [employeeSuccess, setEmployeeSuccess] = useState('');
@@ -592,8 +592,8 @@ const AdminUsers = () => {
             </button>
             <div className="h-8 w-px bg-gray-200 hidden md:block"></div>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
-              <p className="text-gray-600">Administration des clients et équipe</p>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Gestion des Clients</h1>
+              <p className="text-gray-600">Administration des clients et de l'équipe</p>
             </div>
           </div>
         </div>
@@ -621,7 +621,7 @@ const AdminUsers = () => {
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('roles')}
+              onClick={() => navigate('/admin/settings?tab=roles')}
               className={`pb-4 px-2 font-medium border-b-2 transition-colors ${
                 activeTab === 'roles'
                   ? 'border-sky-600 text-sky-600'
@@ -634,10 +634,7 @@ const AdminUsers = () => {
               </div>
             </button>
             <button
-              onClick={() => {
-                setActiveTab('audit');
-                fetchAuditLogs();
-              }}
+              onClick={() => navigate('/admin/settings?tab=audit')}
               className={`pb-4 px-2 font-medium border-b-2 transition-colors ${
                 activeTab === 'audit'
                   ? 'border-sky-600 text-sky-600'
@@ -1320,6 +1317,10 @@ const AdminUsers = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Mot de passe</label>
                   <input type="password" value={newEmployee.password} onChange={e => setNewEmployee(p => ({...p, password: e.target.value}))} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Mot de passe" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Code PIN (laisser vide pour génération automatique)</label>
+                  <input type="text" value={newEmployee.pin} onChange={e => setNewEmployee(p => ({...p, pin: e.target.value}))} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Ex: 123456 (optionnel)" />
                 </div>
               </div>
               <div className="mt-6 flex gap-3">
