@@ -13,6 +13,6 @@ COPY . .
 
 RUN mkdir -p uploads/products uploads/profiles logs
 
-EXPOSE 8080
+EXPOSE $PORT
 
 CMD ["node", "src/server.js"]
