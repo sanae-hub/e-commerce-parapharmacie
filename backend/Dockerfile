@@ -3,13 +3,13 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY backend/package*.json ./
+COPY package*.json ./
 RUN npm install --ignore-scripts
 
-COPY backend/prisma ./prisma
+COPY prisma ./prisma
 RUN npx prisma generate
 
-COPY backend/ .
+COPY . .
 
 RUN mkdir -p uploads/products uploads/profiles logs
 
