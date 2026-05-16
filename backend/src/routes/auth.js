@@ -5,7 +5,6 @@ import * as bcrypt from '../utils/bcryptQueue.js';
 import crypto from 'crypto';
 import notify from '../services/notificationService.js';
 import { sendEmployeePasswordResetCode } from '../services/emailService.js';
-import { sendEmployeePasswordResetCode } from '../services/emailService.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
