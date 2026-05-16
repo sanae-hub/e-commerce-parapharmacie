@@ -15,4 +15,4 @@ RUN mkdir -p uploads/products uploads/profiles logs
 
 EXPOSE $PORT
 
-CMD ["node", "src/server.js"]
+CMD ["node", "--trace-uncaught", "--trace-warnings", "src/server.js"]
